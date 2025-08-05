@@ -8,7 +8,9 @@ void    ServerConfig::parse_config(Vector_str server_configg, int from, int to)
         from++;
     }
     this->store_server_info();
-    this->print_info_server();
+    // std::cout << "---------------\n";
+    // this->print_info_server();
+    // std::cout << "---------------\n";
 }
 
 Vector_str ServerConfig::parse_line(std::string line)

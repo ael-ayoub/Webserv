@@ -1,23 +1,24 @@
 #include "../../INCLUDES/LocationConfig.hpp"
 
 LocationConfig::LocationConfig()
-    : autoindex(false), get_methode(false), post_methode(false), delete_methode(false)
+    : autoindex(false), get_methode(false), post_methode(false),
+        delete_methode(false), upload_enable(false)
 {
 }
 
 void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::string path)
 {
     int brace_cout = 0;
-    if (str[*start].find('{'))
+    if (str[*start].find('{') != std::string::npos)
             brace_cout++;
     (*start)++;
-    std::cout << "------------\n";
+    // std::cout << "------------\n";
     path_location = path;
     while (*start < str.size())
     {
-        if (str[*start].find('{'))
+        if (str[*start].find('{') != std::string::npos)
             brace_cout++;
-        if (str[*start].find('}'))
+        if (str[*start].find('}') != std::string::npos)
         {
             brace_cout--;
             if (brace_cout == 0)
@@ -45,6 +46,17 @@ void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::st
                 tmp_i++;
             }
         }
+        else if (a.first == "upload_enable")
+            upload_enable = true;
+        else if (a.first == "upload_store")
+            upload_store = a.second;
+        else if (a.first == "return")
+        {
+            int status_code;
+            std::pair<std::string, std::string> tmp = ServerConfig::ft_splito(a.second, ' ');
+            std::istringstream(tmp.first) >> status_code;
+            return_location = std::make_pair(status_code, tmp.second);
+        }
         // std::cout << str[i] << " start is " << start << "\n";
         (*start)++;
     }
@@ -52,11 +64,15 @@ void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::st
 
 void LocationConfig::print_info()
 {
-    std::cout << "location : " << path_location << std::endl;
+    std::cout << "--------location : " << path_location << "-----------\n\n" << std::endl;
     std::cout << "index : " << path_index << std::endl;
     std::cout << "root : " << path_root << std::endl;
     std::cout << "autoindex : " <<autoindex << std::endl;
     std::cout << "GET : " << get_methode << std::endl;
     std::cout << "POST : " << post_methode << std::endl;
     std::cout << "Delete : " << delete_methode << std::endl;
+    std::cout << "upload_enable : " << upload_enable << std::endl;
+    std::cout << "upload_store : " << upload_store << std::endl;
+    std::cout << "status return : " << return_location.first << std::endl;
+    std::cout << "return_path : " << return_location.second << std::endl;
 }
