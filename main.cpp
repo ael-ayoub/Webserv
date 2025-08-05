@@ -3,7 +3,8 @@
 int main()
 {
     Config a;
-    a.store_file("/home/abahaded/Desktop/Webserv/SRC/default.conf");
+    if (a.store_file("/home/abahaded/Desktop/Webserv/SRC/default.conf") == -1)
+        std::cerr << "Error in the Config file" << std::endl;
     a.print_confiFile();
     // a.Servers_Config[0].print_info_server();
     // ServerConfig server;

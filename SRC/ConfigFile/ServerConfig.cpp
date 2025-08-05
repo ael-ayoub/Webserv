@@ -1,16 +1,54 @@
 #include "../../INCLUDES/ServerConfig.hpp"
 
-void    ServerConfig::parse_config(Vector_str server_configg, int from, int to)
+int    ServerConfig::check_configFile()
+{
+    size_t i = 0;
+    if (server_config[i][0] != 's')
+        return -1;
+    std::string tmp = Config::remove_whitespaces(server_config[i]);
+    // std::cout << "after is " << tmp << "\n";
+    i++;
+    while (i < server_config.size())
+    {
+        Vector_str tmp = ServerConfig::parse_line(server_config[i]);
+        if (tmp[0] == "location")
+            break;
+        if (tmp[0][0] && tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 1] != ';')
+            return -1;
+        size_t j = 0;
+        if (tmp[0] != "error_page" && tmp[0][0] && tmp.size() != 2)
+            return -1;
+        while (j < tmp.size())
+        {
+            if (tmp[j] == "listen")
+            {
+                /// create another class for checking syntax and pass object this and create member data of the names
+            }
+            std::cout << tmp[j] << ". ";
+            j++;
+        }
+        std::cout << std::endl;
+        i++;
+    }
+    std::cout << "location is : " << server_config[i] << std::endl;
+    return 0;
+}
+
+int    ServerConfig::parse_config(Vector_str server_configg, int from, int to)
 {
     while (from < to)
     {
+
         server_config.push_back(server_configg[from]);
         from++;
     }
+    if (this->check_configFile() == -1)
+        return -1;
     this->store_server_info();
-    // std::cout << "---------------\n";
+    // std::cout << "------------------------------------\n";
     // this->print_info_server();
-    // std::cout << "---------------\n";
+    // std::cout << "------------------------------------\n";
+    return 0;
 }
 
 Vector_str ServerConfig::parse_line(std::string line)
@@ -53,10 +91,19 @@ void    ServerConfig::store_server_info()
         // std::cout << "first :" << a.first << "\nseconde : " << a.second << std::endl;
         if (a.first == "listen")
         {
-            std::pair<std::string, std::string> tmp = this->ft_splito(a.second, ':');
-            int port_tmp;
-            std::istringstream(tmp.second) >> port_tmp;
-            ip_port = std::make_pair(tmp.first, port_tmp);
+            if (a.second.find(':') != std::string::npos)
+            {
+                std::pair<std::string, std::string> tmp = this->ft_splito(a.second, ':');
+                int port_tmp;
+                std::istringstream(tmp.second) >> port_tmp;
+                ip_port = std::make_pair(tmp.first, port_tmp);
+            }
+            else
+            {
+                int port_tmp;
+                std::istringstream(a.second) >> port_tmp;
+                ip_port = std::make_pair("", port_tmp);
+            }
         }
         else if (a.first == "server_name")
             server_name = a.second;
