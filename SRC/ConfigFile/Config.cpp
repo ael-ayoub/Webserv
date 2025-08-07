@@ -15,10 +15,9 @@ int Config::store_file(std::string path_of_Cfile)
     }
     file.close();
     if (this->stores_config() == -1)
-        return -1;
+        throw Config::ErrorSyntax();
     return 0;
 }
-
 
 void Config::print_confiFile()
 {
@@ -41,11 +40,10 @@ int    Config::stores_config()
         first_last = this->get_firstlast();
         // std::cout << "first :" << first_last.first << "seconde :" << first_last.second << "\n";
         if (first_last.first == -2)
-            return -1;
+            throw Config::ErrorSyntax();
         if (first_last.first == -1 || first_last.second == -1)
             break;
-        if (tmp.parse_config(file_lines, first_last.first, first_last.second) == -1)
-            return -1;
+        tmp.parse_config(file_lines, first_last.first, first_last.second);
         Servers_Config.push_back(tmp);
         first_last.first = first_last.second + 1;
     }

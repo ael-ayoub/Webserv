@@ -21,4 +21,13 @@ class Config
         static std::string         remove_whitespaces(std::string line);
         std::pair<int, int> get_firstlast();
         void print_confiFile();
+
+        class ErrorSyntax : public std::exception
+        {
+            public:
+                const char* what() const throw()
+                {
+                    return "Error Syntax Config file";
+                }
+        };
 };

@@ -2,35 +2,8 @@
 
 int    ServerConfig::check_configFile()
 {
-    size_t i = 0;
-    if (server_config[i][0] != 's')
-        return -1;
-    std::string tmp = Config::remove_whitespaces(server_config[i]);
-    // std::cout << "after is " << tmp << "\n";
-    i++;
-    while (i < server_config.size())
-    {
-        Vector_str tmp = ServerConfig::parse_line(server_config[i]);
-        if (tmp[0] == "location")
-            break;
-        if (tmp[0][0] && tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 1] != ';')
-            return -1;
-        size_t j = 0;
-        if (tmp[0] != "error_page" && tmp[0][0] && tmp.size() != 2)
-            return -1;
-        while (j < tmp.size())
-        {
-            if (tmp[j] == "listen")
-            {
-                /// create another class for checking syntax and pass object this and create member data of the names
-            }
-            std::cout << tmp[j] << ". ";
-            j++;
-        }
-        std::cout << std::endl;
-        i++;
-    }
-    std::cout << "location is : " << server_config[i] << std::endl;
+    syntax_server tmp;
+    tmp.check_server_syntax(server_config);
     return 0;
 }
 
@@ -42,8 +15,7 @@ int    ServerConfig::parse_config(Vector_str server_configg, int from, int to)
         server_config.push_back(server_configg[from]);
         from++;
     }
-    if (this->check_configFile() == -1)
-        return -1;
+    this->check_configFile();
     this->store_server_info();
     // std::cout << "------------------------------------\n";
     // this->print_info_server();
@@ -106,7 +78,7 @@ void    ServerConfig::store_server_info()
             }
         }
         else if (a.first == "server_name")
-            server_name = a.second;
+            server_name = ft_splitv2(a.second, ' ');
         else if (a.first == "client_max_body_size")
             std::istringstream(a.second) >> client_max_body_size;
         else if (a.first == "root")
@@ -142,14 +114,19 @@ void    ServerConfig::store_server_info()
 
 void ServerConfig::print_info_server()
 {
+    size_t i = 0;
     std::cout << "--------------------------------------\n";
     std::cout << "ip :" << ip_port.first << "." << std::endl;
     std::cout << "port_num :" << ip_port.second << "." << std::endl;
-    std::cout << "server name :" << server_name << "." << std::endl;
+    while (i < server_name.size())
+    {
+        std::cout << "server name :" << server_name[i] << "." << std::endl;
+        i++;
+    }
     std::cout << "root :" << path_server_root << "." << std::endl;
     std::cout << "index :" << path_server_index << "." << std::endl;
     std::cout << "client_max_body_size :" << client_max_body_size << "." << std::endl;
-    size_t i = 0;
+    i = 0;
     while (i < errorStatus_pathError.size())
     {
         std::map<int, std::string>::iterator ii = errorStatus_pathError[i].begin();
@@ -191,6 +168,24 @@ std::string ServerConfig::remove_spaces(std::string str)
     }
     return tmp;
 }
+
+Vector_str ServerConfig::ft_splitv2(std::string str, char c)
+{
+    Vector_str re;
+    size_t pos = str.find(c);
+    size_t to = 0;
+    while (pos != std::string::npos)
+    {
+        re.push_back(str.substr(to, pos - to));
+        to = pos + 1;
+        pos = str.find(c, to);
+    }
+    if (to != std::string::npos)
+      re.push_back(str.substr(to));
+
+    return re;
+}
+
 std::pair<std::string, std::string> ServerConfig::ft_splito(std::string str, char c)
 {
     // int i = 0;
