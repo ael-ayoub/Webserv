@@ -11,7 +11,7 @@ void syntax_server::check_server_syntax(Vector_str server)
     if (server[i][0] != 's')
         throw Config::ErrorSyntax();
     std::string tmp = Config::remove_whitespaces(server[i]);
-    // std::cout << "after is " << tmp << "\n";
+    std::cout << "after is " << tmp << "\n";
     i++;
     while (i < server.size())
     {
@@ -46,10 +46,15 @@ void syntax_server::check_server_syntax(Vector_str server)
             check_body_size(tmp);
         else if (tmp[0] == "error_page")
             check_error_page(tmp);
-        // std::cout << std::endl;
+        else if (tmp[0].size() != 0 && tmp[0] != "location" 
+                && tmp[0] != "}" && tmp[0] != "server_name"
+                && tmp[0] != "client_max_body_size")
+            throw Config::ErrorSyntax();
 
         i++;
     }
+            std::cout << server[i - 1] << "das" << std::endl;
+
 }
 
 void syntax_server::check_number(std::string str)
