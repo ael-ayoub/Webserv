@@ -14,8 +14,7 @@ int Config::store_file(std::string path_of_Cfile)
         file_lines.push_back(line);
     }
     file.close();
-    if (this->stores_config() == -1)
-        throw Config::ErrorSyntax();
+    this->stores_config();
     return 0;
 }
 
@@ -42,7 +41,10 @@ int    Config::stores_config()
         if (first_last.first == -2)
             throw Config::ErrorSyntax();
         if (first_last.first == -1 || first_last.second == -1)
+        {
+            
             break;
+        }
         tmp.parse_config(file_lines, first_last.first, first_last.second);
         Servers_Config.push_back(tmp);
         first_last.first = first_last.second + 1;
@@ -87,6 +89,8 @@ std::pair<int, int> Config::get_firstlast()
         }
         else if (line.find('}') != std::string::npos)
         {
+            if (line.size() != 1)
+                throw Config::ErrorSyntax();
             brace_cout--;
         }
 

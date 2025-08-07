@@ -17,7 +17,6 @@ int    ServerConfig::parse_config(Vector_str server_configg, int from, int to)
     }
     
     this->check_configFile();
-    std::cout << "asdadasdas\n";
 
     this->store_server_info();
     // std::cout << "------------------------------------\n";

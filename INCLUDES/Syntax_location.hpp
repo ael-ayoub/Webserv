@@ -5,8 +5,11 @@
 class syntax_location
 {
     private:
+        bool methods;
+        bool upload_enable;
+        bool upload_store;
     public:
-        // syntax_location();
+        syntax_location();
         void check_locations(Vector_str str, int *i);
         void check_upload(Vector_str str, int *i);
         void check_cgi(Vector_str str, int *i);

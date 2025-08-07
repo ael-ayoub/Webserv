@@ -11,10 +11,10 @@ void syntax_server::check_server_syntax(Vector_str server)
     if (server[i][0] != 's')
         throw Config::ErrorSyntax();
     std::string tmp = Config::remove_whitespaces(server[i]);
-    std::cout << "after is " << tmp << "\n";
     i++;
     while (i < server.size())
     {
+
         Vector_str tmp = ServerConfig::parse_line(server[i]);
         if (tmp[0] == "location")
         {
@@ -30,6 +30,7 @@ void syntax_server::check_server_syntax(Vector_str server)
                 || error_page_check == false)
                 throw Config::ErrorSyntax();
             // break;
+
             syntax_location loc;
             loc.check_locations(server, (int *)&i);
         }
@@ -40,6 +41,8 @@ void syntax_server::check_server_syntax(Vector_str server)
         // if (tmp[0] != "error_page" && tmp[0][0] && tmp.size() != 2)
         //     throw Config::ErrorSyntax();
         // start checking server info
+        // std::cout << "he is \n";
+
         if (tmp[0] == "listen")
             check_listen(tmp);
         else if (tmp[0] == "client_max_body_size")
@@ -49,11 +52,12 @@ void syntax_server::check_server_syntax(Vector_str server)
         else if (tmp[0].size() != 0 && tmp[0] != "location" 
                 && tmp[0] != "}" && tmp[0] != "server_name"
                 && tmp[0] != "client_max_body_size")
-            throw Config::ErrorSyntax();
+        {
 
+            throw Config::ErrorSyntax();
+        }
         i++;
     }
-            std::cout << server[i - 1] << "das" << std::endl;
 
 }
 

@@ -1,11 +1,16 @@
 #include "../../INCLUDES/Syntax_location.hpp"
 
+syntax_location::syntax_location()
+    : methods(false), upload_enable(false), upload_store(false)
+{
+}
 void syntax_location::check_locations(Vector_str str, int *i)
 {
     size_t store_i = *i;
     int check = 0;
     int brace_cout = 0;
 
+            // std::cout << "he is \n";
     if (str[*i].find('{') != std::string::npos)
         brace_cout++;
     while (store_i < str.size())
@@ -13,7 +18,11 @@ void syntax_location::check_locations(Vector_str str, int *i)
         Vector_str tmp = ServerConfig::ft_splitv2(ServerConfig::remove_spaces(str[store_i]), ' ');
         // size_t j = 0;
         if ((tmp.size() != 3 || tmp[2] != "{") && tmp[0] == "location")
+        {
+            // std::cout << "he is \n";
+
             throw Config::ErrorSyntax();
+        }
         
         if (tmp[0] == "methods")
             tmp[tmp.size() - 1].erase(tmp[tmp.size() - 1].size() - 1);
@@ -21,12 +30,14 @@ void syntax_location::check_locations(Vector_str str, int *i)
             || (tmp[0] == "methods" && tmp[1] == "POST")
             || tmp[0] == "upload_enable")
         {
+            // std::cout << "he is \n";
             check_upload(str, i);
             check = 1;
             break;
         }
         else if (tmp[0] == "cgi_pass")
         {
+            // std::cout << "he is \n";
             check_cgi(str, i);
             check = 1;
             break;
@@ -37,6 +48,7 @@ void syntax_location::check_locations(Vector_str str, int *i)
             break;
         store_i++;
     }
+    // std::cout << "he is \n";
     if (check == 0)
         check_regular(str, i);
         // kmala
@@ -93,6 +105,7 @@ void syntax_location::check_regular(Vector_str str, int *i)
 
 void syntax_location::check_cgi(Vector_str str, int *i)
 {
+
     (*i)++;
     while ((unsigned int)*i < str.size())
     {
@@ -119,17 +132,24 @@ void syntax_location::check_cgi(Vector_str str, int *i)
         else if (tmp[0] == "cgi_pass")
         {
             if (tmp.size() != 2 || tmp[1].size() == 0 || tmp[1][0] != '/')
+            {
+
                 throw Config::ErrorSyntax();
+            }
         }
         else
+        {
             throw Config::ErrorSyntax();
+        }
         (*i)++;
     }
+
 }
 
 void syntax_location::check_upload(Vector_str str, int *i)
 {
     // std::cout << "found upload" << str[*i] << "\n";
+    
     (*i)++;
     while ((unsigned int)*i < str.size())
     {
@@ -138,7 +158,9 @@ void syntax_location::check_upload(Vector_str str, int *i)
         if (tmp[0][0] == '}')
         {
             if (tmp[0].size() != 1 || tmp.size() != 1)
+            {
                 throw Config::ErrorSyntax();
+            }
             break;
         }
 
@@ -149,21 +171,32 @@ void syntax_location::check_upload(Vector_str str, int *i)
         
         if (tmp[0] == "methods")
         {
+            methods = true;
             if (tmp.size() != 2 || tmp[1] != "POST")
+            {
+
                 throw Config::ErrorSyntax();
+            }
+                // throw Config::ErrorSyntax();
         }
         else if (tmp[0] == "upload_store")
         {
+            upload_store = true;
             if (tmp.size() != 2 || tmp[1].size() == 0 || tmp[1][0] != '/')
                 throw Config::ErrorSyntax();
         }
         else if (tmp[0] == "upload_enable")
         {
+            upload_enable = true;
             if (tmp.size() != 2 || (tmp[1] != "on" && tmp[1] != "off"))
                 throw Config::ErrorSyntax();
         }
         else
+        {
             throw Config::ErrorSyntax();
+        }
         (*i)++;
     }
+    if (methods == false || upload_enable == false || upload_store == false)
+        throw Config::ErrorSyntax();
 }

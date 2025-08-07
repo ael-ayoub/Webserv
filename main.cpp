@@ -5,8 +5,7 @@ int main()
     try
     {
         Config a;
-        if (a.store_file("/home/abahaded/Desktop/Webserv/SRC/default.conf") == -1)
-            std::cerr << "Error in the Config file" << std::endl;
+        a.store_file("/home/abahaded/Desktop/Webserv/SRC/default.conf");
     }
     catch(const Config::ErrorSyntax& e)
     {
