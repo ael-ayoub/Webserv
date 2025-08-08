@@ -26,7 +26,6 @@ void syntax_location::check_locations(Vector_str str, int *i)
         if (tmp[0] == "methods")
             tmp[tmp.size() - 1].erase(tmp[tmp.size() - 1].size() - 1);
         if (tmp[0] == "upload_store"
-            || (tmp[0] == "methods" && tmp[1] == "POST")
             || tmp[0] == "upload_enable")
         {
             // std::cout << "he is \n";
@@ -115,7 +114,6 @@ void syntax_location::check_regular(Vector_str str, int *i)
         }
         else
         {
-            std::cout << tmp[0] << std::endl;
             throw Config::ErrorSyntax();
         }
         (*i)++;
@@ -159,7 +157,15 @@ void syntax_location::check_cgi(Vector_str str, int *i)
         //     }
         // }
         // else 
-        if (tmp[0] == "cgi_pass")
+        if (tmp[0] == "root")
+        {
+            if (root == true)
+                throw Config::ErrorSyntax();
+            root = true;
+            if (tmp.size() != 2 || tmp[1].size() == 0 || tmp[1][0] != '/')
+                throw Config::ErrorSyntax();
+        }
+        else if (tmp[0] == "cgi_pass")
         {
             if (cgi == true)
                 throw Config::ErrorSyntax();
@@ -177,9 +183,10 @@ void syntax_location::check_cgi(Vector_str str, int *i)
         }
         (*i)++;
     }
-    if (cgi == false)
+    if (cgi == false || root == false)
         throw Config::ErrorSyntax();
     cgi = false;
+    root = false;
 }
 
 void syntax_location::check_upload(Vector_str str, int *i)
