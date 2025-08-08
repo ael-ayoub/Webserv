@@ -53,7 +53,6 @@ void syntax_server::check_server_syntax(Vector_str server)
                 && tmp[0] != "}" && tmp[0] != "server_name"
                 && tmp[0] != "client_max_body_size")
         {
-
             throw Config::ErrorSyntax();
         }
         i++;

@@ -8,6 +8,10 @@ class syntax_location
         bool methods;
         bool upload_enable;
         bool upload_store;
+        bool cgi;
+        bool root;
+        bool index;
+        bool auto_index;
     public:
         syntax_location();
         void check_locations(Vector_str str, int *i);
