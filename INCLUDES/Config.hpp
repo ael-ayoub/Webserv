@@ -15,10 +15,19 @@ class Config
         Config();
         int                 store_file(std::string path_of_Cfile);
         void                get_port();
-        void                stores_config();
+        int                stores_config();
         void                stores_server(std::pair<int, int> first_lastt);
         Vector_str          get_file_lines();
-        std::string         remove_whitespaces(std::string line);
+        static std::string         remove_whitespaces(std::string line);
         std::pair<int, int> get_firstlast();
         void print_confiFile();
+
+        class ErrorSyntax : public std::exception
+        {
+            public:
+                const char* what() const throw()
+                {
+                    return "Error Syntax Config file";
+                }
+        };
 };

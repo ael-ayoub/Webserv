@@ -18,7 +18,6 @@ int Config::store_file(std::string path_of_Cfile)
     return 0;
 }
 
-
 void Config::print_confiFile()
 {
     // size_t i = 0;
@@ -31,20 +30,27 @@ void Config::print_confiFile()
     // }
 }
 
-void    Config::stores_config()
+int    Config::stores_config()
 {
     while (first_last.first != -1 && first_last.second != -1)
     {
         ServerConfig tmp;
 
         first_last = this->get_firstlast();
-        if (first_last.first == -1 || first_last.second == -1)
-            break;
         // std::cout << "first :" << first_last.first << "seconde :" << first_last.second << "\n";
+        if (first_last.first == -2)
+            throw Config::ErrorSyntax();
+        if (first_last.first == -1 || first_last.second == -1)
+        {
+            
+            break;
+        }
         tmp.parse_config(file_lines, first_last.first, first_last.second);
         Servers_Config.push_back(tmp);
         first_last.first = first_last.second + 1;
     }
+
+    return 0;
 }
 
 std::string  Config::remove_whitespaces(std::string line)
@@ -72,13 +78,19 @@ std::pair<int, int> Config::get_firstlast()
     while (i < file_lines.size() && found_it == 0)
     {
         std::string line = Config::remove_whitespaces(file_lines[i]);
-
+        if (i == 0 && line != "server{")
+        {
+            first = -2;
+            break;
+        }
         if (line.find('{') != std::string::npos)
         {
             brace_cout++;
         }
         else if (line.find('}') != std::string::npos)
         {
+            if (line.size() != 1)
+                throw Config::ErrorSyntax();
             brace_cout--;
         }
 
@@ -91,6 +103,8 @@ std::pair<int, int> Config::get_firstlast()
         }
         i++;
     }
+    if (brace_cout != 0)
+        first = -2;
     return std::make_pair(first, last);
 }
 
