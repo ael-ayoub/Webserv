@@ -100,7 +100,7 @@ void syntax_server::check_body_size(Vector_str str)
     check_number(str[1]);
     size_t size;
     std::istringstream(str[1]) >> size;
-    if (size < 0 || size > INT_MAX)
+    if (size > INT_MAX)
         throw Config::ErrorSyntax();
 }
 
