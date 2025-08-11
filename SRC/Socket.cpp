@@ -1,12 +1,20 @@
-#include "../INCLUDES/Sockets.hpp"
+#include "../INCLUDES/Webserv.hpp"
 
-void set_nonblocking(int fd)
+
+Socket::Socket()
+{
+    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(8080);
+}
+
+void Socket::set_nonblocking(int fd)
 {
     int flags = fcntl(fd, F_GETFL, 0);
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-int CreateSocket(const sockaddr_in &addr)
+int Socket::CreateSocket()
 {
     int fd_socket;
 
@@ -44,7 +52,7 @@ int CreateSocket(const sockaddr_in &addr)
     return fd_socket;
 }
 
-int CreateEpoll(int fd_socket)
+int Socket::CreateEpoll(int fd_socket)
 {
     int fd_epoll;
     epoll_event event;
@@ -68,15 +76,9 @@ int CreateEpoll(int fd_socket)
     }
     return (fd_epoll);
 }
- 
-void HandleClient(const int &fd_epoll, const int &fd_client)
+
+void Socket::HandleClient(const int &fd_epoll, const int &fd_client)
 {
-    // this just simple handling of client !!!!!!!
-
-    // so i get file that conation message of request : 
-
-    // it is fd_Client;
-    // so should parse it , for prepare responce !!!
 
     char buffer[1024];
     int b_read = read(fd_client, buffer, 1024);
@@ -84,6 +86,17 @@ void HandleClient(const int &fd_epoll, const int &fd_client)
     {
         buffer[b_read] = '\0';
         std::cout << buffer;
+        std::string response = m.GetMethod();
+
+        size_t total_sent = 0;
+        while (total_sent < response.size())
+        {
+            ssize_t sent = send(fd_client, response.c_str() + total_sent,
+                                response.size() - total_sent, 0);
+            if (sent <= 0)
+                break;
+            total_sent += sent;
+        }
     }
     else
     {
@@ -93,7 +106,7 @@ void HandleClient(const int &fd_epoll, const int &fd_client)
     }
 }
 
-void  Monitor(const int &fd_socket, const int &fd_epoll, sockaddr_in &addr)
+void Socket::Monitor(const int &fd_socket, const int &fd_epoll)
 {
     int MAX_EVENTS = 256;
     int fd_client;
@@ -119,11 +132,11 @@ void  Monitor(const int &fd_socket, const int &fd_epoll, sockaddr_in &addr)
                 set_nonblocking(fd_client);
                 if (epoll_ctl(fd_epoll, EPOLL_CTL_ADD, fd_client, &event_client) == -1)
                 {
-                
+
                     std::cerr << "cannot add client to epoll instance !" << std::endl;
                     close(fd_socket);
                     close(fd_epoll);
-                    return ;
+                    return;
                 }
             }
             else
@@ -135,3 +148,17 @@ void  Monitor(const int &fd_socket, const int &fd_epoll, sockaddr_in &addr)
     }
 }
 
+int Socket::run()
+{
+    int fd_socket;
+    int fd_epoll;
+
+    fd_socket = CreateSocket();
+    if (fd_socket == -1)
+        return (0);
+    fd_epoll = CreateEpoll(fd_socket);
+    if (fd_epoll == -1)
+        return (0);
+    Monitor(fd_socket, fd_epoll);
+    return (1);
+}
