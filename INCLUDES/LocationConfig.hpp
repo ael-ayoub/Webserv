@@ -18,6 +18,12 @@ class LocationConfig
 
     public:
         LocationConfig();
+
+        std::string get_path();
+        std::string get_root();
+        std::string get_pathIndex();
+        bool get_autoIndex();
+        bool get_method(std::string request_method);
         void print_info();
         void parse_locationConfig(Vector_str str, size_t *start, std::string path);
 };

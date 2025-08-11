@@ -3,6 +3,8 @@
 #include "Webserv.hpp"
 
 class ServerConfig;
+class LocationConfig;
+
 class Config
 {
     private:
@@ -21,6 +23,8 @@ class Config
         static std::string         remove_whitespaces(std::string line);
         std::pair<int, int> get_firstlast();
         void print_confiFile();
+
+        LocationConfig get_info_location(std::string path);
 
         class ErrorSyntax : public std::exception
         {

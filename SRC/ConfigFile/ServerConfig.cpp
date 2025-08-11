@@ -1,5 +1,40 @@
 #include "../../INCLUDES/ServerConfig.hpp"
 
+LocationConfig ServerConfig::get_Location_Config(std::string path)
+{
+    size_t i = 0;
+    LocationConfig tmp;
+    std::vector<int> num;
+    int store = 0;
+    while (i < Location_Config.size())
+    {
+        num.push_back(Location_Config[i].get_path().size());
+        i++;
+    }
+    i = 0;
+    while (i < Location_Config.size())
+    {
+        if (Location_Config[i].get_path() == path)
+        {
+            if (num[i] > store)
+            {
+                store = num[i];
+                tmp = Location_Config[i];
+            }
+        }
+        else if (Location_Config[i].get_path() == "/")
+        {
+            if (num[i] > store)
+            {
+                store = num[i];
+                tmp = Location_Config[i];
+            }
+        }
+        i++;
+    }
+    return tmp;
+}
+
 int    ServerConfig::check_configFile()
 {
     syntax_server tmp;
@@ -208,9 +243,9 @@ std::pair<std::string, std::string> ServerConfig::ft_splito(std::string str, cha
     return std::make_pair(first, seconde);
 }
 
-Vector_str ServerConfig::get_conf()
+LocationConfig ServerConfig::get_conf(std::string path)
 {
-    return server_config;
+    return get_Location_Config(path);
 }
 
 void    ServerConfig::print_conf()
