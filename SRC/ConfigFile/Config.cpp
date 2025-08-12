@@ -1,5 +1,10 @@
 #include "../../INCLUDES/Config.hpp"
 
+ServerConfig Config::get_server_config()
+{
+    return Servers_Config[0];
+}
+
 int Config::store_file(std::string path_of_Cfile)
 {
     std::ifstream file(path_of_Cfile.c_str());
@@ -63,7 +68,8 @@ int    Config::stores_config()
         Servers_Config.push_back(tmp);
         first_last.first = first_last.second + 1;
     }
-
+    //check if a fallback is set
+    std::cout << "finish checking\n";
     return 0;
 }
 

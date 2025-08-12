@@ -7,7 +7,9 @@
 #include <sstream>
 #include <map>
 #include <limits.h>
-
+#include <sstream>
+#include <sys/stat.h>
+#include <unistd.h>
 typedef std::vector<std::string> Vector_str;
 
 #include "ServerConfig.hpp"
@@ -15,5 +17,6 @@ typedef std::vector<std::string> Vector_str;
 #include "LocationConfig.hpp"
 #include "Syntax_server.hpp"
 #include "Syntax_location.hpp"
+#include "Methodes.hpp"
 #include "Sockets.hpp"
 #include "Request.hpp"

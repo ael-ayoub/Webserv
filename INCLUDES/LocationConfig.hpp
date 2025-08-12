@@ -19,6 +19,9 @@ class LocationConfig
     public:
         LocationConfig();
 
+        void set_methode();
+        void set_autoindex();
+        void path_root();
         std::string get_path();
         std::string get_root();
         std::string get_pathIndex();

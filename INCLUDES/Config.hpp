@@ -15,6 +15,8 @@ class Config
 
     public:
         Config();
+
+        ServerConfig get_server_config();
         int                 store_file(std::string path_of_Cfile);
         void                get_port();
         int                stores_config();

@@ -7,6 +7,21 @@ LocationConfig::LocationConfig()
     path_location = "None";
 }
 
+void LocationConfig::set_methode()
+{
+    get_method = true;
+}
+
+void LocationConfig::set_autoindex()
+{
+    autoindex = true;
+}
+
+void LocationConfig::path_root()
+{
+    path_root = "/home/abahaded/Desktop/Webserv/STATIC";
+}
+
 bool LocationConfig::get_autoIndex()
 {
     return autoindex;

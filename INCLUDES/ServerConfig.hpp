@@ -20,6 +20,8 @@ class ServerConfig
     public:
         LocationConfig get_Location_Config(std::string path);
         
+        bool checkAdd_fallback();
+        std::vector<std::map<int, std::string> > get_error_status();
         int    parse_config(Vector_str server_configg, int from, int to);
         void    print_conf();
         static std::pair<std::string, std::string> ft_splito(std::string str, char c);
