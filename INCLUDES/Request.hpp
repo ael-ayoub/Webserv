@@ -8,8 +8,9 @@ class Request
         std::string method;
         std::string path;
     public:
-        std::string default_response_error(Config a);
-        std::string response_error(Config a, std::string path);
+        bool check_headerline(std::string str);
+        bool check_requestline(std::string str);
+        bool check_request(std::string str);
         void    parse_request(char *buffer);
         std::string get_path();
         std::string get_method();

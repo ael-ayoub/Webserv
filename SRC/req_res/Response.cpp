@@ -45,12 +45,12 @@ std::string Response::Display_dir(std::string path, LocationConfig info_location
     return response;
 }
 
-std::string Response::Display_file(std::string last_path, Config a, Request test_request)
+std::string Response::Display_file(std::string last_path, Config a)
 {
     std::string body, line, s;
     std::ifstream file((last_path).c_str() , std::ios::in);
 	if (!file.is_open())
-		return test_request.response_error(a, last_path);
+		return ErrorResponse::response_error(a, last_path);
 	while (getline(file, line))
 		body += line + "\n";
 	std::stringstream ss ;
@@ -66,4 +66,53 @@ std::string Response::Display_file(std::string last_path, Config a, Request test
 	response += "\r\n";
 	response += body;
     return response;
+}
+
+std::string Response::Get_response(std::string path, LocationConfig info_location,
+                                    Request test_request, Config a)
+{
+    std::string last_path;
+    struct stat statbuf;
+    if (stat(path.c_str(), &statbuf) == 0)
+    {
+        if (S_ISDIR(statbuf.st_mode))
+        {
+            if (info_location.get_pathIndex() != "None")
+            {
+                last_path = info_location.get_root() + "/" + info_location.get_pathIndex();
+                return Response::Display_file(last_path, a);
+            }
+            else
+            {
+                if (info_location.get_autoIndex() == false && info_location.get_pathIndex() == "None")
+                    return ErrorResponse::response_error(a, last_path);
+                return Response::Display_dir(path, info_location);
+            }
+        }
+        else
+        {
+            last_path = info_location.get_root() + test_request.get_path();
+            return Response::Display_file(last_path, a);
+        }
+    }
+    return ErrorResponse::response_error(a, last_path);
+}
+
+std::string Response::Get_delete(std::string path, LocationConfig info_location,
+                                    Request test_request, Config a)
+{
+    (void)info_location, (void)test_request, (void)a;
+    std::cout << "path to delete is " << path << std::endl;
+    int status = remove(path.c_str());
+    if (status != 0)
+    {
+        std::cout << "error deleting " << path << std::endl;
+        std::string response = "HTTP/1.1 404 Not Found\r\n";
+        response += "Content-Length: 17\r\n";
+        response += "Connection: close\r\n";
+        response += "\r\n";
+        response += "<h1>DELETED</h1>\n";
+        return response;
+    }
+    return "HTTP/1.1 204 No Content\r\n\r\n";
 }

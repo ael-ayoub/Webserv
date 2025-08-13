@@ -8,39 +8,21 @@ std::string Methodes::GetMethod(Config a, char *buffer)
     std::string body, line, last_path;
     Request test_request;
     test_request.parse_request(buffer);
-    // std::cout << "Get request of " << test_request.get_path() << std::endl;
     if (test_request.get_path() == "/favicon.ico")
-        return std::string(); ///////////////////// check heree the favicon.co why he display everytume
+    return std::string(); ///////////////////// check heree the favicon.co why he display everytume
     LocationConfig info_location = a.get_info_location(test_request.get_path());
-
     std::string path = info_location.get_root() + test_request.get_path();
-    struct stat statbuf;
-
-    if (stat(path.c_str(), &statbuf) == 0)
+    if (test_request.get_method() == "GET" && info_location.get_method("GET") == true)
     {
-        if (S_ISDIR(statbuf.st_mode))
-        {
-            if (info_location.get_pathIndex() != "None")
-            {
-                last_path = info_location.get_root() + "/" + info_location.get_pathIndex();
-                return Response::Display_file(last_path, a, test_request);
-            }
-            else
-            {
-                if (info_location.get_autoIndex() == false && info_location.get_pathIndex() == "None")
-                    return test_request.response_error(a, last_path);
-                return Response::Display_dir(path, info_location);
-            }
-        }
-        else
-        {
-            last_path = info_location.get_root() + test_request.get_path();
-            return Response::Display_file(last_path, a, test_request);
-        }
+        return Response::Get_response(path, info_location, test_request, a);
+    }
+    else if (test_request.get_method() == "DELETE" && info_location.get_method("DELETE") == true)
+    {
+        return Response::Get_delete(path, info_location, test_request, a);
     }
     else
     {
-        return test_request.response_error(a, last_path);
+        return ErrorResponse::Error_MethodeNotAllowed(a);
     }
 	return "";
 }

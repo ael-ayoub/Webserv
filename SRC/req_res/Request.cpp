@@ -1,77 +1,104 @@
 #include "../../INCLUDES/Request.hpp"
 
-std::string Request::default_response_error(Config a)
+bool Request::check_requestline(std::string request_line)
 {
-    std::string body, line, headers, response, s;
-    ServerConfig tmp = a.get_server_config();
-    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-    std::map<int, std::string>::iterator err_tmp = error[0].begin();
-    headers = "HTTP/1.1 ";
-    headers += err_tmp->first;
-    headers += " OK\r\n";
-    body =
-        "<!DOCTYPE html>\n"
-        "<html>\n"
-        "<head>\n"
-        "  <meta charset=\"UTF-8\">\n"
-        "  <title>Error 404</title>\n"
-        "</head>\n"
-        "<body>\n"
-        "  <h1> Error </h1>\n"
-        "  <p>The requested resource could not be found on this server.</p>\n"
-        "</body>\n"
-        "</html>\n";
-	std::stringstream ss ;
-	ss << body.size();
-	s = ss.str();
-    std::string header =
-		"Content-Type: text/html\r\n"
-		"Content-Length: " + s + "\r\n"
-		"Date: Sun, 10 Aug 2025 16:45:00 GMT\r\n"
-		"Server: webserv42/1.0\r\n"
-		"Connection: close\r\n";
-	response += headers;
-	response += header;
-	response += "\r\n";
-	response += body;
-    return response;
+    int spaces = 0;
+    int newline = 0;
+    int car = 0;
+    size_t i = 0;
+    while (request_line[i])
+    {
+        if (request_line[i] == ' ')
+            spaces++;
+        if (request_line.size() > 5 && i == request_line.size() - 1 && request_line[i] == '\n')
+            newline++;
+        if (request_line.size() > 5 && i == request_line.size() - 2 && request_line[i] == '\r')
+            car++;
+        i++;
+    }
+    if (spaces != 2 || newline != 1 || car != 1)
+        return false;
+    Vector_str args = ServerConfig::ft_splitv2(request_line, ' ');
+    if (args.size() != 3)
+        return false;
+    if (args[0] != "GET" && args[0] != "POST" && args[0] != "DELETE")
+        return false; //405
+    if (args[1][0] != '/')
+        return false;
+    if (args[2] != "HTTP/1.1\r\n" && args[2] != "HTTP/1.0\r\n")
+        return false; //505
+    return true;
 }
 
-std::string Request::response_error(Config a, std::string last)
+bool Request::check_headerline(std::string header_line)
 {
-    ServerConfig tmp = a.get_server_config();
-    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-    std::string body, line, headers, response, s;
-    std::map<int, std::string>::iterator err_tmp = error[0].begin();
-    
-    std::ifstream file((err_tmp->second).c_str() , std::ios::in);
-	if (!file.is_open())
-        return default_response_error(a);
-    headers = "HTTP/1.1 ";
-    headers += err_tmp->first;
-    headers += " OK\r\n";
-	while (getline(file, line))
-		body += line + "\n";
-	std::stringstream ss ;
-	ss << body.size();
-	s = ss.str();
-    std::string header =
-		"Content-Type: " + a.get_mine(last) + "\r\n"
-		"Content-Length: " + s + "\r\n"
-		"Date: Sun, 10 Aug 2025 16:45:00 GMT\r\n"
-		"Server: webserv42/1.0\r\n"
-		"Connection: close\r\n";
-	response += headers;
-	response += header;
-	response += "\r\n";
-	response += body;
-    return response;
+    int spaces = 0;
+    int newline = 0;
+    int car = 0;
+    size_t i = 0;
+    std::cout << "str: " << header_line << "." << std::endl;
+    while (header_line[i])
+    {
+        if (header_line[i] == ' ')
+            spaces++;
+        if (header_line.size() > 5 && i == header_line.size() - 1 && header_line[i] == '\n')
+            newline++;
+        if (header_line.size() > 5 && i == header_line.size() - 2 && header_line[i] == '\r')
+            car++;
+        i++;
+    }
+    if (spaces != 1 || newline != 1 || car != 1)
+    {
+        std::cout << "spa " << spaces << newline << car << "\n";
+        return false;
+    }
+    Vector_str args = ServerConfig::ft_splitv2(header_line, ' ');
+    if (args.size() != 2)
+        return false;//400
+    if (args[0] != "Host:")
+        return false; //400
+
+    Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
+    if (ip_port.size() != 2)
+        return false; //400
+    if (ip_port[0] != "localhost" && ip_port[0] != "127.0.0.1")
+        return false;//400
+    int start = ip_port[1].find('\r');
+    std::string ip = ip_port[1].substr(0, start);
+    std::cout << "ip:   " << ip << std::endl;
+    return true;
+}
+
+bool Request::check_request(std::string str)
+{
+    // size_t i = 0;
+    int from = 0;
+    // bool request = false;
+    std::string request_line;
+
+    // bool header = false;
+    std::string header_line;
+
+    // while (str[i])
+            int first = str.find('\n');
+            request_line = str.substr(0, first + 1);
+            from = first + 1;
+            first = str.find(from, '\n');
+            header_line = str.substr(from, first - from);
+            //////////// header_line taycoper tallekher 
+    if (check_requestline(request_line) == false)
+        return false;
+    if (check_headerline(header_line) == false)
+        return false;
+    return true;
 }
 
 void Request::parse_request(char *buffer)
 {
     int i = 0;
     std::string str(buffer);
+    if (check_request(str) == false)
+        return ;
     std::string tmp_str;
     while (str[i])
     {

@@ -22,3 +22,4 @@ typedef std::vector<std::string> Vector_str;
 #include "Sockets.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "ErrorResponse.hpp"

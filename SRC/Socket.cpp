@@ -84,7 +84,7 @@ void Socket::HandleClient(const int &fd_epoll, const int &fd_client, Config a)
     if (b_read > 0)
     {
         buffer[b_read] = '\0';
-        // std::cout << buffer;
+        std::cout << buffer;
         std::string response = m.GetMethod(a, buffer);
 
         size_t total_sent = 0;
