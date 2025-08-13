@@ -1,7 +1,5 @@
 #include "../INCLUDES/Webserv.hpp"
 
-#include <pthread.h>
-
 Socket::Socket()
 {
     addr.sin_addr.s_addr = INADDR_ANY;
@@ -78,7 +76,7 @@ int Socket::CreateEpoll(int fd_socket)
     return (fd_epoll);
 }
 
-void Socket::HandleClient(const int &fd_epoll, const int &fd_client)
+void Socket::HandleClient(const int &fd_epoll, const int &fd_client, Config a)
 {
 
     char buffer[1024];
@@ -86,17 +84,8 @@ void Socket::HandleClient(const int &fd_epoll, const int &fd_client)
     if (b_read > 0)
     {
         buffer[b_read] = '\0';
-        //std::cout << buffer;
-        std::string response = m.GetMethod();
-        try
-        {
-            m.PostMethod(buffer);
-        }
-        catch(const std::exception& e)
-        {
-            std::cerr << e.what() << '\n';
-        }
-        
+        // std::cout << buffer;
+        std::string response = m.GetMethod(a, buffer);
 
         size_t total_sent = 0;
         while (total_sent < response.size())
@@ -111,12 +100,12 @@ void Socket::HandleClient(const int &fd_epoll, const int &fd_client)
     else
     {
         epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
-        std::cout << "cant read from the file ..." << std::endl;
+        // std::cout << "cant read from the file ..." << std::endl;
         close(fd_client);
     }
 }
 
-void Socket::Monitor(const int &fd_socket, const int &fd_epoll)
+void Socket::Monitor(const int &fd_socket, const int &fd_epoll, Config a)
 {
     int MAX_EVENTS = 256;
     int fd_client;
@@ -134,7 +123,7 @@ void Socket::Monitor(const int &fd_socket, const int &fd_epoll)
             current_fd = events[i].data.fd;
             if (current_fd == fd_socket)
             {
-                std::cout << "new connection ..." << std::endl;
+                // std::cout << "new connection ..." << std::endl;
                 addr_size = sizeof(addr);
                 fd_client = accept(fd_socket, (sockaddr *)&addr, &addr_size);
                 event_client.data.fd = fd_client;
@@ -152,13 +141,13 @@ void Socket::Monitor(const int &fd_socket, const int &fd_epoll)
             else
             {
                 fd_client = events[i].data.fd;
-                HandleClient(fd_epoll, fd_client);
+                HandleClient(fd_epoll, fd_client, a);
             }
         }
     }
 }
 
-int Socket::run()
+int Socket::run(Config a)
 {
     int fd_socket;
     int fd_epoll;
@@ -169,6 +158,6 @@ int Socket::run()
     fd_epoll = CreateEpoll(fd_socket);
     if (fd_epoll == -1)
         return (0);
-    Monitor(fd_socket, fd_epoll);
+    Monitor(fd_socket, fd_epoll, a);
     return (1);
 }

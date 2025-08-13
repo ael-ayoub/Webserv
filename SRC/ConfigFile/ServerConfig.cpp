@@ -1,5 +1,45 @@
 #include "../../INCLUDES/ServerConfig.hpp"
 
+std::vector<std::map<int, std::string> > ServerConfig::get_error_status()
+{
+    return errorStatus_pathError;
+}
+
+int right_path(std::string Config_path, std::string path)
+{
+    int i = 0;
+    while (path[i] && Config_path[i] && path[i] == Config_path[i])
+    {
+        i++;
+    }
+    if (Config_path[i] && path[i])
+        return -1;
+    if (i != 0 && (Config_path[i - 1] != '/' || path[i - 1] != '/'))
+        return -1;
+    return i;
+}
+
+LocationConfig ServerConfig::get_Location_Config(std::string path)
+{
+    LocationConfig tmp;
+    int store_id = 0;
+    // Vector_str paths;
+    size_t i = 0;
+    while (i < Location_Config.size())
+    {
+        if (Location_Config[i].get_path() == path)
+            return Location_Config[i];
+        int j = right_path(Location_Config[i].get_path(), path);
+        if (j > store_id)
+            store_id = i;
+        i++;
+    }
+    // while ()
+    if (store_id != 0 && path != "/")
+        return Location_Config[store_id];
+    return tmp;
+}
+
 int    ServerConfig::check_configFile()
 {
     syntax_server tmp;
@@ -54,6 +94,19 @@ Vector_str ServerConfig::parse_line(std::string line)
     //     pos = tmp.find(' ');
     // }
     return re;
+}
+
+bool ServerConfig::checkAdd_fallback()
+{
+    size_t i = 0;
+    while (i < Location_Config.size())
+    {
+        if (Location_Config[i].get_path() == "/")
+            return true;
+        i++;
+    }
+    // Loc
+    return false;
 }
 
 void    ServerConfig::store_server_info()
@@ -112,6 +165,9 @@ void    ServerConfig::store_server_info()
         i++;
         // std::cout << "i = " << i << "server size is " << server_config.size() << std::endl;
     }
+    if (this->check_fallback() == false)
+        std::cout << "the fallback not found\n";
+    std::cout << "end of adding the location\n";
 }
 
 void ServerConfig::print_info_server()
@@ -208,9 +264,9 @@ std::pair<std::string, std::string> ServerConfig::ft_splito(std::string str, cha
     return std::make_pair(first, seconde);
 }
 
-Vector_str ServerConfig::get_conf()
+LocationConfig ServerConfig::get_conf(std::string path)
 {
-    return server_config;
+    return get_Location_Config(path);
 }
 
 void    ServerConfig::print_conf()

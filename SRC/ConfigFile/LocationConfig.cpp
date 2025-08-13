@@ -1,9 +1,56 @@
 #include "../../INCLUDES/LocationConfig.hpp"
 
 LocationConfig::LocationConfig()
-    : autoindex(false), get_methode(false), post_methode(false),
-        delete_methode(false), upload_enable(false)
+    : path_index("None"), autoindex(false), get_methode(false),
+        post_methode(false), delete_methode(false), upload_enable(false)
 {
+    path_location = "None";
+}
+
+void LocationConfig::set_methode()
+{
+    get_method = true;
+}
+
+void LocationConfig::set_autoindex()
+{
+    autoindex = true;
+}
+
+void LocationConfig::path_root()
+{
+    path_root = "/home/abahaded/Desktop/Webserv/STATIC";
+}
+
+bool LocationConfig::get_autoIndex()
+{
+    return autoindex;
+}
+
+std::string LocationConfig::get_pathIndex()
+{
+    return path_index;
+}
+
+std::string LocationConfig::get_root()
+{
+    return path_root;
+}
+
+std::string LocationConfig::get_path()
+{
+    return path_location;
+}
+
+bool LocationConfig::get_method(std::string request_method)
+{
+    if (get_methode == true && request_method == "GET")
+        return true;
+    if (post_methode == true && request_method == "POST")
+        return true;
+    if (delete_methode == true && request_method == "DELETE")
+        return true;
+    return false;
 }
 
 void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::string path)
@@ -30,7 +77,10 @@ void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::st
         else if (a.first == "index")
             path_index = a.second;
         else if (a.first == "autoindex")
-            autoindex = false;
+        {
+            if (a.second == "on")
+                autoindex = true;
+        }
         else if (a.first == "methods")
         {
             Vector_str tmp_methods = ServerConfig::parse_line(a.second);

@@ -1,5 +1,10 @@
 #include "../../INCLUDES/Config.hpp"
 
+ServerConfig Config::get_server_config()
+{
+    return Servers_Config[0];
+}
+
 int Config::store_file(std::string path_of_Cfile)
 {
     std::ifstream file(path_of_Cfile.c_str());
@@ -16,6 +21,20 @@ int Config::store_file(std::string path_of_Cfile)
     file.close();
     this->stores_config();
     return 0;
+}
+
+LocationConfig Config::get_info_location(std::string path)
+{
+    LocationConfig tmp;
+    size_t i = 0;
+    while (i < Servers_Config.size())
+    {
+        tmp = Servers_Config[i].get_conf(path);
+        if (tmp.get_path() != "None")
+            return tmp;
+        i++;
+    }
+    return tmp;
 }
 
 void Config::print_confiFile()
@@ -49,7 +68,8 @@ int    Config::stores_config()
         Servers_Config.push_back(tmp);
         first_last.first = first_last.second + 1;
     }
-
+    //check if a fallback is set
+    std::cout << "finish checking\n";
     return 0;
 }
 

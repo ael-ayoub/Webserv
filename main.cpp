@@ -9,15 +9,15 @@ int main()
     try
     {
         Config a;
-        a.store_file("/home/ael-aiss/Desktop/Webserv/SRC/default.conf");
+        a.store_file("/home/abahaded/Desktop/Webserv/SRC/default.conf");
+        if (!socket.run(a))
+        {
+            std::cout << "cannod run the rerver !!!" << std::endl;
+        }
     }
     catch(const Config::ErrorSyntax& e)
     {
         std::cerr << e.what() << '\n';
     }
 
-    if (!socket.run())
-    {
-        std::cout << "cannod run the rerver !!!" << std::endl;
-    }
 }

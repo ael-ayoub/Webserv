@@ -12,6 +12,7 @@
 #include <iostream>
 #include "Webserv.hpp"
 
+class Config;
 class Socket
 {
 private:
@@ -20,12 +21,12 @@ private:
 	sockaddr_in addr;
 public:
 	Socket();
-	int run();
+	int run(Config a);
 	void set_nonblocking(int fd);
 	int CreateSocket();
 	int CreateEpoll(int fd_socket);
-	void HandleClient(const int &fd_epoll, const int &fd_client);
-	void Monitor(const int &fd_socket, const int &fd_epoll);
+	void HandleClient(const int &fd_epoll, const int &fd_client, Config a);
+	void Monitor(const int &fd_socket, const int &fd_epoll, Config a);
 };
 
 #endif

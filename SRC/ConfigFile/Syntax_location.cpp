@@ -118,8 +118,8 @@ void syntax_location::check_regular(Vector_str str, int *i)
         }
         (*i)++;
     }
-    if (auto_index == false || index == false
-        || root == false || methods == false)
+    if (auto_index == false || root == false
+        || methods == false)
         throw Config::ErrorSyntax();
     auto_index = false;
     index = false;
