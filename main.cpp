@@ -10,6 +10,14 @@ int main()
     {
         Config a;
         a.store_file("/home/abahaded/Desktop/Webserv/SRC/default.conf");
+        // std::vector<ServerConfig> tmp_a = a.get_allserver_config();
+        // size_t i = 0;
+        // while (i < tmp_a.size())
+        // {
+        //     std::pair<std::string, int> ip = tmp_a[i].get_ip();
+        //     std::cout << "add :" << ip.first << " ip: " << ip.second << std::endl;
+        //     i++;
+        // }
         if (!socket.run(a))
         {
             std::cout << "cannod run the rerver !!!" << std::endl;

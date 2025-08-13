@@ -5,6 +5,11 @@ std::vector<std::map<int, std::string> > ServerConfig::get_error_status()
     return errorStatus_pathError;
 }
 
+std::pair<std::string, int> ServerConfig::get_ip()
+{
+    return ip_port;
+}
+
 int right_path(std::string Config_path, std::string path)
 {
     int i = 0;
@@ -105,7 +110,12 @@ bool ServerConfig::checkAdd_fallback()
             return true;
         i++;
     }
-    // Loc
+    LocationConfig tmp;
+    tmp.set_autoindex();
+    tmp.set_methode();
+    tmp.set_path_root();
+    tmp.set_path_location();
+    Location_Config.push_back(tmp);
     return false;
 }
 
@@ -165,9 +175,8 @@ void    ServerConfig::store_server_info()
         i++;
         // std::cout << "i = " << i << "server size is " << server_config.size() << std::endl;
     }
-    if (this->check_fallback() == false)
+    if (checkAdd_fallback() == false)
         std::cout << "the fallback not found\n";
-    std::cout << "end of adding the location\n";
 }
 
 void ServerConfig::print_info_server()

@@ -5,6 +5,32 @@ ServerConfig Config::get_server_config()
     return Servers_Config[0];
 }
 
+std::vector<ServerConfig> Config::get_allserver_config()
+{
+    return Servers_Config;
+}
+
+std::string Config::get_mine(std::string path)
+{
+    size_t dot = path.rfind('.');
+    if (dot == std::string::npos || dot == path.size() - 1)
+        return "";
+    std::string tmp = path.substr(dot + 1);
+    if (tmp == "html")
+        return "text/html";
+    else if (tmp == "css")
+        return "text/css";
+    else if (tmp == "js")
+        return "application/javascript";
+    else if (tmp == "gif")
+        return "image/gif";
+    else if (tmp == "txt")
+        return "text/plain";
+    else if (tmp == "json")
+        return "application/json";
+    return "text/plain";
+}
+
 int Config::store_file(std::string path_of_Cfile)
 {
     std::ifstream file(path_of_Cfile.c_str());
@@ -69,7 +95,6 @@ int    Config::stores_config()
         first_last.first = first_last.second + 1;
     }
     //check if a fallback is set
-    std::cout << "finish checking\n";
     return 0;
 }
 

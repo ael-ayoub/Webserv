@@ -10,6 +10,7 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
 typedef std::vector<std::string> Vector_str;
 
 #include "ServerConfig.hpp"
@@ -20,3 +21,4 @@ typedef std::vector<std::string> Vector_str;
 #include "Methodes.hpp"
 #include "Sockets.hpp"
 #include "Request.hpp"
+#include "Response.hpp"

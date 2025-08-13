@@ -20,6 +20,7 @@ class ServerConfig
     public:
         LocationConfig get_Location_Config(std::string path);
         
+        std::pair<std::string, int> get_ip();
         bool checkAdd_fallback();
         std::vector<std::map<int, std::string> > get_error_status();
         int    parse_config(Vector_str server_configg, int from, int to);
