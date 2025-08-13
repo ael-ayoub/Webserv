@@ -26,6 +26,7 @@ class Config
         std::pair<int, int> get_firstlast();
         void print_confiFile();
 
+        std::string get_mine(std::string path);
         LocationConfig get_info_location(std::string path);
 
         class ErrorSyntax : public std::exception

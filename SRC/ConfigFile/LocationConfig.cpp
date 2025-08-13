@@ -1,15 +1,20 @@
 #include "../../INCLUDES/LocationConfig.hpp"
 
 LocationConfig::LocationConfig()
-    : path_index("None"), autoindex(false), get_methode(false),
+    : path_index("None"), autoindex(false), GET_methode(false),
         post_methode(false), delete_methode(false), upload_enable(false)
 {
     path_location = "None";
 }
 
+void LocationConfig::set_path_location()
+{
+    path_location = "/";
+}
+
 void LocationConfig::set_methode()
 {
-    get_method = true;
+    GET_methode = true;
 }
 
 void LocationConfig::set_autoindex()
@@ -17,7 +22,7 @@ void LocationConfig::set_autoindex()
     autoindex = true;
 }
 
-void LocationConfig::path_root()
+void LocationConfig::set_path_root()
 {
     path_root = "/home/abahaded/Desktop/Webserv/STATIC";
 }
@@ -44,7 +49,7 @@ std::string LocationConfig::get_path()
 
 bool LocationConfig::get_method(std::string request_method)
 {
-    if (get_methode == true && request_method == "GET")
+    if (GET_methode == true && request_method == "GET")
         return true;
     if (post_methode == true && request_method == "POST")
         return true;
@@ -88,7 +93,7 @@ void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::st
             while (tmp_i < tmp_methods.size())
             {
                 if (tmp_methods[tmp_i] == "GET")
-                    get_methode = true;
+                    GET_methode = true;
                 if (tmp_methods[tmp_i] == "POST")
                     post_methode = true;
                 if (tmp_methods[tmp_i] == "DELETE")
@@ -118,7 +123,7 @@ void LocationConfig::print_info()
     std::cout << "index : " << path_index << std::endl;
     std::cout << "root : " << path_root << std::endl;
     std::cout << "autoindex : " <<autoindex << std::endl;
-    std::cout << "GET : " << get_methode << std::endl;
+    std::cout << "GET : " << GET_methode << std::endl;
     std::cout << "POST : " << post_methode << std::endl;
     std::cout << "Delete : " << delete_methode << std::endl;
     std::cout << "upload_enable : " << upload_enable << std::endl;

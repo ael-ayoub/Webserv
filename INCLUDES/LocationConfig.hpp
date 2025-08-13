@@ -10,7 +10,7 @@ class LocationConfig
         std::string path_index;
         std::string upload_store;
         bool autoindex;
-        bool get_methode;
+        bool GET_methode;
         bool post_methode;
         bool delete_methode;
         bool upload_enable;
@@ -19,9 +19,10 @@ class LocationConfig
     public:
         LocationConfig();
 
+        void set_path_location();
         void set_methode();
         void set_autoindex();
-        void path_root();
+        void set_path_root();
         std::string get_path();
         std::string get_root();
         std::string get_pathIndex();
