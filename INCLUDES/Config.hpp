@@ -17,6 +17,9 @@ class Config
         Config();
 
         ServerConfig get_server_config();
+        std::vector<ServerConfig> get_allserver_config();
+
+
         int                 store_file(std::string path_of_Cfile);
         void                get_port();
         int                stores_config();

@@ -5,6 +5,11 @@ std::vector<std::map<int, std::string> > ServerConfig::get_error_status()
     return errorStatus_pathError;
 }
 
+std::pair<std::string, int> ServerConfig::get_ip()
+{
+    return ip_port;
+}
+
 int right_path(std::string Config_path, std::string path)
 {
     int i = 0;

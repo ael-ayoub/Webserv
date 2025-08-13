@@ -5,6 +5,11 @@ ServerConfig Config::get_server_config()
     return Servers_Config[0];
 }
 
+std::vector<ServerConfig> Config::get_allserver_config()
+{
+    return Servers_Config;
+}
+
 std::string Config::get_mine(std::string path)
 {
     size_t dot = path.rfind('.');
