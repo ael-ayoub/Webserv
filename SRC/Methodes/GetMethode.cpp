@@ -29,7 +29,7 @@ std::string Methodes::GetMethod(Config a, char *buffer)
             {
                 if (info_location.get_autoIndex() == false && info_location.get_pathIndex() == "None")
                     return test_request.response_error(a, last_path);
-                return Response::Display_dir(path, info_location, a, last_path);
+                return Response::Display_dir(path, info_location);
             }
         }
         else
