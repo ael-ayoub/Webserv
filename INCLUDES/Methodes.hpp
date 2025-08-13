@@ -7,7 +7,7 @@ class Methodes
 {
 	public:
 		std::string GetMethod(); 
-		void PostMethod(); 
+		int PostMethod(const std::string& Prequest); 
 		void DeleteMethod(); 
 };
 

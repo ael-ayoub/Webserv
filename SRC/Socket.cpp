@@ -1,5 +1,6 @@
 #include "../INCLUDES/Webserv.hpp"
 
+#include <pthread.h>
 
 Socket::Socket()
 {
@@ -85,8 +86,17 @@ void Socket::HandleClient(const int &fd_epoll, const int &fd_client)
     if (b_read > 0)
     {
         buffer[b_read] = '\0';
-        std::cout << buffer;
+        //std::cout << buffer;
         std::string response = m.GetMethod();
+        try
+        {
+            m.PostMethod(buffer);
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
 
         size_t total_sent = 0;
         while (total_sent < response.size())
