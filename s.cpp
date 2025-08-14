@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 int ree(std::string ori, std::string check)
 {
@@ -25,5 +26,7 @@ int main()
   std::cout << ree(test, str1) << std::endl;
   std::cout << ree(test, str2) << std::endl;
   std::cout << ree(test, str3) << std::endl;
+    //std::vector<int> ports = {8080, 8002, 4000};
+
   return 0;
 }

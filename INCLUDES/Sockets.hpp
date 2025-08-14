@@ -13,20 +13,38 @@
 #include "Webserv.hpp"
 
 class Config;
+
+
+class SockConf
+{
+	// private:
+	
+	public:
+	int port;
+	int fd_socket;
+	sockaddr_in addr;
+	SockConf(int p);
+};
+void printVector(std::vector<SockConf> vect);
+
 class Socket
 {
 private:
 	// here vars:
 	Methodes m;
-	sockaddr_in addr;
+	// sockaddr_in addr;
+	std::vector<SockConf> sockconf;
+	int fd_epoll;
+
 public:
-	Socket();
+	Socket(std::vector<int>ports);
 	int run(Config a);
 	void set_nonblocking(int fd);
-	int CreateSocket();
-	int CreateEpoll(int fd_socket);
-	void HandleClient(const int &fd_epoll, const int &fd_client, Config a);
-	void Monitor(const int &fd_socket, const int &fd_epoll, Config a);
+	void CreateSocket();
+	void CreateEpoll();
+	int checkEvent(int fd);
+	void HandleClient(const int &fd_client, Config a);
+	void Monitor(Config a);
 };
 
 #endif

@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <bits/stdc++.h>
 typedef std::vector<std::string> Vector_str;
 
 #include "ServerConfig.hpp"

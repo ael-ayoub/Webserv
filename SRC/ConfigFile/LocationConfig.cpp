@@ -24,7 +24,7 @@ void LocationConfig::set_autoindex()
 
 void LocationConfig::set_path_root()
 {
-    path_root = "/home/abahaded/Desktop/Webserv/STATIC";
+    path_root = "/home/ael-aiss/Desktop/Webserv/STATIC";
 }
 
 bool LocationConfig::get_autoIndex()
