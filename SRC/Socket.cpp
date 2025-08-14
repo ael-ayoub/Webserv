@@ -1,19 +1,19 @@
 #include "../INCLUDES/Webserv.hpp"
 
-SockConf::SockConf(int p)
+SockConf::SockConf(std::string ip, int p)
 {
     // sockaddr_in addr;
-    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_addr.s_addr = inet_addr(ip.c_str());
     addr.sin_family = AF_INET;
     addr.sin_port = htons(p);
     fd_socket = -1;
 }
 
-Socket::Socket(std::vector<int> ports)
+Socket::Socket(std::vector<std::pair<std::string, int> > ports)
 {
     for (size_t i = 0; i < ports.size(); i++)
     {
-        sockconf.push_back(SockConf(ports[i]));
+        sockconf.push_back(SockConf(ports[i].first, ports[i].second));
     }
 }
 
@@ -112,7 +112,7 @@ int Socket::checkEvent(int fd)
         if (sockconf[i].fd_socket == fd)
             return (i);
     }
-    return (0);
+    return (-1);
 }
 
 void Socket::Monitor(Config a)
@@ -124,6 +124,7 @@ void Socket::Monitor(Config a)
     int max_fds;
     epoll_event events[MAX_EVENTS];
     epoll_event event_client;
+    sockaddr_in addr_client;
 
     while (true)
     {
@@ -135,10 +136,8 @@ void Socket::Monitor(Config a)
             if (index != -1)
             {
                 int &fd_socket = sockconf[index].fd_socket;
-                //sockaddr_in &addr = sockconf[index].addr;
-                sockaddr_in addr_client;
                 addr_size = sizeof(addr_client);
-                fd_client = accept(fd_socket, (sockaddr *)&addr_client, &addr_size);
+                fd_client = accept(fd_socket, NULL, NULL);
                 if (fd_client == -1)
                     throw std::runtime_error("cannot accept new client !!");
 
@@ -149,7 +148,6 @@ void Socket::Monitor(Config a)
                 if (epoll_ctl(fd_epoll, EPOLL_CTL_ADD, fd_client, &event_client) == -1)
                 {
                     close(fd_socket);
-                    //close(fd_epoll);
                     throw(std::runtime_error("cannot add client to epoll instance !"));
                 }
             }
@@ -162,13 +160,8 @@ void Socket::Monitor(Config a)
     }
 }
 
-int Socket::run(Config a)
+void Socket::run(Config a)
 {
-    // std::vector<int> fd_socket;
-    // int fd_epoll;
-
-    // std::vector<int> ports = {8080, 8002, 4000};
-    // CreateSocket();
     try
     {
         CreateSocket();
@@ -177,12 +170,7 @@ int Socket::run(Config a)
     }
     catch (std::exception &e)
     {
+        std::cout << "cannod run the rerver !!!" << std::endl;
         std::cout << e.what() << std::endl;
-        return -1;
     }
-    return 1;
 }
-
-// 1-send ports and change
-// 2- send vector of fds to create epoll;
-// 3- send to monitor vector of fds;

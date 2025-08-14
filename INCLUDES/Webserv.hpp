@@ -12,8 +12,9 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <bits/stdc++.h>
-typedef std::vector<std::string> Vector_str;
 
+typedef std::vector<std::string> Vector_str;
+void run_server();
 #include "ServerConfig.hpp"
 #include "Config.hpp"
 #include "LocationConfig.hpp"
@@ -23,3 +24,4 @@ typedef std::vector<std::string> Vector_str;
 #include "Sockets.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "socketConfig.hpp"
