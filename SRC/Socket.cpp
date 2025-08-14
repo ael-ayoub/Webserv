@@ -2,7 +2,6 @@
 
 SockConf::SockConf(std::string ip, int p)
 {
-    // sockaddr_in addr;
     addr.sin_addr.s_addr = inet_addr(ip.c_str());
     addr.sin_family = AF_INET;
     addr.sin_port = htons(p);
@@ -141,7 +140,6 @@ void Socket::Monitor(Config a)
                 if (fd_client == -1)
                     throw std::runtime_error("cannot accept new client !!");
 
-                std::cout << "this client fd value: " << fd_client << std::endl;
                 event_client.data.fd = fd_client;
                 event_client.events = EPOLLIN;
                 set_nonblocking(fd_client);

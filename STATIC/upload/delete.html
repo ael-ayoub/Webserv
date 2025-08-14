@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Delete File</title>
+</head>
+<body>
+    <h1>Understanding HTTP DELETE</h1>
+    <p>
+        The HTTP DELETE method is used to request that the server remove a resource identified by a URL.
+        Unlike GET or POST, DELETE is intended to remove data on the server. 
+        Browsers don’t automatically send DELETE requests when you enter a URL; it must be sent by a client 
+        script or tool that supports it, such as JavaScript, curl, or an API client.
+    </p>
+
+    <h2>Delete a File</h2>
+    <!-- Input for the file path to delete -->
+    <input type="text" id="filePath" placeholder="Enter file path to delete">
+    <button onclick="deleteFile()">Delete</button>
+
+    <p id="status"></p>
+
+    <script>
+        function deleteFile() {
+            const path = document.getElementById('filePath').value;
+            if (!path) {
+                alert("Please enter a file path.");
+                return;
+            }
+
+            fetch(path, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('status').textContent = "File deleted successfully.";
+                    } else {
+                        document.getElementById('status').textContent = "Error deleting file: " + response.status;
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('status').textContent = "Request failed: " + err;
+                });
+        }
+    </script>
+</body>
+</html>
