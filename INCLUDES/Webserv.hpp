@@ -24,4 +24,5 @@ void run_server();
 #include "Sockets.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "ErrorResponse.hpp"
 #include "socketConfig.hpp"

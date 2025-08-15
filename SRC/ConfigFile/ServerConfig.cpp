@@ -60,9 +60,7 @@ int    ServerConfig::parse_config(Vector_str server_configg, int from, int to)
         server_config.push_back(server_configg[from]);
         from++;
     }
-    
     this->check_configFile();
-
     this->store_server_info();
     // std::cout << "------------------------------------\n";
     // this->print_info_server();

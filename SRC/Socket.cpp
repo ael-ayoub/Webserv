@@ -86,7 +86,6 @@ void Socket::HandleClient(const int &fd_client, Config a)
     {
         buffer[b_read] = '\0';
         std::string response = m.GetMethod(a, buffer);
-
         size_t total_sent = 0;
         while (total_sent < response.size())
         {
