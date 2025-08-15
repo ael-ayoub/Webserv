@@ -85,6 +85,7 @@ void Socket::HandleClient(const int &fd_client, Config a)
     if (b_read > 0)
     {
         buffer[b_read] = '\0';
+        //std::cout << buffer << std::endl;
         std::vector<ServerConfig> servers;
         size_t i = 0;
         servers = a.get_allserver_config();
@@ -100,13 +101,18 @@ void Socket::HandleClient(const int &fd_client, Config a)
                 break;
             i++;
         }
+        //if (i == servers.size())
+        //    std::cerr << "herer" << std::endl;
         // std::cout << "req->host name is " << test_request.get_Hostname() << std::endl;
         // std::cout << "req->port is " << test_request.get_port() << std::endl;
         // std::cout << "server->host name is " << ip_port.first << std::endl;
         // std::cout << "server->port is " << ip_port.second << std::endl;
         // std::cout << "host name is " << test_request.get() << std::endl;
         if (response == "NONE")
-            response = m.GetMethod(a, test_request, servers[i]);
+        {
+            if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE")
+                response = m.GetMethod(a, test_request, servers[i]);
+        }
         size_t total_sent = 0;
         while (total_sent < response.size())
         {

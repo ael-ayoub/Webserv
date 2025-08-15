@@ -22,10 +22,14 @@ std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Ser
     }
     else if (test_request.get_method() == "DELETE" && info_location.get_method("DELETE") == true)
     {
+
         return Response::Get_delete(path, info_location, test_request, a);
     }
     else
     {
+        std::cout << "re: " << info_location.get_method("GET") << std::endl;
+        std::cout << "re path: " << info_location.get_path() << std::endl;
+        std::cout << "nasjkfls\n";
         return ErrorResponse::Error_MethodeNotAllowed(a);
     }
 	return "";

@@ -111,10 +111,9 @@ std::string Request::check_headerline(std::string header_line, Config a)
     if (ip_port[1][start] != '\r' && ip_port[1][start + 1] != '\r')
         return ErrorResponse::Error_BadRequest(a);
     port = v_ip;
+    hostname = ip_port[0];
     if (hostname == "localhost")
         hostname = "127.0.0.1";
-    else
-        hostname = ip_port[0];
     return "NONE";
 }
 

@@ -39,7 +39,7 @@ LocationConfig ServerConfig::get_Location_Config(std::string path)
             store_id = i;
         i++;
     }
-    // while ()
+    
     if (store_id != 0 && path != "/")
         return Location_Config[store_id];
     return tmp;

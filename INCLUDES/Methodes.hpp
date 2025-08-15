@@ -9,7 +9,7 @@ class ServerConfig;
 class Methodes
 {
 	public:
-		static std::string GetMethod(Config a, Request test_request, ServerConfig Servers_Config);
+		std::string GetMethod(Config a, Request test_request, ServerConfig Servers_Config);
 		void PostMethod(); 
 		std::string GetMethod(); 
 		int PostMethod(const std::string& Prequest); 
