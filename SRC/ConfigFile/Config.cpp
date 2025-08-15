@@ -87,7 +87,6 @@ int    Config::stores_config()
             throw Config::ErrorSyntax();
         if (first_last.first == -1 || first_last.second == -1)
         {
-            
             break;
         }
         tmp.parse_config(file_lines, first_last.first, first_last.second);

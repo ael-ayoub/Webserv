@@ -7,11 +7,14 @@ class Request
     private:
         std::string method;
         std::string path;
+        std::string HTTP;
+        int port;
+        std::string hostname;
     public:
-        bool check_headerline(std::string str);
-        bool check_requestline(std::string str);
-        bool check_request(std::string str);
-        void    parse_request(char *buffer);
+        std::string check_headerline(std::string str, Config a);
+        std::string check_requestline(std::string str, Config a);
+        std::string check_request(std::string str, Config a);
+        std::string parse_request(char *buffer, Config a);
         std::string get_path();
         std::string get_method();
 };

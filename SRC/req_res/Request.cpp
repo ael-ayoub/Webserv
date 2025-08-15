@@ -1,13 +1,16 @@
 #include "../../INCLUDES/Request.hpp"
 
-bool Request::check_requestline(std::string request_line)
+std::string Request::check_requestline(std::string request_line, Config a)
 {
     int spaces = 0;
     int newline = 0;
     int car = 0;
     size_t i = 0;
+    // std::cout << "requ : " << request_line << std::endl;
     while (request_line[i])
     {
+        // if (i == request_line.size())
+        //     std::cout << "int: " << static_cast<int>(request_line[i]) << std::endl;
         if (request_line[i] == ' ')
             spaces++;
         if (request_line.size() > 5 && i == request_line.size() - 1 && request_line[i] == '\n')
@@ -17,26 +20,31 @@ bool Request::check_requestline(std::string request_line)
         i++;
     }
     if (spaces != 2 || newline != 1 || car != 1)
-        return false;
+    {
+        return ErrorResponse::Error_BadRequest(a);
+    }
     Vector_str args = ServerConfig::ft_splitv2(request_line, ' ');
     if (args.size() != 3)
-        return false;
+        return ErrorResponse::Error_BadRequest(a);
     if (args[0] != "GET" && args[0] != "POST" && args[0] != "DELETE")
-        return false; //405
+        return ErrorResponse::Error_MethodeNotAllowed(a); //405
     if (args[1][0] != '/')
-        return false;
+        return ErrorResponse::Error_BadRequest(a);
     if (args[2] != "HTTP/1.1\r\n" && args[2] != "HTTP/1.0\r\n")
-        return false; //505
-    return true;
+        return ErrorResponse::Error_BadRequest(a); 
+    method = args[0];
+    path = args[1];
+    HTTP = args[2];
+    return "NONE";
 }
 
-bool Request::check_headerline(std::string header_line)
+std::string Request::check_headerline(std::string header_line, Config a)
 {
     int spaces = 0;
     int newline = 0;
     int car = 0;
     size_t i = 0;
-    std::cout << "str: " << header_line << "." << std::endl;
+    // std::cout << "str: " << header_line << std::endl;
     while (header_line[i])
     {
         if (header_line[i] == ' ')
@@ -49,27 +57,35 @@ bool Request::check_headerline(std::string header_line)
     }
     if (spaces != 1 || newline != 1 || car != 1)
     {
-        std::cout << "spa " << spaces << newline << car << "\n";
-        return false;
+        // std::cout << "spa " << spaces << newline << car << "\n";
+        return ErrorResponse::Error_BadRequest(a);
     }
     Vector_str args = ServerConfig::ft_splitv2(header_line, ' ');
     if (args.size() != 2)
-        return false;//400
+        return ErrorResponse::Error_BadRequest(a);//400
     if (args[0] != "Host:")
-        return false; //400
+        return ErrorResponse::Error_BadRequest(a); //400
 
     Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
     if (ip_port.size() != 2)
-        return false; //400
+        return ErrorResponse::Error_BadRequest(a); //400
     if (ip_port[0] != "localhost" && ip_port[0] != "127.0.0.1")
-        return false;//400
+        return ErrorResponse::Error_BadRequest(a);//400
     int start = ip_port[1].find('\r');
     std::string ip = ip_port[1].substr(0, start);
-    std::cout << "ip:   " << ip << std::endl;
-    return true;
+    int v_ip;
+    std::istringstream ss(ip);
+    ss >> v_ip;
+    if (v_ip < 0 || v_ip > 65535)
+        return ErrorResponse::Error_BadRequest(a);
+    if (ip_port[1][start] != '\r' && ip_port[1][start + 1] != '\r')
+        return ErrorResponse::Error_BadRequest(a);
+    port = v_ip;
+    hostname = ip_port[0];
+    return "NONE";
 }
 
-bool Request::check_request(std::string str)
+std::string Request::check_request(std::string str, Config a)
 {
     // size_t i = 0;
     int from = 0;
@@ -80,43 +96,35 @@ bool Request::check_request(std::string str)
     std::string header_line;
 
     // while (str[i])
-            int first = str.find('\n');
-            request_line = str.substr(0, first + 1);
-            from = first + 1;
-            first = str.find(from, '\n');
-            header_line = str.substr(from, first - from);
-            //////////// header_line taycoper tallekher 
-    if (check_requestline(request_line) == false)
-        return false;
-    if (check_headerline(header_line) == false)
-        return false;
-    return true;
+    int first = str.find('\n');
+    // std::cout << "first is " << first << std::endl;
+    request_line = str.substr(0, first + 1);
+    from = first + 1;
+    first = str.find('\n', from);
+    header_line = str.substr(from, first - from + 1);
+    // std::cout << "from is " << from << ". first is " << first << std::endl;
+    // std::cout << "requ_line: " << request_line << std::endl;
+    // std::cout << "int is " << static_cast<int>(request_line[request_line.size() - 2]) << ", char: " << request_line[request_line.size() - 2] << std::endl;
+    //         //////////// header_line taycoper tallekher 
+    // std::cout << "hea_line: " << header_line << std::endl;
+    // std::cout << "int is " << static_cast<int>(header_line[header_line.size() - 1]) << ", char: " << header_line[header_line.size() - 1] << std::endl;
+    std::string response;
+    response = check_requestline(request_line, a);
+    if (response != "NONE")
+        return response;
+    response = check_headerline(header_line, a);
+    if (response != "NONE")
+        return response;
+    return "NONE";
 }
 
-void Request::parse_request(char *buffer)
+std::string Request::parse_request(char *buffer, Config a)
 {
-    int i = 0;
     std::string str(buffer);
-    if (check_request(str) == false)
-        return ;
-    std::string tmp_str;
-    while (str[i])
-    {
-        tmp_str += str[i];
-        if (str[i] == '\n')
-            break;
-        i++;
-    }
-    Vector_str tmp = ServerConfig::ft_splitv2(tmp_str, ' ');
-    size_t j = 0;
-    while (j < tmp.size())
-    {
-        if (j == 0)
-            method = tmp[0];
-        else if (j == 1)
-            path = tmp[1];
-        j++;
-    }
+    std::string response = check_request(str, a);
+    if (response != "NONE")
+        return response;
+    return "NONE";
 }
 
 std::string Request::get_method()

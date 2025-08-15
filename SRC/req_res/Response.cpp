@@ -50,7 +50,7 @@ std::string Response::Display_file(std::string last_path, Config a)
     std::string body, line, s;
     std::ifstream file((last_path).c_str() , std::ios::in);
 	if (!file.is_open())
-		return ErrorResponse::response_error(a, last_path);
+		return ErrorResponse::Error_NotFound(a);
 	while (getline(file, line))
 		body += line + "\n";
 	std::stringstream ss ;
@@ -85,7 +85,7 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
             else
             {
                 if (info_location.get_autoIndex() == false && info_location.get_pathIndex() == "None")
-                    return ErrorResponse::response_error(a, last_path);
+                    return ErrorResponse::Error_Forbidden(a);
                 return Response::Display_dir(path, info_location);
             }
         }
@@ -95,24 +95,19 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
             return Response::Display_file(last_path, a);
         }
     }
-    return ErrorResponse::response_error(a, last_path);
+    return ErrorResponse::Error_NotFound(a);
 }
 
 std::string Response::Get_delete(std::string path, LocationConfig info_location,
                                     Request test_request, Config a)
 {
     (void)info_location, (void)test_request, (void)a;
-    std::cout << "path to delete is " << path << std::endl;
     int status = remove(path.c_str());
     if (status != 0)
     {
-        std::cout << "error deleting " << path << std::endl;
-        std::string response = "HTTP/1.1 404 Not Found\r\n";
-        response += "Content-Length: 17\r\n";
-        response += "Connection: close\r\n";
-        response += "\r\n";
-        response += "<h1>DELETED</h1>\n";
-        return response;
+        if (errno == EACCES)
+            std::cout << "doesnt have the permession to delete\n";
+        return ErrorResponse::Error_NotFound(a);
     }
     return "HTTP/1.1 204 No Content\r\n\r\n";
 }

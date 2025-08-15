@@ -49,7 +49,6 @@ std::string LocationConfig::get_path()
 
 bool LocationConfig::get_method(std::string request_method)
 {
-    std::cout << "delete methode is: " << delete_methode << " and the request is " << request_method << std::endl;
     if (GET_methode == true && request_method == "GET")
         return true;
     if (post_methode == true && request_method == "POST")
