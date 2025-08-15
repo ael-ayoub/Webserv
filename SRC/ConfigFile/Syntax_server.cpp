@@ -121,18 +121,21 @@ void syntax_server::check_listen(Vector_str str)
         std::istringstream(info[1]) >> num;
         if (num < 1 || num > 65535)
             throw Config::ErrorSyntax();
-        Vector_str ip_port = ServerConfig::ft_splitv2(info[0], '.');
-        if (ip_port.size() != 4)
-            throw Config::ErrorSyntax();
-        // std::cout << "size is " << ip_port.size() << "\n";
-        size_t j = 0;
-        while (j < ip_port.size())
+        if (info[0] != "localhost")
         {
-            check_number(ip_port[j]);
-            std::istringstream(ip_port[j]) >> num;
-            if (num < 0 || num > 255)
+            Vector_str ip_port = ServerConfig::ft_splitv2(info[0], '.');
+            if (ip_port.size() != 4)
                 throw Config::ErrorSyntax();
-            j++;
+            // std::cout << "size is " << ip_port.size() << "\n";
+            size_t j = 0;
+            while (j < ip_port.size())
+            {
+                check_number(ip_port[j]);
+                std::istringstream(ip_port[j]) >> num;
+                if (num < 0 || num > 255)
+                    throw Config::ErrorSyntax();
+                j++;
+            }
         }
     }
     else

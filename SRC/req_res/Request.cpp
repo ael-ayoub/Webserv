@@ -1,5 +1,16 @@
 #include "../../INCLUDES/Request.hpp"
 
+int Request::get_port()
+{
+    return port;
+}
+
+std::string Request::get_Hostname()
+{
+    return hostname;
+}
+
+
 std::string Request::check_requestline(std::string request_line, Config a)
 {
     int spaces = 0;
@@ -38,6 +49,25 @@ std::string Request::check_requestline(std::string request_line, Config a)
     return "NONE";
 }
 
+bool check_ip(std::string info)
+{
+    int num;
+    Vector_str ip_port = ServerConfig::ft_splitv2(info, '.');
+    if (ip_port.size() != 4)
+        throw Config::ErrorSyntax();
+    // std::cout << "size is " << ip_port.size() << "\n";
+    size_t j = 0;
+    while (j < ip_port.size())
+    {
+        syntax_server::check_number(ip_port[j]);
+        std::istringstream(ip_port[j]) >> num;
+        if (num < 0 || num > 255)
+            return false;
+        j++;
+    }
+    return true;
+}
+
 std::string Request::check_headerline(std::string header_line, Config a)
 {
     int spaces = 0;
@@ -69,7 +99,7 @@ std::string Request::check_headerline(std::string header_line, Config a)
     Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
     if (ip_port.size() != 2)
         return ErrorResponse::Error_BadRequest(a); //400
-    if (ip_port[0] != "localhost" && ip_port[0] != "127.0.0.1")
+    if (ip_port[0] != "localhost" && check_ip(ip_port[0]) == false)
         return ErrorResponse::Error_BadRequest(a);//400
     int start = ip_port[1].find('\r');
     std::string ip = ip_port[1].substr(0, start);
@@ -81,7 +111,10 @@ std::string Request::check_headerline(std::string header_line, Config a)
     if (ip_port[1][start] != '\r' && ip_port[1][start + 1] != '\r')
         return ErrorResponse::Error_BadRequest(a);
     port = v_ip;
-    hostname = ip_port[0];
+    if (hostname == "localhost")
+        hostname = "127.0.0.1";
+    else
+        hostname = ip_port[0];
     return "NONE";
 }
 

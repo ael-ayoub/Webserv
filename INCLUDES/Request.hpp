@@ -17,4 +17,6 @@ class Request
         std::string parse_request(char *buffer, Config a);
         std::string get_path();
         std::string get_method();
+        int get_port();
+        std::string get_Hostname();
 };

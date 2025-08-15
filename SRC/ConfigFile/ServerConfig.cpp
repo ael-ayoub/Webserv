@@ -131,7 +131,10 @@ void    ServerConfig::store_server_info()
                 std::pair<std::string, std::string> tmp = this->ft_splito(a.second, ':');
                 int port_tmp;
                 std::istringstream(tmp.second) >> port_tmp;
-                ip_port = std::make_pair(tmp.first, port_tmp);
+                if (tmp.first == "localhost")
+                    ip_port = std::make_pair("127.0.0.1", port_tmp);
+                else
+                    ip_port = std::make_pair(tmp.first, port_tmp);
             }
             else
             {

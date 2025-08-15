@@ -85,7 +85,28 @@ void Socket::HandleClient(const int &fd_client, Config a)
     if (b_read > 0)
     {
         buffer[b_read] = '\0';
-        std::string response = m.GetMethod(a, buffer);
+        std::vector<ServerConfig> servers;
+        size_t i = 0;
+        servers = a.get_allserver_config();
+        std::pair<std::string, int> ip_port;
+        Request test_request;
+        std::string response;
+        response = test_request.parse_request(buffer, a);
+        while (i < servers.size())
+        {
+            ip_port = servers[i].get_ip();
+            if (ip_port.first == test_request.get_Hostname()
+                && ip_port.second == test_request.get_port())
+                break;
+            i++;
+        }
+        // std::cout << "req->host name is " << test_request.get_Hostname() << std::endl;
+        // std::cout << "req->port is " << test_request.get_port() << std::endl;
+        // std::cout << "server->host name is " << ip_port.first << std::endl;
+        // std::cout << "server->port is " << ip_port.second << std::endl;
+        // std::cout << "host name is " << test_request.get() << std::endl;
+        if (response == "NONE")
+            response = m.GetMethod(a, test_request, servers[i]);
         size_t total_sent = 0;
         while (total_sent < response.size())
         {

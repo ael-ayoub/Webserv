@@ -16,6 +16,6 @@ class syntax_server
 
         void check_listen(Vector_str str);
         void check_body_size(Vector_str str);
-        void check_number(std::string str);
+        static void check_number(std::string str);
         void check_error_page(Vector_str str);
 };
