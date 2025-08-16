@@ -35,19 +35,7 @@ LocationConfig ServerConfig::get_Location_Config(std::string path)
 {
     LocationConfig tmp;
     int store_id = 0;
-    // Vector_str paths;
-    // std::cout << "path is : " << get_current_pathh() + path << std::endl;
-    //         path += '/';
-    // struct stat statbuf;
-    // if (stat((get_current_pathh() + path).c_str(), &statbuf) == 0)
-    // {
-    //     if (S_ISDIR(statbuf.st_mode))
-    //     {
-    //         std::cout << "is dir\n";
-    //         path += '/';
-    //     }
-    // }
-    // std::cout << "path is " << path << std::endl;
+    
     size_t i = 0;
     while (i < Location_Config.size())
     {

@@ -93,6 +93,7 @@ void Socket::HandleClient(const int &fd_client, Config a)
         Request test_request;
         std::string response;
         response = test_request.parse_request(buffer, a);
+        
         while (i < servers.size())
         {
             ip_port = servers[i].get_ip();
@@ -101,13 +102,7 @@ void Socket::HandleClient(const int &fd_client, Config a)
                 break;
             i++;
         }
-        //if (i == servers.size())
-        //    std::cerr << "herer" << std::endl;
-        // std::cout << "req->host name is " << test_request.get_Hostname() << std::endl;
-        // std::cout << "req->port is " << test_request.get_port() << std::endl;
-        // std::cout << "server->host name is " << ip_port.first << std::endl;
-        // std::cout << "server->port is " << ip_port.second << std::endl;
-        // std::cout << "host name is " << test_request.get() << std::endl;
+
         if (response == "NONE")
         {
             if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE")
