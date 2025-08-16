@@ -85,7 +85,7 @@ void Socket::HandleClient(const int &fd_client, Config a)
     if (b_read > 0)
     {
         buffer[b_read] = '\0';
-        //std::cout << buffer << std::endl;
+        // std::cout << buffer << std::endl;
         std::vector<ServerConfig> servers;
         size_t i = 0;
         servers = a.get_allserver_config();

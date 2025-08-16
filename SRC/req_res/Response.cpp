@@ -73,6 +73,7 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
 {
     std::string last_path;
     struct stat statbuf;
+    // std::cout << "path before is: " << path << std::endl;
     if (stat(path.c_str(), &statbuf) == 0)
     {
         if (S_ISDIR(statbuf.st_mode))
@@ -80,6 +81,7 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
             if (info_location.get_pathIndex() != "None")
             {
                 last_path = info_location.get_root() + "/" + info_location.get_pathIndex();
+                std::cout << "pathh: " << last_path << std::endl;
                 return Response::Display_file(last_path, a);
             }
             else
