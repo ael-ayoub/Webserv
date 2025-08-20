@@ -1,4 +1,5 @@
 #include "../../INCLUDES/Upload.hpp"
+#include <cstdlib>
 
 Upload::Upload(std::string Request) : request(Request)
 {
@@ -15,7 +16,7 @@ bool Upload::ReqChecker()
 
 void Upload::printChunks()
 {
-	for (int i = 0; i < files.size(); i++)
+	for (size_t i = 0; i < files.size(); i++)
 		std::cout << "Chunk part " << i + 1 << ":\n"<< files[i] << std::endl;
 }
 
@@ -84,7 +85,7 @@ bool Upload::getData()
 		return false;
 	std::string number = request.substr(start + boundary.size(), end);
 
-	contentLenght.push_back(std::atoi(number.c_str()));
+	contentLenght.push_back(atoi(number.c_str()));
 
 	int i = 0;
 	while (1)
@@ -108,7 +109,7 @@ bool Upload::getData()
 void Upload::fileContent()
 {
 	size_t start, end;
-	for (int i = 0; i < chunks.size(); i++)
+	for (size_t i = 0; i < chunks.size(); i++)
 	{
 		std::string toFind = "filename=";
 		start = chunks[i].find(toFind, 0);
@@ -125,10 +126,10 @@ void Upload::fileContent()
 			return ;
 		std::string line = chunks[i].substr(start, end - start);
 		std::string file;
-		for (int i = 0, k = 0; i < line.size(); i++)
+		for (size_t j = 0; j < line.size(); j++)
 		{
-			if (line[i] != '"')
-				file += line[i];
+			if (line[j] != '"')
+				file += line[j];
 		}
 		if (file.empty() == false && file[0] == '/')
 		{
@@ -142,7 +143,7 @@ void Upload::fileContent()
 	}
 
 	// ! CONTENT
-	for (int i = 0; i < chunks.size(); i++)
+	for (size_t i = 0; i < chunks.size(); i++)
 	{
 		std::string toFind = "\r\n\r\n";
 		start = chunks[i].find(toFind, 0);
@@ -158,10 +159,10 @@ void Upload::fileContent()
 
 void Upload::appendContentToLocalFile()
 {
-	for (int i = 0; i < files.size(); i++)
+	for (size_t i = 0; i < files.size(); i++)
 	{
 		// debugger(filename[i]);
-		std::ofstream file("./uploads/" + filename[i]);
+		std::ofstream file(("./uploads/" + filename[i]).c_str());
 		file << files[i].c_str();
 	}
 }
@@ -192,10 +193,10 @@ void Upload::normalUpload()
 		return ;
 	std::string line = request.substr(start, end - start);
 	std::string file;
-	for (int i = 0, k = 0; i < line.size(); i++)
+	for (size_t j = 0; j < line.size(); j++)
 	{
-		if (line[i] != '"')
-			file += line[i];
+		if (line[j] != '"')
+			file += line[j];
 	}
 	if (file.empty() == false && file[0] == '/')
 	{

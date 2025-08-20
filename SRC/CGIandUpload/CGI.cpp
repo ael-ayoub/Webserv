@@ -1,4 +1,5 @@
 #include "../../INCLUDES/CGI.hpp"
+#include <sstream>
 
 CGI::CGI(const char *RequestType,
 		const char *FilePath,
@@ -105,9 +106,11 @@ int CGI::responseWrapper()
 	std::string lines = output.str();
 	if (lines.find(':', 0))
 	{
+		std::ostringstream contentLengthStream;
+		contentLengthStream << lines.length();
 		std::string header =
 			"Content-Type: text/html\r\n"
-			"Content-Length: " + std::to_string(lines.length()) + "\r\n\r\n";
+			"Content-Length: " + contentLengthStream.str() + "\r\n\r\n";
 
 		response += "\r\n";
 		response += statusLine;

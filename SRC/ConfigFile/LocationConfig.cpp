@@ -37,12 +37,12 @@ std::string LocationConfig::get_pathIndex()
     return path_index;
 }
 
-std::string LocationConfig::get_root()
+std::string LocationConfig::get_root() const
 {
     return path_root;
 }
 
-std::string LocationConfig::get_path()
+std::string LocationConfig::get_path() const
 {
     return path_location;
 }

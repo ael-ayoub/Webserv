@@ -23,8 +23,8 @@ class LocationConfig
         void set_methode();
         void set_autoindex();
         void set_path_root();
-        std::string get_path();
-        std::string get_root();
+        std::string get_path() const;
+        std::string get_root() const ;
         std::string get_pathIndex();
         bool get_autoIndex();
         bool get_method(std::string request_method);
