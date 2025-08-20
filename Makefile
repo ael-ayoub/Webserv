@@ -7,14 +7,16 @@ SRCS = main.cpp SRC/ConfigFile/Config.cpp SRC/ConfigFile/ServerConfig.cpp \
 	SRC/req_res/Response.cpp SRC/req_res/ErrorResponse.cpp SRC/runServer.cpp \
 	SRC/CGIandUpload/CGI.cpp SRC/CGIandUpload/Upload.cpp SRC/CGIandUpload/command_runner.cpp
 
-CC = c++
+CPP = c++
 
 FLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
+OBJ = $(SRCS:.cpp=.o)
+
 all: $(NAME)
 
-$(NAME): $(SRCS)
-	$(CC) $(FLAGS) $(SRCS) -o $(NAME)
+$(NAME): $(OBJ)
+	$(CPP) $(FLAGS) $(?) -o $(NAME)
 
 fclean: clean
 	rm -f $(NAME)

@@ -154,7 +154,7 @@ void Socket::Monitor(Config a)
     epoll_event events[MAX_EVENTS];
     epoll_event event_client;
     sockaddr_in addr_client;
-
+    (void) addr_size;
     while (true)
     {
         max_fds = epoll_wait(fd_epoll, events, MAX_EVENTS, -1);

@@ -73,7 +73,7 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
 {
     std::string last_path;
     struct stat statbuf;
-    // std::cout << "path before is: " << path << std::endl;
+    std::cout << "path before is: " << path << std::endl;
     if (stat(path.c_str(), &statbuf) == 0)
     {
         if (S_ISDIR(statbuf.st_mode))

@@ -2,20 +2,16 @@
 
 
 
-// Integrate Upload and CGI handling
 int Methodes::PostMethod(const std::string& Prequest, const LocationConfig& info_location)
 {
 	if (Prequest.empty())
 		throw(std::invalid_argument("Post request is empty !"));
 
-	// Check if upload is enabled for this location
 	if (info_location.is_upload_enabled()) {
 		Upload uploader(Prequest);
-		// Optionally, you can return a status or response string
-		return 0; // Success
+		return 0;
 	}
 
-	// Check if this is a CGI request (by file extension in path)
 	std::string path = info_location.get_root() + info_location.get_path();
 	if (path.size() > 3 && (path.substr(path.size()-3) == ".py" || path.substr(path.size()-4) == ".php")) {
 		// Example: you may need to extract env, cgiBinary, etc. from config
@@ -23,18 +19,16 @@ int Methodes::PostMethod(const std::string& Prequest, const LocationConfig& info
 		const char* filePath = path.c_str();
 		const char* lang = (path.substr(path.size()-3) == ".py") ? ".py" : ".php";
 		const char* cgiBinary = (lang == std::string(".py")) ? "/usr/bin/python3" : "/usr/bin/php-cgi";
+		std::cout << "\n\n\n\n\n-----cgi bin = " << cgiBinary << "----\n\n\n\n\n\n\n";
 		const char* env[] = { NULL };
 		CGI cgi(reqType, filePath, lang, cgiBinary, env);
 		if (cgi.CGIProccess()) {
-			// Optionally, you can return cgi.response or status
+			// return cgi.response or status
 			return 0;
 		} else {
-			// CGI failed
 			return -1;
 		}
 	}
-
-	// Fallback: old logic (write to file)
 	std::string fallback_path = info_location.get_root() + "/uploads/filename.txt";
 	std::ofstream fileUpload(fallback_path.c_str(), std::ios::app);
 	if (!fileUpload.is_open())

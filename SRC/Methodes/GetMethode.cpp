@@ -31,7 +31,7 @@ std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Ser
     // std::cout << "choose: " << info_location.get_path() << std::endl;
     // std::cout << "choose test_req: " << test_request.get_path() << std::endl;
     std::string path = info_location.get_root() + test_request.get_path();
-    // std::cout << "path: " << path<< std::endl;
+    std::cout << "path: " << path<< std::endl;
     struct stat statbuf;
     if (stat((path).c_str(), &statbuf) == 0)
     {
