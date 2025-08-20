@@ -105,8 +105,17 @@ void Socket::HandleClient(const int &fd_client, Config a)
 
         if (response == "NONE")
         {
-            if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE")
+            if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE") {
                 response = m.GetMethod(a, test_request, servers[i]);
+            } else if (test_request.get_method() == "POST") {
+                LocationConfig info_location = servers[i].get_conf(test_request.get_path());
+                int post_status = m.PostMethod(buffer, info_location);
+                // For now, send a simple HTTP response for POST
+                if (post_status == 0)
+                    response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 7\r\n\r\nSuccess";
+                else
+                    response = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 5\r\n\r\nError";
+            }
         }
         size_t total_sent = 0;
         while (total_sent < response.size())

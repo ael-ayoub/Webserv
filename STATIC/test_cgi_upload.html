@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CGI and File Upload Test</title>
+</head>
+<body>
+    <h1>CGI and File Upload Test Page</h1>
+
+    <h2>Test CGI Script</h2>
+    <form action="/cgi-bin/hello.py" method="get">
+        <button type="submit">Run hello.py CGI</button>
+    </form>
+    <div>
+        <em>Check the output of the CGI script above.</em>
+    </div>
+
+    <hr>
+
+    <h2>Test File Upload</h2>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <label for="file">Choose file to upload:</label>
+        <input type="file" id="file" name="file"><br><br>
+        <button type="submit">Upload File</button>
+    </form>
+    <div>
+        <em>After uploading, check your upload directory for the file.</em>
+    </div>
+
+</body>
+</html>
