@@ -26,8 +26,7 @@ void syntax_server::check_server_syntax(Vector_str server)
                 k++;
             }
             location_path.push_back(tmp[1]);
-            if (listen_check == false || client_max_body_size_check == false
-                || error_page_check == false)
+            if (listen_check == false || client_max_body_size_check == false)
                 throw Config::ErrorSyntax();
             // break;
 
