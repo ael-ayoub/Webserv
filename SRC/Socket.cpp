@@ -102,11 +102,13 @@ void Socket::HandleClient(const int &fd_client, Config a)
                 break;
             i++;
         }
-
+        std::cout << "a: " << test_request.get_path() << std::endl;
         if (response == "NONE")
         {
+            
             if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE")
                 response = m.GetMethod(a, test_request, servers[i]);
+            
         }
         size_t total_sent = 0;
         while (total_sent < response.size())
