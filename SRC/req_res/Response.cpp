@@ -1,4 +1,5 @@
 #include "../../INCLUDES/Response.hpp"
+#include "../../INCLUDES/CGI.hpp"
 
 std::string Response::Display_dir(std::string path, LocationConfig info_location)
 {
@@ -94,7 +95,51 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
         else
         {
             last_path = info_location.get_root() + test_request.get_path();
-            return Response::Display_file(last_path, a);
+            
+            if (last_path.empty() || info_location.get_root() == "None") {
+                return ErrorResponse::Error_NotFound(a);
+            }
+            
+            std::string extension = "";
+            size_t dot_pos = last_path.find_last_of('.');
+            if (dot_pos != std::string::npos) {
+                extension = last_path.substr(dot_pos);
+            }
+            
+            if (extension == ".py" || extension == ".php") {
+                const char *env[] = {
+                    "REQUEST_METHOD=GET",
+                    "QUERY_STRING=",
+                    "CONTENT_LENGTH=0",
+                    "CONTENT_TYPE=",
+                    "GATEWAY_INTERFACE=CGI/1.1",
+                    "SCRIPT_NAME=/cgi-bin/script.cgi",
+                    "SERVER_NAME=localhost",
+                    "SERVER_PORT=8080",
+                    "SERVER_PROTOCOL=HTTP/1.1",
+                    "SERVER_SOFTWARE=MyWebServer/1.0",
+                    "REMOTE_ADDR=127.0.0.1",
+                    "REMOTE_PORT=12345",
+                    NULL
+                };
+                
+                const char *cgi_binary = (extension == ".py") ? "/usr/bin/python3" : "/usr/bin/php";
+                struct stat cgi_stat;
+                if (stat(cgi_binary, &cgi_stat) == 0 && (cgi_stat.st_mode & S_IXUSR)) {
+                    try {
+                        CGI cgi_processor("GET", last_path.c_str(), extension.c_str(), cgi_binary, env);
+                        
+                        if (cgi_processor.CGIProccess()) {
+                            return cgi_processor.response;
+                        }
+                    } catch (const std::exception& e) {
+                        std::cerr << "CGI processing error: " << e.what() << std::endl;
+                    }
+                }
+                return Response::Display_file(last_path, a);
+            } else {
+                return Response::Display_file(last_path, a);
+            }
         }
     }
     return ErrorResponse::Error_NotFound(a);

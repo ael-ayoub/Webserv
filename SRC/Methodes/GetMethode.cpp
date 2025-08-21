@@ -47,7 +47,13 @@ std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Ser
     info_location = Servers_Config.get_conf(clean_string(test_request.get_path()));
     // std::cout << "we have now configure : " << clean_string(test_request.get_path()) << std::endl;
     // std::cout << "location working with is : " << info_location.get_path() << std::endl;
+	std::string extention;
+	if (path.find_last_of(".", 0) != path.npos)
+		std::string extention = path.substr(path.find_last_of(".", 0));
+	if (extention.empty() == false && test_request.get_method() == "GET")
+	{
 
+	}
     if (test_request.get_method() == "GET" && info_location.get_method("GET") == true)
     {
         return Response::Get_response(path, info_location, test_request, a);

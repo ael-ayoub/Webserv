@@ -2,7 +2,8 @@
 
 LocationConfig::LocationConfig()
     : path_index("None"), autoindex(false), GET_methode(false),
-        post_methode(false), delete_methode(false), upload_enable(false)
+        post_methode(false), delete_methode(false), upload_enable(false),
+        path_root("None")
 {
     path_location = "None";
 }
@@ -24,7 +25,7 @@ void LocationConfig::set_autoindex()
 
 void LocationConfig::set_path_root()
 {
-    path_root = "/home/ael-aiss/Desktop/Webserv/STATIC";
+    path_root = "/home/asoudani/Webserv/STATIC";
 }
 
 bool LocationConfig::get_autoIndex()
