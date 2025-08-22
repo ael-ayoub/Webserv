@@ -79,11 +79,11 @@ void Socket::CreateEpoll()
 
 void Socket::HandleClient(const int &fd_client, Config a)
 {
-
     char buffer[1024];
     int b_read = read(fd_client, buffer, 1024);
     if (b_read > 0)
     {
+        if (b_read >= 1024) b_read = 1023;
         buffer[b_read] = '\0';
         std::cout << buffer << std::endl;
         std::vector<ServerConfig> servers;
@@ -92,7 +92,13 @@ void Socket::HandleClient(const int &fd_client, Config a)
         std::pair<std::string, int> ip_port;
         Request test_request;
         std::string response;
-        response = test_request.parse_request(buffer, a);
+        
+        try {
+            response = test_request.parse_request(buffer, a);
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing request: " << e.what() << std::endl;
+            response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nBad Request";
+        }
         
         while (i < servers.size())
         {
@@ -103,18 +109,26 @@ void Socket::HandleClient(const int &fd_client, Config a)
             i++;
         }
 
-        if (response == "NONE")
+        if (i >= servers.size()) {
+            response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: 9\r\n\r\nNot Found";
+        }
+
+        if (response == "NONE" && i < servers.size())
         {
-            if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE") {
-                response = m.GetMethod(a, test_request, servers[i]);
-            } else if (test_request.get_method() == "POST") {
-                LocationConfig info_location = servers[i].get_conf(test_request.get_path());
-                int post_status = m.PostMethod(buffer, info_location);
-                // For now, send a simple HTTP response for POST
-                if (post_status == 0)
-                    response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 7\r\n\r\nSuccess";
-                else
-                    response = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 5\r\n\r\nError";
+            try {
+                if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE") {
+                    response = m.GetMethod(a, test_request, servers[i]);
+                } else if (test_request.get_method() == "POST") {
+                    LocationConfig info_location = servers[i].get_conf(test_request.get_path());
+                    int post_status = m.PostMethod(buffer, info_location);
+                    if (post_status == 0)
+                        response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 7\r\n\r\nSuccess";
+                    else
+                        response = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 5\r\n\r\nError";
+                }
+            } catch (const std::exception& e) {
+                std::cerr << "Error processing request: " << e.what() << std::endl;
+                response = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 21\r\n\r\nInternal Server Error";
             }
         }
         size_t total_sent = 0;
@@ -127,8 +141,15 @@ void Socket::HandleClient(const int &fd_client, Config a)
             total_sent += sent;
         }
     }
+    else if (b_read == 0)
+    {
+        std::cout << "Client closed connection" << std::endl;
+        epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
+        close(fd_client);
+    }
     else
     {
+        std::cerr << "Read error from client" << std::endl;
         epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
         close(fd_client);
     }
@@ -198,7 +219,7 @@ void Socket::run(Config a)
     }
     catch (std::exception &e)
     {
-        std::cout << "cannod run the rerver !!!" << std::endl;
+        std::cout << "cannot run the rerver !!!" << std::endl;
         std::cout << e.what() << std::endl;
     }
 }

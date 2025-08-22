@@ -3,10 +3,20 @@
 
 Upload::Upload(std::string Request) : request(Request)
 {
-	if (getData() == false)
-		normalUpload();
-	fileContent();
-	appendContentToLocalFile();
+	try {
+		if (request.empty()) {
+			std::cerr << "Upload: Empty request" << std::endl;
+			return;
+		}
+		
+		if (getData() == false)
+			normalUpload();
+		fileContent();
+		appendContentToLocalFile();
+	} catch (const std::exception& e) {
+		std::cerr << "Upload constructor error: " << e.what() << std::endl;
+		throw;
+	}
 }
 
 bool Upload::ReqChecker()
@@ -83,7 +93,8 @@ bool Upload::getData()
 	end = request.find("\r", start);
 	if (end == request.npos || start == request.npos)
 		return false;
-	std::string number = request.substr(start + boundary.size(), end);
+	start += 16; // Length of "Content-Length: "
+	std::string number = request.substr(start, end - start);
 
 	contentLenght.push_back(atoi(number.c_str()));
 
@@ -159,11 +170,24 @@ void Upload::fileContent()
 
 void Upload::appendContentToLocalFile()
 {
-	for (size_t i = 0; i < files.size(); i++)
+	for (size_t i = 0; i < files.size() && i < filename.size(); i++)
 	{
 		// debugger(filename[i]);
-		std::ofstream file(("./uploads/" + filename[i]).c_str());
-		file << files[i].c_str();
+		if (filename[i].empty()) {
+			std::cerr << "Warning: Empty filename for file " << i << std::endl;
+			continue;
+		}
+		
+		std::string filepath = "./uploads/" + filename[i];
+		std::ofstream file(filepath.c_str());
+		if (!file.is_open()) {
+			std::cerr << "Could not create file: " << filepath << std::endl;
+			continue;
+		}
+		
+		file << files[i];
+		file.close();
+		std::cout << "File uploaded: " << filepath << std::endl;
 	}
 }
 
