@@ -30,7 +30,7 @@ public:
 	void CreateSocket();
 	void CreateEpoll();
 	int checkEvent(int fd);
-	void HandleClient(const int &fd_client, Config& a);
+	void HandleClient(int fd_client, Config& a);
 	void Monitor(Config &a);
 };
 

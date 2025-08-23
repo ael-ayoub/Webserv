@@ -29,8 +29,8 @@ std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Ser
         return std::string(); ///////////////////// check heree the favicon.co why he display everytume
     
     LocationConfig info_location = Servers_Config.get_conf(test_request.get_path());
-    std::cout << "choose: " << info_location.get_path() << std::endl;
-    std::cout << "choose test_req: " << test_request.get_path() << std::endl;
+    // std::cout << "choose: " << info_location.get_path() << std::endl;
+    // std::cout << "choose test_req: " << test_request.get_path() << std::endl;
     std::string path = info_location.get_root() + test_request.get_path();
     // std::cout << "path: " << path<< std::endl;
     struct stat statbuf;

@@ -99,16 +99,15 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
                 return response;
         }
     }
-    std::cout << "path is : " << path << std::endl;
+    // std::cout << "path is : " << path << std::endl;
     if (stat(path.c_str(), &statbuf) == 0)
     {
         if (S_ISDIR(statbuf.st_mode))
         {
             if (info_location.get_pathIndex() != "None")
             {
-                std::cout << "display the index\n";
                 last_path = info_location.get_root() + test_request.get_path() + info_location.get_pathIndex();
-                std::cout << "last path is : " << last_path << std::endl;
+                // std::cout << "last path is : " << last_path << std::endl;
                 return Response::Display_file(last_path, a);
             }
             else
@@ -121,11 +120,10 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
         else
         {
             last_path = info_location.get_root() + test_request.get_path();
-            std::cout << "pathh: " << last_path << std::endl;
+            // std::cout << "pathh: " << last_path << std::endl;
             return Response::Display_file(last_path, a);
         }
     }
-    std::cout << "error not found\n";
     return ErrorResponse::Error_NotFound(a);
 }
 

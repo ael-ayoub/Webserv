@@ -16,12 +16,14 @@ std::string generat_random_id()
 	return random;
 }
 
-std::string Methodes::PostMethod(Config &a, Request test_request, ServerConfig Servers_Config)
+void  Methodes::PostMethod(Config &a, Request test_request, ServerConfig Servers_Config , std::string &response)
 {
 	(void)a;
 	//(void)test_request;
 	(void)Servers_Config;
-	std::string response;
+	// std::string response;
+	std::cout << "this responce: " << std::endl;
+
 
 	if (test_request.get_path() == "/register")
 	{
@@ -37,8 +39,7 @@ std::string Methodes::PostMethod(Config &a, Request test_request, ServerConfig S
 				"Content-Length: " +
 				ss.str() + "\r\n"
 						   "Connection: close\r\n"
-						   "\r\n" +
-				body;
+						   "\r\n" + body;
 		}
 		else
 		{
@@ -71,7 +72,7 @@ std::string Methodes::PostMethod(Config &a, Request test_request, ServerConfig S
 						   "Connection: close\r\n"
 						   "\r\n" +
 				body;
-                return response;
+                // return response;
         }
 		if (test_request.check_if_user_exist())
 		{
@@ -105,5 +106,18 @@ std::string Methodes::PostMethod(Config &a, Request test_request, ServerConfig S
 				"\r\n" + body;
 		}
 	}
-	return response;
+	else if (test_request.get_path() == "/uploads")
+	{
+		std::string body = "<html><body> <h1>User dzxczxczxo not exists!</h1></body></html>";
+		std::stringstream ss;
+		ss << body.size();
+		// srand(time(0));
+		response =
+		"HTTP/1.1 409 Conflict\r\n"
+		"Content-Type: text/html\r\n"
+		"Content-Length: " + ss.str() + "\r\n" 
+		"Connection: close\r\n\r\n";
+		response += body;
+	}
+	// return response;
 }
