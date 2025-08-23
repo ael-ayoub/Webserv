@@ -162,3 +162,23 @@ Config::Config()
     first_last = std::make_pair(0, 0);
     start = 0;
 }
+
+
+void Config::set_sessions(std::pair<std::string , std::string> ss)
+{
+    sessions.push_back(ss);
+}
+std::vector<std::pair<std::string , std::string> > Config::get_sessions()
+{
+    return sessions;
+}
+
+bool Config::check_session(std::pair<std::string , std::string> ss)
+{
+    for (size_t i = 0; i < sessions.size(); i++)
+    {
+        if (sessions[i].first == ss.first && sessions[i].second == ss.second)
+            return true;
+    }
+    return false;
+}

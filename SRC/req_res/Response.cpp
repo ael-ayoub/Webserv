@@ -73,7 +73,28 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
 {
     std::string last_path;
     struct stat statbuf;
-    // std::cout << "path before is: " << path << std::endl;
+    std::string pathh = test_request.get_path();
+    //std::cout << pathh << std::endl;
+    if ( pathh == "/login/" || pathh == "/login/login.html" || pathh == "/login/register.html")
+    {
+        //std::map<std::string, std::string>::iterator s = test_request.get_session().begin();
+        if (a.check_session(test_request.get_session()))
+        {
+            std::string body = "<html><body> <h1>u are loger in !!</h1></body></html>";
+			std::stringstream ss;
+			ss << body.size();
+			std::string response =
+				"HTTP/1.1 409 Conflict\r\n"
+				"Content-Type: text/html\r\n"
+				"Content-Length: " +
+				ss.str() + "\r\n"
+						   "Connection: close\r\n"
+						   "\r\n" +
+				body;
+                return response;
+        }
+    }
+        //std::cout << "yes" << std::endl;
     if (stat(path.c_str(), &statbuf) == 0)
     {
         if (S_ISDIR(statbuf.st_mode))

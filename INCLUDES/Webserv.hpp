@@ -26,3 +26,4 @@ void run_server();
 #include "Response.hpp"
 #include "ErrorResponse.hpp"
 #include "socketConfig.hpp"
+#include "Users.hpp"

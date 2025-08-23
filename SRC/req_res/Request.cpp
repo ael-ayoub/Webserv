@@ -10,7 +10,6 @@ std::string Request::get_Hostname()
     return hostname;
 }
 
-
 std::string Request::check_requestline(std::string request_line, Config a)
 {
     int spaces = 0;
@@ -38,11 +37,11 @@ std::string Request::check_requestline(std::string request_line, Config a)
     if (args.size() != 3)
         return ErrorResponse::Error_BadRequest(a);
     if (args[0] != "GET" && args[0] != "POST" && args[0] != "DELETE")
-        return ErrorResponse::Error_MethodeNotAllowed(a); //405
+        return ErrorResponse::Error_MethodeNotAllowed(a); // 405
     if (args[1][0] != '/')
         return ErrorResponse::Error_BadRequest(a);
     if (args[2] != "HTTP/1.1\r\n" && args[2] != "HTTP/1.0\r\n")
-        return ErrorResponse::Error_BadRequest(a); 
+        return ErrorResponse::Error_BadRequest(a);
     method = args[0];
     path = args[1];
     HTTP = args[2];
@@ -92,15 +91,15 @@ std::string Request::check_headerline(std::string header_line, Config a)
     }
     Vector_str args = ServerConfig::ft_splitv2(header_line, ' ');
     if (args.size() != 2)
-        return ErrorResponse::Error_BadRequest(a);//400
+        return ErrorResponse::Error_BadRequest(a); // 400
     if (args[0] != "Host:")
-        return ErrorResponse::Error_BadRequest(a); //400
+        return ErrorResponse::Error_BadRequest(a); // 400
 
     Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
     if (ip_port.size() != 2)
-        return ErrorResponse::Error_BadRequest(a); //400
+        return ErrorResponse::Error_BadRequest(a); // 400
     if (ip_port[0] != "localhost" && check_ip(ip_port[0]) == false)
-        return ErrorResponse::Error_BadRequest(a);//400
+        return ErrorResponse::Error_BadRequest(a); // 400
     int start = ip_port[1].find('\r');
     std::string ip = ip_port[1].substr(0, start);
     int v_ip;
@@ -117,6 +116,40 @@ std::string Request::check_headerline(std::string header_line, Config a)
     return "NONE";
 }
 
+void Request::get_user_form_request(const std::string& str)
+{
+    size_t pos;
+	std::string u;
+	std::string p;
+    User user;
+	pos = str.find("username=");
+	if (pos != std::string::npos)
+	{
+		pos += 9;
+		size_t end =  str.find('&', pos);
+		u = str.substr(pos, end - pos);
+	}
+	pos = str.find("password=");
+	if (pos != std::string::npos)
+	{
+		pos += 9;
+		size_t end =  str.find("\r\n", pos);
+		p = str.substr(pos, end - pos);
+	}
+	if (!u.empty() && !p.empty())
+	{
+		user.setPassword(p);
+		user.setUsername(u);
+	}
+    else 
+    {
+        user.setPassword("");
+		user.setUsername("");
+    }
+    this->user = user;
+}
+
+
 std::string Request::check_request(std::string str, Config a)
 {
     // size_t i = 0;
@@ -126,6 +159,11 @@ std::string Request::check_request(std::string str, Config a)
 
     // bool header = false;
     std::string header_line;
+    get_user_form_request(str);
+    set_session(str);
+
+    //std::cout << str ;
+    //std::cout << get_session().first  << std::endl;
 
     // while (str[i])
     int first = str.find('\n');
@@ -134,10 +172,11 @@ std::string Request::check_request(std::string str, Config a)
     from = first + 1;
     first = str.find('\n', from);
     header_line = str.substr(from, first - from + 1);
+
     // std::cout << "from is " << from << ". first is " << first << std::endl;
     // std::cout << "requ_line: " << request_line << std::endl;
     // std::cout << "int is " << static_cast<int>(request_line[request_line.size() - 2]) << ", char: " << request_line[request_line.size() - 2] << std::endl;
-    //         //////////// header_line taycoper tallekher 
+    //         //////////// header_line taycoper tallekher
     // std::cout << "hea_line: " << header_line << std::endl;
     // std::cout << "int is " << static_cast<int>(header_line[header_line.size() - 1]) << ", char: " << header_line[header_line.size() - 1] << std::endl;
     std::string response;
@@ -167,4 +206,36 @@ std::string Request::get_method()
 std::string Request::get_path()
 {
     return path;
+}
+
+User Request::get_user()
+{
+    return user;
+}
+
+void Request::set_session(const std::string& str)
+{
+    size_t pos = str.find("Cookie: ");
+    std::string uname;
+    std::string pass;
+    session = std::pair<std::string, std::string>();
+    if (pos != std::string::npos)
+    {
+        pos+= 8;
+        size_t end = str.find('=', pos);
+        uname = str.substr(pos, end - pos);
+        pos = str.find("\r\n", end);
+        pass = str.substr(end + 1, pos - end - 1);
+    }
+    if (!pass.empty() && !uname.empty())
+    {
+        session.first = uname;
+        session.second = pass;
+    }
+}
+
+
+std::pair<std::string, std::string> Request::get_session()
+{
+    return session;
 }
