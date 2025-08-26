@@ -77,7 +77,7 @@ void Socket::CreateEpoll()
     }
 }
 
-void Socket::HandleClient(const int &fd_client, Config a)
+void Socket::HandleClient(const int &fd_client, Config& a)
 {
 
     char buffer[1024];
@@ -103,12 +103,30 @@ void Socket::HandleClient(const int &fd_client, Config a)
             i++;
         }
 
+        //if (a.checkSession("111"))
+        //    std::cout << "i did it" << std::endl;
+        //if (i == servers.size())
+        //    std::cerr << "herer" << std::endl;
+        // std::cout << "req->host name is " << test_request.get_Hostname() << std::endl;
+        // std::cout << "req->port is " << test_request.get_port() << std::endl;
+        // std::cout << "server->host name is " << ip_port.first << std::endl;
+        // std::cout << "server->port is " << ip_port.second << std::endl;
+        // std::cout << "host name is " << test_request.get() << std::endl;
+        //std::vector<User> users = Get_all_users();
+
+        //for (size_t it = 0; it < users.size(); it++)
+        //    std::cout << users[it].getUsername() << "&" << users[it].getPassword() << "--" <<std::endl; 
+
+
         if (response == "NONE")
         {
             if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE")
                 response = m.GetMethod(a, test_request, servers[i]);
+            else if (test_request.get_method() == "POST")
+                response = m.PostMethod(a, test_request, servers[i]);
         }
         size_t total_sent = 0;
+        //std::cout << response << std::endl;
         while (total_sent < response.size())
         {
             ssize_t sent = send(fd_client, response.c_str() + total_sent,
@@ -135,7 +153,7 @@ int Socket::checkEvent(int fd)
     return (-1);
 }
 
-void Socket::Monitor(Config a)
+void Socket::Monitor(Config &a)
 {
     int MAX_EVENTS = 256;
     int fd_client;
@@ -179,7 +197,7 @@ void Socket::Monitor(Config a)
     }
 }
 
-void Socket::run(Config a)
+void Socket::run(Config& a)
 {
     try
     {

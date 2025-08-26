@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Webserv.hpp"
+#include "Users.hpp"
 
 class ServerConfig;
 class LocationConfig;
@@ -12,10 +13,13 @@ class Config
         std::pair<int, int> first_last;
         std::vector<ServerConfig> Servers_Config;
         Vector_str file_lines;
-
+        std::vector<std::pair<std::string , std::string> > sessions;
     public:
         Config();
 
+        void set_sessions(std::pair<std::string , std::string> ss);
+        std::vector<std::pair<std::string , std::string> > get_sessions();
+        bool check_session(std::pair<std::string , std::string> ss);
         std::vector<ServerConfig> get_allserver_config();
         ServerConfig get_server_config();
 
@@ -26,6 +30,8 @@ class Config
         Vector_str          get_file_lines();
         static std::string         remove_whitespaces(std::string line);
         std::pair<int, int> get_firstlast();
+        //void Get_all_users();
+
         void print_confiFile();
 
         std::string get_mine(std::string path);

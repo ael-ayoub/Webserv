@@ -25,13 +25,13 @@ private:
 
 public:
 	Socket(std::vector<std::pair<std::string, int> > ports);
-	void run(Config a);
+	void run(Config &a);
 	void set_nonblocking(int fd);
 	void CreateSocket();
 	void CreateEpoll();
 	int checkEvent(int fd);
-	void HandleClient(const int &fd_client, Config a);
-	void Monitor(Config a);
+	void HandleClient(const int &fd_client, Config& a);
+	void Monitor(Config &a);
 };
 
 #endif
