@@ -9,7 +9,7 @@ SRCS = main.cpp SRC/ConfigFile/Config.cpp SRC/ConfigFile/ServerConfig.cpp \
 
 CPP = c++
 
-FLAGS = -Wall -Wextra -Werror -std=c++98 -g
+FLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 
 OBJ = $(SRCS:.cpp=.o)
 

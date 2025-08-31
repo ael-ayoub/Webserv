@@ -82,13 +82,10 @@ int    Config::stores_config()
         ServerConfig tmp;
 
         first_last = this->get_firstlast();
-        // std::cout << "first :" << first_last.first << "seconde :" << first_last.second << "\n";
         if (first_last.first == -2)
             throw Config::ErrorSyntax();
         if (first_last.first == -1 || first_last.second == -1)
-        {
             break;
-        }
         tmp.parse_config(file_lines, first_last.first, first_last.second);
         Servers_Config.push_back(tmp);
         first_last.first = first_last.second + 1;
@@ -127,6 +124,7 @@ std::pair<int, int> Config::get_firstlast()
             first = -2;
             break;
         }
+
         if (line.find('{') != std::string::npos)
         {
             brace_cout++;
@@ -145,9 +143,12 @@ std::pair<int, int> Config::get_firstlast()
             last = i + 1;
             found_it = 1;
         }
+
         i++;
     }
     if (brace_cout != 0)
+        first = -2;
+    if (first == -1 && last != -1)
         first = -2;
     return std::make_pair(first, last);
 }

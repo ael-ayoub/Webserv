@@ -71,16 +71,27 @@ int CGI::CGIOutput()
         execve(cgiBinary, execArg, (char **)env);
         return 1;
     }
+    close(piped[1]);
+
+    char buffer[4096];
+    int totalRead = 0;
+    int bytesRead;
+    
+    while ((bytesRead = read(piped[0], buffer, sizeof(buffer) - 1)) > 0)
+    {
+        buffer[bytesRead] = '\0';
+        file << buffer;
+        totalRead += bytesRead;
+    }
+    
     if (waitpid(id, &status, 0) == -1)
         return 1;
-    char s[1024] = {0};
-    int readen = read(piped[0], s, 1023);
-    if (readen == -1 || readen == 0)
-        return std::cerr << "coudn't read\n", 1;
-    s[readen] = '\0';
-    wrireToFile(file, s);
+        
+    if (totalRead == 0)
+        return std::cerr << "couldn't read CGI output\n", 1;
+    
     close(piped[0]);
-	file.close();
+    file.close();
     return 0;
 }
 
@@ -104,7 +115,17 @@ int CGI::responseWrapper()
 	std::stringstream output;
 	output << file.rdbuf();
 	std::string lines = output.str();
-	if (lines.find(':', 0))
+	file.close();
+	
+	std::cout << "---lines---\n";
+	std::cout << lines << std::endl;
+
+	// Check if CGI script already provided headers
+	if (lines.find("Content-Type:") != lines.npos)
+	{
+		response = statusLine + lines;
+	}
+	else
 	{
 		std::ostringstream contentLengthStream;
 		contentLengthStream << lines.length();
@@ -112,12 +133,9 @@ int CGI::responseWrapper()
 			"Content-Type: text/html\r\n"
 			"Content-Length: " + contentLengthStream.str() + "\r\n\r\n";
 
-		response += "\r\n";
-		response += statusLine;
-		response += header;
-		response += lines;
+		response = statusLine + header + lines;
 	}
-	file.close();
+	std::cout << "----response----\n" << response << std::endl;
 	return 0;
 }
 

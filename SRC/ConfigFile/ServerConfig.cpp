@@ -63,7 +63,6 @@ int    ServerConfig::parse_config(Vector_str server_configg, int from, int to)
 {
     while (from < to)
     {
-
         server_config.push_back(server_configg[from]);
         from++;
     }
