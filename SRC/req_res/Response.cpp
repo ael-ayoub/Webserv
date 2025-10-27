@@ -50,7 +50,12 @@ std::string Response::Display_file(std::string last_path, Config a)
     std::string body, line, s;
     std::ifstream file((last_path).c_str() , std::ios::in);
 	if (!file.is_open())
-		return ErrorResponse::Error_NotFound(a);
+    {
+        if (errno == EACCES)
+            return ErrorResponse::Error_Forbidden(a);
+        else if (errno == ENONET)
+		    return ErrorResponse::Error_NotFound(a);
+    }
 	while (getline(file, line))
 		body += line + "\n";
 	std::stringstream ss ;
@@ -94,15 +99,16 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
                 return response;
         }
     }
-        //std::cout << "yes" << std::endl;
+    std::cout << "path is : " << path << std::endl;
     if (stat(path.c_str(), &statbuf) == 0)
     {
         if (S_ISDIR(statbuf.st_mode))
         {
             if (info_location.get_pathIndex() != "None")
             {
-                last_path = info_location.get_root() + "/" + info_location.get_pathIndex();
-                std::cout << "pathh: " << last_path << std::endl;
+                std::cout << "display the index\n";
+                last_path = info_location.get_root() + test_request.get_path() + info_location.get_pathIndex();
+                std::cout << "last path is : " << last_path << std::endl;
                 return Response::Display_file(last_path, a);
             }
             else
@@ -115,9 +121,11 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
         else
         {
             last_path = info_location.get_root() + test_request.get_path();
+            std::cout << "pathh: " << last_path << std::endl;
             return Response::Display_file(last_path, a);
         }
     }
+    std::cout << "error not found\n";
     return ErrorResponse::Error_NotFound(a);
 }
 

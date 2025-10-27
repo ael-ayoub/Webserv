@@ -34,34 +34,31 @@ std::string get_current_pathh()
 LocationConfig ServerConfig::get_Location_Config(std::string path)
 {
     LocationConfig tmp;
-    int store_id = 0;
-    // Vector_str paths;
-    // std::cout << "path is : " << get_current_pathh() + path << std::endl;
-    //         path += '/';
-    // struct stat statbuf;
-    // if (stat((get_current_pathh() + path).c_str(), &statbuf) == 0)
-    // {
-    //     if (S_ISDIR(statbuf.st_mode))
-    //     {
-    //         std::cout << "is dir\n";
-    //         path += '/';
-    //     }
-    // }
-    // std::cout << "path is " << path << std::endl;
+    int store_id = -1, j_old = -1;
+
     size_t i = 0;
     while (i < Location_Config.size())
     {
         if (Location_Config[i].get_path() == path)
             return Location_Config[i];
         int j = right_path(Location_Config[i].get_path(), path);
-        if (j > store_id)
+        
+        if (j > j_old)
             store_id = i;
+
+        if (j != j_old)
+            j_old = j;
         i++;
     }
-    
-    if (store_id != 0 && path != "/")
+    // std::cout << "first location is : " << Location_Config[0].get_path() << std::endl;
+    // std::cout << "seconde location is : " << Location_Config[1].get_path() << std::endl;
+    // if (store_id != 0 && path != "/")
+    // {
+        // std::cout << "returning this and the index is " << store_id << std::endl;
+        std::cout << "index is " << store_id << std::endl;
         return Location_Config[store_id];
-    return tmp;
+    // }
+    // return tmp;
 }
 
 int    ServerConfig::check_configFile()

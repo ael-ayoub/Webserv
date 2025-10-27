@@ -93,6 +93,7 @@ void Socket::HandleClient(const int &fd_client, Config& a)
         Request test_request;
         std::string response;
         response = test_request.parse_request(buffer, a);
+        
         while (i < servers.size())
         {
             ip_port = servers[i].get_ip();
