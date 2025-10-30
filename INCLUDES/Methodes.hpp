@@ -12,7 +12,7 @@ class Methodes
 		std::string GetMethod(Config a, Request test_request, ServerConfig Servers_Config);
 		// void PostMethod(); 
 		// std::string GetMethod(); 
-		void PostMethod(Config& a, Request test_request, ServerConfig Servers_Config, std::string& responce); 
+		std::string PostMethod(Config& a, Request test_request, ServerConfig Servers_Config,int fd, const std::string &header); 
 		// void DeleteMethod(); 
 };
 

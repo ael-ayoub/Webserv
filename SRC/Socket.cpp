@@ -77,67 +77,94 @@ void Socket::CreateEpoll()
     }
 }
 
-void Socket::HandleClient(const int &fd_client, Config& a)
+std::string ft_getline(int fd)
+{
+    if (fd < 0)
+        return "";
+
+    char ch;
+    std::string line;
+
+    while (true)
+    {
+        int byte_read = read(fd, &ch, 1);
+        if (byte_read < 0)
+        {
+            std::cout << "Error happen Try to Read Request !!\n";
+            return "";
+        }
+        if (byte_read == 0)
+            break;
+        if (ch == '\n')
+            break;
+        line += ch;
+    }
+    return line;
+}
+
+void Socket::HandleClient(int fd_client, Config &a)
 {
 
-    char buffer[1024];
-    int b_read = read(fd_client, buffer, 1024);
-    if (b_read > 0)
+    std::vector<ServerConfig> servers = a.get_allserver_config();
+    std::pair<std::string, int> ip_port;
+    Request test_request;
+    std::string response;
+    std::string header;
+
+    while (true)
     {
-        buffer[b_read] = '\0';
-        // std::cout << buffer << std::endl;
-        std::vector<ServerConfig> servers;
-        size_t i = 0;
-        servers = a.get_allserver_config();
-        std::pair<std::string, int> ip_port;
-        Request test_request;
-        std::string response;
-        response = test_request.parse_request(buffer, a);
-        
-        while (i < servers.size())
-        {
-            ip_port = servers[i].get_ip();
-            if (ip_port.first == test_request.get_Hostname()
-                && ip_port.second == test_request.get_port())
-                break;
-            i++;
-        }
+        std::string line = ft_getline(fd_client);
 
-        //if (a.checkSession("111"))
-        //    std::cout << "i did it" << std::endl;
-        //if (i == servers.size())
-        //    std::cerr << "herer" << std::endl;
-        // std::cout << "req->host name is " << test_request.get_Hostname() << std::endl;
-        // std::cout << "req->port is " << test_request.get_port() << std::endl;
-        // std::cout << "server->host name is " << ip_port.first << std::endl;
-        // std::cout << "server->port is " << ip_port.second << std::endl;
-        // std::cout << "host name is " << test_request.get() << std::endl;
-        //std::vector<User> users = Get_all_users();
+        if (line == "\r" || line.empty())
+            break;
+        header += line + "\n";
+    }
 
-        //for (size_t it = 0; it < users.size(); it++)
-        //    std::cout << users[it].getUsername() << "&" << users[it].getPassword() << "--" <<std::endl; 
+    if (header.empty())
+    {
+        // std::cerr << "Empty request received" << std::endl;
+        epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
+        close(fd_client);
+        return;
+    }
 
+    size_t i = 0;
+    response = test_request.parse_request((char *)header.c_str(), a);
+    while (i < servers.size())
+    {
+        ip_port = servers[i].get_ip();
+        if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
+            break;
+        i++;
+    }
 
-        if (response == "NONE")
-        {
-            if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE")
-                response = m.GetMethod(a, test_request, servers[i]);
-            else if (test_request.get_method() == "POST")
-                response = m.PostMethod(a, test_request, servers[i]);
-        }
+    if (response == "NONE")
+    {
+        if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE")
+            response = m.GetMethod(a, test_request, servers[i]);
+        else if (test_request.get_method() == "POST")
+            response = m.PostMethod(a, test_request, servers[i], fd_client, header);
+    }
+
+    if (!response.empty())
+    {
         size_t total_sent = 0;
-        //std::cout << response << std::endl;
         while (total_sent < response.size())
         {
             ssize_t sent = send(fd_client, response.c_str() + total_sent,
                                 response.size() - total_sent, 0);
-            if (sent <= 0)
+            if (sent < 0)
+            {
+                perror("send error");
                 break;
+            }
+            if (sent == 0)
+            {
+                std::cerr << "Connection closed by client" << std::endl;
+                break;
+            }
             total_sent += sent;
         }
-    }
-    else
-    {
         epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
         close(fd_client);
     }
@@ -197,7 +224,7 @@ void Socket::Monitor(Config &a)
     }
 }
 
-void Socket::run(Config& a)
+void Socket::run(Config &a)
 {
     try
     {

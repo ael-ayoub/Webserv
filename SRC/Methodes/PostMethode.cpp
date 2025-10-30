@@ -16,12 +16,12 @@ std::string generat_random_id()
 	return random;
 }
 
-void  Methodes::PostMethod(Config &a, Request test_request, ServerConfig Servers_Config , std::string &response)
+std::string  Methodes::PostMethod(Config &a, Request test_request, ServerConfig Servers_Config , int fd_client,const std::string &header)
 {
 	(void)a;
 	//(void)test_request;
 	(void)Servers_Config;
-	// std::string response;
+	std::string response;
 	std::cout << "this responce: " << std::endl;
 
 
@@ -108,10 +108,16 @@ void  Methodes::PostMethod(Config &a, Request test_request, ServerConfig Servers
 	}
 	else if (test_request.get_path() == "/uploads")
 	{
+		// std::cout << "i am here prob " << std::endl;
+		// size_t pos = header.find()
+		std::string metadata;
+
+		
 		std::string body = "<html><body> <h1>User dzxczxczxo not exists!</h1></body></html>";
 		std::stringstream ss;
 		ss << body.size();
-		// srand(time(0));
+		srand(time(0));
+		// usleep( 1000);
 		response =
 		"HTTP/1.1 409 Conflict\r\n"
 		"Content-Type: text/html\r\n"
@@ -119,5 +125,7 @@ void  Methodes::PostMethod(Config &a, Request test_request, ServerConfig Servers
 		"Connection: close\r\n\r\n";
 		response += body;
 	}
-	// return response;
+	(void )fd_client;
+	// close(fd_client);
+	return response;
 }
