@@ -129,6 +129,7 @@ void Socket::HandleClient(int fd_client, Config &a)
     }
 
     size_t i = 0;
+    // std::cout << header << std::endl;
     response = test_request.parse_request((char *)header.c_str(), a);
     while (i < servers.size())
     {
@@ -153,6 +154,7 @@ void Socket::HandleClient(int fd_client, Config &a)
         {
             ssize_t sent = send(fd_client, response.c_str() + total_sent,
                                 response.size() - total_sent, 0);
+            std::cout << response << std::endl;
             if (sent < 0)
             {
                 perror("send error");
