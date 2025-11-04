@@ -16,22 +16,21 @@ std::string generat_random_id()
 	return random;
 }
 
-
 static std::string ft_getline(int fd)
 {
-    if (fd < 0)
-        return "";
+	if (fd < 0)
+		return "";
 
-    char ch;
-    int byte_read;
-    std::string line;
-    while ((byte_read = read(fd, &ch,1)) > 0)
-    {
-        if (ch == '\n')
-            break;
-        line += ch;
-    }
-    return line;
+	char ch;
+	int byte_read;
+	std::string line;
+	while ((byte_read = read(fd, &ch, 1)) > 0)
+	{
+		if (ch == '\n')
+			break;
+		line += ch;
+	}
+	return line;
 }
 
 std::string Methodes::PostMethod(Config &a, Request test_request, ServerConfig Servers_Config, const int &fd_client, const std::string &header)
@@ -40,7 +39,6 @@ std::string Methodes::PostMethod(Config &a, Request test_request, ServerConfig S
 	//(void)test_request;
 	(void)Servers_Config;
 	std::string response;
-	std::cout << "this responce: " << std::endl;
 
 	if (test_request.get_path() == "/register")
 	{
@@ -136,7 +134,6 @@ std::string Methodes::PostMethod(Config &a, Request test_request, ServerConfig S
 		if (pos != std::string::npos)
 		{
 			boundary = header.substr(pos + sizeof("boundary=") - 1, header.find("\n", pos) - sizeof("boundary=") - pos);
-			printf("======\n___%s___\n=======\n", boundary.c_str());
 		}
 		std::string metadata, line;
 		while ((line = ft_getline(fd_client)) != "")
@@ -150,63 +147,81 @@ std::string Methodes::PostMethod(Config &a, Request test_request, ServerConfig S
 		if (pos_3 != std::string::npos)
 		{
 			filename = metadata.substr(pos_3 + sizeof("filename="), metadata.find("\n", pos_3) - sizeof("filename=") - pos_3 - 2);
-			printf("======\n___%s___\n=======\n", filename.c_str());
+			// printf("======\n___%s___\n=======\n", filename.c_str());
 		}
 		std::string u_path = "STATIC/upload/" + filename;
-		// std::string u_path = "test.txt";
-		int fd = open(u_path.c_str(), O_WRONLY | O_CREAT | 0777);
+
+		int fd = open(u_path.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0666);
+
 		if (fd < 0)
 		{
-			std::cout << "file exist ..." << std::endl;
-			// close(file);
-			// return 1;
+			std::cout << "problem whele try to open file ..." << std::endl;
+		}
+		else
+		{
+			std::string end_boundary = "--" + boundary + "--";
+
+			char buffer[4096];
+			std::vector<char> tail; // ← Changed to vector
+			bool found = false;
+
+			while (!found)
+			{
+				ssize_t byte_read = read(fd_client, buffer, sizeof(buffer));
+				if (byte_read <= 0)
+				{
+					if (byte_read < 0)
+						std::cout << "read function failed" << std::endl;
+					break;
+				}
+
+				// Combine tail + new data
+				std::vector<char> check;
+				check.reserve(tail.size() + byte_read);
+				check.insert(check.end(), tail.begin(), tail.end());
+				check.insert(check.end(), buffer, buffer + byte_read);
+
+				// Search for boundary (convert to string only for searching)
+				std::string check_str(check.begin(), check.end());
+				size_t pos = check_str.find(end_boundary);
+
+				if (pos != std::string::npos)
+				{
+					found = true;
+					if (write(fd, check.data(), pos) == -1)
+					{
+						std::cout << "write failed" << std::endl;
+						break;
+					}
+				}
+				else
+				{
+					size_t write_size = check.size();
+
+					if (write_size >= end_boundary.size())
+					{
+						write_size = check.size() - (end_boundary.size() - 1);
+						tail.assign(check.begin() + write_size, check.end());
+					}
+					else
+					{
+						tail = check;
+						continue;
+					}
+
+					if (write(fd, check.data(), write_size) == -1)
+					{
+						std::cout << "write failed" << std::endl;
+						break;
+					}
+				}
+			}
+			close(fd);
 		}
 
-		std::string end_boundary = "\r\n--" + boundary;
-
-		char buffer[4096];
-		// while (true)
-		// {
-		// 	size_t byte_read = read(fd_client, buffer, sizeof(buffer));
-		// 	if (byte_read < 0)
-		// 	{
-		// 		std::cout << "read function was fail " << std::endl;
-		// 		break;
-		// 	}
-		// 	else if (byte_read < sizeof(buffer))
-		// 	{
-		// 		write(fd, buffer, byte_read);
-		// 		std::cout << "finished" << std::endl;
-		// 		close(fd);
-		// 		break;
-		// 	}
-		// 	// std::string chunk(buffer, byte_read);
-		// 	// size_t pp = chunk.find(end_boundary);
-		// 	// if (pp != std::string::npos)
-		// 	// {
-		// 	// 	std::cout << "dsfsdfds";
-		// 	// 	write(fd, buffer, pp);
-		// 	// 	break;
-		// 	// }
-		// 	std::cout << byte_read << std::endl;
-		// 	if (write(fd, buffer, byte_read) == -1)
-		// 	{
-		// 		std::cout << "error in write function" << std::endl;
-		// 		// exit(1);
-		// 	}
-		// }
-
-	
-		size_t bb = read (fd_client, buffer, sizeof(buffer));
-		std::cout << "byte_read: " << bb << std::endl;
-		write (fd, buffer, sizeof(buffer));
-		close(fd);
-
-		std::string body = "<html><body> <h1>User dzxczxczxo not exists!</h1></body></html>";
+		std::string body = "<html><body> <h1>file uploaded with sccuss !</h1></body></html>";
 		std::stringstream ss;
 		ss << body.size();
-		srand(time(0));
-		// usleep( 1000);
 		response =
 			"HTTP/1.1 409 Conflict\r\n"
 			"Content-Type: text/html\r\n"
@@ -214,8 +229,7 @@ std::string Methodes::PostMethod(Config &a, Request test_request, ServerConfig S
 			ss.str() + "\r\n"
 					   "Connection: close\r\n\r\n";
 		response += body;
+		close(fd);
 	}
-	(void)fd_client;
-	// close(fd_client);
 	return response;
 }
