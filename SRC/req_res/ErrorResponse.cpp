@@ -6,7 +6,18 @@ std::string ErrorResponse::default_response_error(std::string status_code)
 
     headers = "HTTP/1.1 ";
     headers += status_code;
-    headers += " OK\r\n";
+    if (status_code == "200")
+        headers += " OK\r\n";
+    else if (status_code == "204")
+        headers += " No Content\r\n";
+    else if (status_code == "400")
+        headers += " Bad Request\r\n";
+    else if (status_code == "403")
+        headers += " Forbidden\r\n";
+    else if (status_code == "404")
+        headers += " Not Found\r\n";
+    else if (status_code == "405")
+        headers += " Method Not Allowed\r\n";
     body = "<!DOCTYPE html>\n";
     body += "<html>\n";
     body += "<head>\n";
@@ -106,7 +117,18 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
     header = "HTTP/1.1 ";
     header += error_status;
     // std::cout << "err: " << error_status << std::endl;
-    header += " OK\r\n";
+    if (error_status == "200")
+        header += " OK\r\n";
+    else if (error_status == "204")
+        header += " No Content\r\n";
+    else if (error_status == "400")
+        header += " Bad Request\r\n";
+    else if (error_status == "403")
+        header += " Forbidden\r\n";
+    else if (error_status == "404")
+        header += " Not Found\r\n";
+    else if (error_status == "405")
+        header += " Method Not Allowed\r\n";
     // std::cout << "hear :" << header << ". " << std::endl;
     path = err_tmp->second;
     return header;

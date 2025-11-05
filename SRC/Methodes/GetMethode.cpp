@@ -25,8 +25,8 @@ std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Ser
     // std::string respon = test_request.parse_request(buffer, a);
     // if (respon != "NONE")
     //     return respon;
-    if (test_request.get_path() == "/favicon.ico")
-        return std::string(); ///////////////////// check heree the favicon.co why he display everytume
+    // if (test_request.get_path() == "/favicon.ico")
+    //     return std::string(); ///////////////////// check heree the favicon.co why he display everytume
     
     LocationConfig info_location = Servers_Config.get_conf(test_request.get_path());
     std::cout << "choose: " << info_location.get_path() << std::endl;

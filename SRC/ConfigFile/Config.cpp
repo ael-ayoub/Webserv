@@ -28,6 +28,8 @@ std::string Config::get_mine(std::string path)
         return "text/plain";
     else if (tmp == "json")
         return "application/json";
+    else if (tmp == "ico")
+        return "image/x-icon";
     return "text/plain";
 }
 
