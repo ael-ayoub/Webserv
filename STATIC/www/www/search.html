@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search (GET) - Webserv</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <h1>GET Method Test with Query Parameters</h1>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/upload.html">Upload File</a></li>
+            <li><a href="/form.html">POST Form</a></li>
+            <li><a href="/search.html">Search (GET)</a></li>
+            <li><a href="/delete.html">Delete Test</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>Search Form (GET Method)</h2>
+            <p>This form uses GET method - parameters appear in URL</p>
+            
+            <form action="/test.php" method="GET" class="search-form">
+                <div class="form-group">
+                    <label for="query">Search Query:</label>
+                    <input type="text" id="query" name="query" placeholder="Enter search terms...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select id="category" name="category">
+                        <option value="all">All</option>
+                        <option value="web">Web</option>
+                        <option value="images">Images</option>
+                        <option value="videos">Videos</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sort">Sort By:</label>
+                    <select id="sort" name="sort">
+                        <option value="relevance">Relevance</option>
+                        <option value="date">Date</option>
+                        <option value="popularity">Popularity</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="limit">Results per page:</label>
+                    <input type="number" id="limit" name="limit" value="10" min="1" max="100">
+                </div>
+                
+                <button type="submit">Search</button>
+            </form>
+        </section>
+        
+        <section>
+            <h2>Direct GET Links with Query Parameters</h2>
+            <p>Click these links to test GET with different query strings:</p>
+            <ul>
+                <li><a href="/test.php?query=hello&category=all">Simple GET: query=hello&category=all</a></li>
+                <li><a href="/test.php?id=123&action=view">GET: id=123&action=view</a></li>
+                <li><a href="/test.php?user=john&role=admin&status=active">Multiple params: user, role, status</a></li>
+                <li><a href="/test.py?search=webserv&lang=cpp&year=2024">Python CGI with params</a></li>
+                <li><a href="/test.php?text=Hello%20World&special=%40%23%24">URL encoded special characters</a></li>
+            </ul>
+        </section>
+        
+        <section>
+            <h2>Filter Form (GET)</h2>
+            <form action="/test.py" method="GET" class="filter-form">
+                <fieldset>
+                    <legend>Filters:</legend>
+                    
+                    <label>
+                        <input type="checkbox" name="filter" value="new">
+                        New
+                    </label>
+                    
+                    <label>
+                        <input type="checkbox" name="filter" value="popular">
+                        Popular
+                    </label>
+                    
+                    <label>
+                        <input type="checkbox" name="filter" value="featured">
+                        Featured
+                    </label>
+                </fieldset>
+                
+                <div class="form-group">
+                    <label>Price Range:</label>
+                    <input type="number" name="min_price" placeholder="Min" value="0">
+                    <input type="number" name="max_price" placeholder="Max" value="1000">
+                </div>
+                
+                <button type="submit">Apply Filters</button>
+            </form>
+        </section>
+    </main>
+    
+    <footer>
+        <p><a href="/index.html">Back to Home</a></p>
+    </footer>
+</body>
+</html>
