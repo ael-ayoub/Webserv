@@ -1,0 +1,6 @@
+* : mean it is not done
+/ : mean it is done
+
+
+in POST: check if the methode POST is approved before applying it *
+in POST: check the request if it is good *
