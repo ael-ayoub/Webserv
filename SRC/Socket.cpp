@@ -18,8 +18,8 @@ Socket::Socket(std::vector<std::pair<std::string, int> > ports)
 
 void Socket::set_nonblocking(int fd)
 {
-    int flags = fcntl(fd, F_GETFL, 0);
-    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    // int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, O_NONBLOCK);
 }
 
 void Socket::CreateSocket()
@@ -77,100 +77,6 @@ void Socket::CreateEpoll()
     }
 }
 
-std::string ft_getline(int fd)
-{
-    if (fd < 0)
-        return "";
-
-    char ch;
-    std::string line;
-
-    while (true)
-    {
-        int byte_read = read(fd, &ch, 1);
-        if (byte_read < 0)
-        {
-            std::cout << "Error happen Try to Read Request !!\n";
-            return "";
-        }
-        if (byte_read == 0)
-            break;
-        if (ch == '\n')
-            break;
-        line += ch;
-    }
-    return line;
-}
-
-void Socket::HandleClient(int fd_client, Config &a)
-{
-
-    std::vector<ServerConfig> servers = a.get_allserver_config();
-    std::pair<std::string, int> ip_port;
-    Request test_request;
-    std::string response;
-    std::string header;
-
-    while (true)
-    {
-        std::string line = ft_getline(fd_client);
-
-        if (line == "\r" || line.empty())
-            break;
-        header += line + "\n";
-    }
-
-    if (header.empty())
-    {
-        // std::cerr << "Empty request received" << std::endl;
-        epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
-        close(fd_client);
-        return;
-    }
-
-    size_t i = 0;
-    // std::cout << header << std::endl;
-    response = test_request.parse_request((char *)header.c_str(), a);
-    while (i < servers.size())
-    {
-        ip_port = servers[i].get_ip();
-        if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
-            break;
-        i++;
-    }
-
-    if (response == "NONE")
-    {
-        if (test_request.get_method() == "GET" || test_request.get_method() == "DELETE")
-            response = m.GetMethod(a, test_request, servers[i]);
-        else if (test_request.get_method() == "POST")
-            response = m.PostMethod(a, test_request, servers[i], fd_client, header);
-    }
-
-    if (!response.empty())
-    {
-        size_t total_sent = 0;
-        while (total_sent < response.size())
-        {
-            ssize_t sent = send(fd_client, response.c_str() + total_sent,
-                                response.size() - total_sent, 0);
-            if (sent < 0)
-            {
-                perror("send error");
-                break;
-            }
-            if (sent == 0)
-            {
-                std::cerr << "Connection closed by client" << std::endl;
-                break;
-            }
-            total_sent += sent;
-        }
-        epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
-        close(fd_client);
-    }
-}
-
 int Socket::checkEvent(int fd)
 {
     for (size_t i = 0; i < sockconf.size(); i++)
@@ -191,6 +97,7 @@ void Socket::Monitor(Config &a)
     epoll_event events[MAX_EVENTS];
     epoll_event event_client;
     sockaddr_in addr_client;
+    std::map<int, ClientState> status;
 
     while (true)
     {
@@ -206,10 +113,9 @@ void Socket::Monitor(Config &a)
                 fd_client = accept(fd_socket, NULL, NULL);
                 if (fd_client == -1)
                     throw std::runtime_error("cannot accept new client !!");
-
+                set_nonblocking(fd_client);
                 event_client.data.fd = fd_client;
                 event_client.events = EPOLLIN;
-                set_nonblocking(fd_client);
                 if (epoll_ctl(fd_epoll, EPOLL_CTL_ADD, fd_client, &event_client) == -1)
                 {
                     close(fd_socket);
@@ -219,7 +125,27 @@ void Socket::Monitor(Config &a)
             else
             {
                 fd_client = events[i].data.fd;
-                HandleClient(fd_client, a);
+                HandleClient(fd_client, a, status);
+                std::map<int,ClientState>::iterator it = status.find(fd_client);
+                if (it != status.end())
+                {
+                    bool should_cleanup = false;
+
+                    if (it->second.complete_upload)
+                        should_cleanup = true;
+                    else if (it->second.path != "/uploads")
+                        should_cleanup = true;
+
+                    if (should_cleanup)
+                    {
+                        if (it->second.fd_upload >= 0)
+                            close(it->second.fd_upload);
+
+                        status.erase(it);
+                        epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
+                        close(fd_client);
+                    }
+                }
             }
         }
     }

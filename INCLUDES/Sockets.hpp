@@ -15,6 +15,30 @@
 
 class Config;
 
+class ClientState
+{
+public:
+	std::string header;
+	std::string metadata;
+	std::string filename;
+	std::string boundary;
+	std::string method;
+	std::string path;
+	int fd_upload;
+	bool complete_metadata;
+	bool complete_header;
+	bool complete_upload;
+	std::vector<char> tail;
+
+	ClientState()
+	{
+		complete_metadata = false;
+		complete_header = false;
+		complete_upload = false;
+		// data_send = false;
+		fd_upload = -1;
+	}
+};
 
 class Socket
 {
@@ -30,8 +54,12 @@ public:
 	void CreateSocket();
 	void CreateEpoll();
 	int checkEvent(int fd);
-	void HandleClient(int fd_client, Config& a);
+	void HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status);
 	void Monitor(Config &a);
 };
+
+std::string generateSuccessMsg();
+std::string generateFailerMsg();
+bool _uploadFile(const int &fd_client,ClientState &state);
 
 #endif

@@ -6,6 +6,7 @@ SRCS = main.cpp SRC/ConfigFile/Config.cpp SRC/ConfigFile/ServerConfig.cpp \
 	   SRC/Methodes/GetMethode.cpp SRC/req_res/Request.cpp\
 	   SRC/Methodes/PostMethode.cpp \
 	   SRC/req_res/Response.cpp SRC/req_res/ErrorResponse.cpp SRC/runServer.cpp \
+	   SRC/generateMsg.cpp SRC/uploadFile.cpp SRC/client.cpp \
 	   SRC/Session/LoadUsers.cpp
 
 OBJ = $(SRCS:.cpp=.o)
