@@ -14,6 +14,7 @@
 #include "socketConfig.hpp"
 
 class Config;
+typedef std::vector<std::pair<std::string, std::string> > mysession;
 
 class ClientState
 {
@@ -24,6 +25,7 @@ public:
 	std::string boundary;
 	std::string method;
 	std::string path;
+	std::pair<std::string, std::string> session;
 	int fd_upload;
 	bool complete_metadata;
 	bool complete_header;
@@ -60,6 +62,12 @@ public:
 
 std::string generateSuccessMsg();
 std::string generateFailerMsg();
-bool _uploadFile(const int &fd_client,ClientState &state);
+bool _uploadFile(const int &fd_client, ClientState &state);
+
+bool _setSession(std::string &response);
+bool _getSession(std::string &response);
+bool _removeName(std::string &responce);
+void _setCookies(ClientState& state);
+std::vector<std::pair<std::string, std::string> > _loadData();
 
 #endif

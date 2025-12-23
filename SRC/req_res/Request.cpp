@@ -115,39 +115,7 @@ std::string Request::check_headerline(std::string header_line, Config a)
         hostname = "127.0.0.1";
     return "NONE";
 }
-
-void Request::get_user_form_request(const std::string& str)
-{
-    size_t pos;
-	std::string u;
-	std::string p;
-    User user;
-	pos = str.find("username=");
-	if (pos != std::string::npos)
-	{
-		pos += 9;
-		size_t end =  str.find('&', pos);
-		u = str.substr(pos, end - pos);
-	}
-	pos = str.find("password=");
-	if (pos != std::string::npos)
-	{
-		pos += 9;
-		size_t end =  str.find("\r\n", pos);
-		p = str.substr(pos, end - pos);
-	}
-	if (!u.empty() && !p.empty())
-	{
-		user.setPassword(p);
-		user.setUsername(u);
-	}
-    else 
-    {
-        user.setPassword("");
-		user.setUsername("");
-    }
-    this->user = user;
-}
+\
 
 
 std::string Request::check_request(std::string str, Config a)
@@ -159,8 +127,6 @@ std::string Request::check_request(std::string str, Config a)
 
     // bool header = false;
     std::string header_line;
-    get_user_form_request(str);
-    set_session(str);
 
     //std::cout << str ;
     //std::cout << get_session().first  << std::endl;
@@ -208,34 +174,4 @@ std::string Request::get_path()
     return path;
 }
 
-User Request::get_user()
-{
-    return user;
-}
 
-void Request::set_session(const std::string& str)
-{
-    size_t pos = str.find("Cookie: ");
-    std::string uname;
-    std::string pass;
-    session = std::pair<std::string, std::string>();
-    if (pos != std::string::npos)
-    {
-        pos+= 8;
-        size_t end = str.find('=', pos);
-        uname = str.substr(pos, end - pos);
-        pos = str.find("\r\n", end);
-        pass = str.substr(end + 1, pos - end - 1);
-    }
-    if (!pass.empty() && !uname.empty())
-    {
-        session.first = uname;
-        session.second = pass;
-    }
-}
-
-
-std::pair<std::string, std::string> Request::get_session()
-{
-    return session;
-}

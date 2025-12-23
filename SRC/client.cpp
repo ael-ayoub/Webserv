@@ -53,6 +53,7 @@ std::string _getHeader(int fd_client)
     std::string header;
     while (true)
     {
+        // std::cout
         std::string line = ft_getline(fd_client);
         if (line == "EWOULDBLOCK" || line == "ERROR")
             return "";
@@ -104,14 +105,28 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     if (!state.complete_header)
         return;
-
-    if (state.method == "POST" && state.path == "/uploads" && !state.complete_metadata)
+   
+    
+    if (state.method == "POST" && !state.complete_metadata)
     {
-        state.metadata = _getMetadata(fd_client);
+        if (state.path == "/uploads")
+            state.metadata = _getMetadata(fd_client);
+        else
+        {
+            char buffer[1000];
+            size_t b = read(fd_client, buffer, 1000);
+            if (b < 0)
+                return;
+            buffer[b] = '\0';
+            state.metadata = std::string(buffer, b);
+        }
         if (state.metadata.empty())
             return;
         state.complete_metadata = true;
     }
+
+    std::cout << state.header << std::endl;
+    std::cout << state.metadata << std::endl;
 
     if (state.method == "GET")
     {
@@ -135,18 +150,9 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         if (state.path == "/uploads" && !state.complete_upload)
         {
             if (_uploadFile(fd_client, state) == false)
-                return ;
+                return;
             state.complete_upload = true;
             response = generateSuccessMsg();
-        }
-        else if (state.path == "/register")
-        {
-            // post register
-        }
-
-        else if (state.path == "/login")
-        {
-            // post login
         }
     }
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Webserv.hpp"
-#include "Users.hpp"
 
 class ServerConfig;
 class LocationConfig;
