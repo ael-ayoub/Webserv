@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Webserv</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <h1>About Webserv</h1>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/upload.html">Upload File</a></li>
+            <li><a href="/form.html">POST Form</a></li>
+            <li><a href="/search.html">Search (GET)</a></li>
+            <li><a href="/delete.html">Delete Test</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>About This Project</h2>
+            <p>Webserv is a custom HTTP server implementation written in C++ 98.</p>
+            
+            <h3>Features Implemented:</h3>
+            <ul>
+                <li>HTTP/1.1 protocol support</li>
+                <li>Non-blocking I/O using poll() or select()</li>
+                <li>Multiple port listening</li>
+                <li>GET, POST, and DELETE methods</li>
+                <li>Static file serving</li>
+                <li>CGI execution (PHP, Python)</li>
+                <li>File upload handling</li>
+                <li>Custom error pages</li>
+                <li>HTTP redirections</li>
+                <li>Directory listing</li>
+                <li>Configuration file parsing</li>
+            </ul>
+            
+            <h3>Technical Details:</h3>
+            <p><strong>Language:</strong> C++ 98</p>
+            <p><strong>I/O Model:</strong> Non-blocking with poll()/select()</p>
+            <p><strong>Compatibility:</strong> Works with standard web browsers</p>
+        </section>
+        
+        <section>
+            <h2>Testing Information</h2>
+            <p>This server is designed to be tested with:</p>
+            <ul>
+                <li>Web browsers (Chrome, Firefox, Safari)</li>
+                <li>curl command line tool</li>
+                <li>telnet for raw HTTP requests</li>
+                <li>Custom test scripts</li>
+            </ul>
+        </section>
+    </main>
+    
+    <footer>
+        <p><a href="/index.html">Back to Home</a></p>
+    </footer>
+</body>
+</html>
