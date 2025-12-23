@@ -1,6 +1,5 @@
 {
     "files.associations": {
-        "ostream": "cpp",
         "any": "cpp",
         "array": "cpp",
         "atomic": "cpp",
@@ -73,6 +72,7 @@
         "mutex": "cpp",
         "new": "cpp",
         "numbers": "cpp",
+        "ostream": "cpp",
         "print": "cpp",
         "ranges": "cpp",
         "scoped_allocator": "cpp",
@@ -92,6 +92,10 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "flat_map": "cpp",
+        "flat_set": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     }
 }

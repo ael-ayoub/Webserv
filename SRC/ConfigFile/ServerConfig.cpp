@@ -266,6 +266,7 @@ Vector_str ServerConfig::ft_splitv2(std::string str, char c)
     }
     if (to != std::string::npos)
       re.push_back(str.substr(to));
+      
 
     return re;
 }
