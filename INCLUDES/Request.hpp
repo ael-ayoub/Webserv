@@ -14,7 +14,7 @@ private:
 
 public:
 
-    std::string check_headerline(std::string str, Config a);
+    std::string check_headerline(std::string str, Config &a);
     std::string check_requestline(std::string str, Config a);
     std::string check_request(std::string str, Config a);
     std::string parse_request(char *buffer, Config a);

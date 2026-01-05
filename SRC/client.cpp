@@ -125,12 +125,12 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         state.complete_metadata = true;
     }
 
-    // std::cout << state.header << std::endl;
+    std::cout << state.header << std::endl;
     // std::cout << state.metadata << std::endl;
 
     if (state.method == "GET" || state.method == "DELETE")
     {
-        // std::cout << "HEADER is : " << state.header << std::endl;
+        Config a;
         size_t i = 0;
         response = test_request.parse_request((char *)state.header.c_str(), a);
         while (i < servers.size())
@@ -143,7 +143,10 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         if (response == "NONE")
             response = m.GetMethod(a, test_request, servers[i]);
         else
+        {
             std::cout << "error in the get request\n";
+            response = ErrorResponse::Error_BadRequest(a);
+        }
     }
     // else if (state.method == "DELETE")
     // {

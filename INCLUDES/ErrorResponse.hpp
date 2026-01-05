@@ -11,7 +11,7 @@ class ErrorResponse
 
         static std::string Error_MethodeNotAllowed(Config a);
         static std::string Error_NotFound(Config a);
-        static std::string Error_BadRequest(Config a);
+        static std::string Error_BadRequest(Config &a);
         static std::string Error_Forbidden(Config a);
         static std::string Responde(Config a, std::string path, std::string &head, std::string status);
 

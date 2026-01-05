@@ -196,12 +196,12 @@ std::string ErrorResponse::Error_NotFound(Config a)
     return header;
 }
 
-std::string ErrorResponse::Error_BadRequest(Config a)
+std::string ErrorResponse::Error_BadRequest(Config &a)
 {
     std::string path, line, body, s;
 
     ServerConfig tmp = a.get_server_config();
-
+    std::cout << "\n before this \n";
     std::vector<std::map<int, std::string> > error = tmp.get_error_status();
 
     std::string header = check_errorstatus(error, 400, path);
