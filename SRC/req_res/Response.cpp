@@ -1,5 +1,13 @@
 #include "../../INCLUDES/Response.hpp"
 
+std::string gcwdd()
+{
+    char buffer[PATH_MAX];
+    if (getcwd(buffer, sizeof(buffer)) != NULL)
+        return std::string(buffer);
+    return "";
+}
+
 std::string Response::Display_dir(std::string path, LocationConfig info_location)
 {
     std::string body, s;
@@ -88,7 +96,7 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
         {
             if (info_location.get_pathIndex() != "None")
             {
-                last_path = info_location.get_root() + test_request.get_path() + info_location.get_pathIndex();
+                last_path = gcwdd() + info_location.get_root() + test_request.get_path() + info_location.get_pathIndex();
                 // std::cout << "last path is : " << last_path << std::endl;
                 return Response::Display_file(last_path, a);
             }
@@ -101,7 +109,7 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
         }
         else
         {
-            last_path = info_location.get_root() + test_request.get_path();
+            last_path = gcwdd() + info_location.get_root() + test_request.get_path();
             // std::cout << "pathh: " << last_path << std::endl;
             return Response::Display_file(last_path, a);
         }
@@ -113,13 +121,18 @@ std::string Response::Get_delete(std::string path, LocationConfig info_location,
                                     Request test_request, Config a)
 {
     (void)info_location, (void)test_request, (void)a;
-    std::cout << "path: " << path << std::endl;
+    std::cout << path << std::endl;
     int status = remove(path.c_str());
     if (status != 0)
     {
-        if (errno == EACCES)
-            std::cout << "doesnt have the permession to delete\n";
-        return ErrorResponse::Error_NotFound(a);
+        if (errno == ENOTEMPTY)
+            return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
+        else if (errno == EACCES)
+            return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
+        else if (errno == ENOENT)
+            return "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+        else
+            return "HTTP/1.1 500 Internal Server Error\r\nConnection: close\r\n\r\n";
     }
-    return "HTTP/1.1 204 No Content\r\n\r\n";
+    return "HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n";
 }

@@ -16,6 +16,14 @@ std::string clean_string(std::string str)
     return re;
 }
 
+std::string gcwd()
+{
+    char buffer[PATH_MAX];
+    if (getcwd(buffer, sizeof(buffer)) != NULL)
+        return std::string(buffer);
+    return "";
+}
+
 std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Servers_Config)
 {
     (void)a;
@@ -25,13 +33,13 @@ std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Ser
     // std::string respon = test_request.parse_request(buffer, a);
     // if (respon != "NONE")
     //     return respon;
-    if (test_request.get_path() == "/favicon.ico")
-        return std::string(); ///////////////////// check heree the favicon.co why he display everytume
+    // if (test_request.get_path() == "/favicon.ico")
+    //     return std::string(); ///////////////////// check heree the favicon.co why he display everytume
     
     LocationConfig info_location = Servers_Config.get_conf(test_request.get_path());
     // std::cout << "choose: " << info_location.get_path() << std::endl;
     // std::cout << "choose test_req: " << test_request.get_path() << std::endl;
-    std::string path = info_location.get_root() + test_request.get_path();
+    std::string path = gcwd() + info_location.get_root() + test_request.get_path();
     // std::cout << "path: " << path<< std::endl;
     struct stat statbuf;
     if (stat((path).c_str(), &statbuf) == 0)
