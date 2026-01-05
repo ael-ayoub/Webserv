@@ -128,23 +128,13 @@ std::string Request::check_request(std::string str, Config a)
     // bool header = false;
     std::string header_line;
 
-    //std::cout << str ;
-    //std::cout << get_session().first  << std::endl;
-
-    // while (str[i])
     int first = str.find('\n');
-    // std::cout << "first is " << first << std::endl;
+    
     request_line = str.substr(0, first + 1);
     from = first + 1;
     first = str.find('\n', from);
     header_line = str.substr(from, first - from + 1);
 
-    // std::cout << "from is " << from << ". first is " << first << std::endl;
-    // std::cout << "requ_line: " << request_line << std::endl;
-    // std::cout << "int is " << static_cast<int>(request_line[request_line.size() - 2]) << ", char: " << request_line[request_line.size() - 2] << std::endl;
-    //         //////////// header_line taycoper tallekher
-    // std::cout << "hea_line: " << header_line << std::endl;
-    // std::cout << "int is " << static_cast<int>(header_line[header_line.size() - 1]) << ", char: " << header_line[header_line.size() - 1] << std::endl;
     std::string response;
     response = check_requestline(request_line, a);
     if (response != "NONE")
