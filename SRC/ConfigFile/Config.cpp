@@ -2,6 +2,8 @@
 
 ServerConfig Config::get_server_config()
 {
+    if (Servers_Config.size() == 0)
+        return ServerConfig();
     return Servers_Config[0];
 }
 

@@ -27,11 +27,11 @@ std::string ErrorResponse::default_response_error(std::string status_code)
     body += "<body>\n";
 
     if (status_code == "404")
-        body += "  <h1>400 Bad Request</h1>\n";
+        body += "  <h1>404 Not Found</h1>\n";
     if (status_code == "405")
         body += "  <h1>405 Method Not Allowed</h1>\n";
     if (status_code == "400")
-        body += "  <h1>404 Not Found</h1>\n";
+        body += "  <h1>400 Bad Request</h1>\n";
     if (status_code == "403")
         body += "  <h1>403 Forbidden</h1>\n";
 
@@ -97,20 +97,29 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
                                             int status_code, std::string& path)
 {
     size_t i = 0;
-    std::map<int, std::string>::iterator err_tmp;
+    std::map<int, std::string> err_tmp;
+    std::string error_status;
+    std::stringstream ss;
 
     while (i < error.size())
     {
-        err_tmp = error[i].begin();
-        if (err_tmp->first == status_code)
-            break;
+        std::map<int, std::string>::iterator it;
+        for (it = error[i].begin(); it != error[i].end(); ++it) 
+        {
+            err_tmp[it->first] = it->second;
+            if (it->first == status_code)
+            {
+                ss << it->first;
+                error_status = ss.str();
+                path = it->second;
+                break;
+            }
+        }
         i++;
     }
-
-    std::string error_status;
-    std::stringstream ss;
-    ss << err_tmp->first;
-    error_status = ss.str();
+    // int key = err_tmp.begin();
+    // ss << err_tmp.begin();
+    // error_status = ss.str();
     if (i == error.size())
         return "";
     std::string header;
@@ -129,8 +138,7 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
         header += " Not Found\r\n";
     else if (error_status == "405")
         header += " Method Not Allowed\r\n";
-    // std::cout << "hear :" << header << ". " << std::endl;
-    path = err_tmp->second;
+    // path = err_tmp->second;
     return header;
 }
 
@@ -201,7 +209,7 @@ std::string ErrorResponse::Error_BadRequest(Config &a)
     std::string path, line, body, s;
 
     ServerConfig tmp = a.get_server_config();
-    std::cout << "\n before this \n";
+
     std::vector<std::map<int, std::string> > error = tmp.get_error_status();
 
     std::string header = check_errorstatus(error, 400, path);

@@ -104,7 +104,12 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     }
 
     if (!state.complete_header)
+    {
+        // std::cout << "nothing found\n";
+        response = ErrorResponse::Error_BadRequest(a);
+        _sendReaponse(response, fd_client);
         return;
+    }
    
     
     if (state.method == "POST" && !state.complete_metadata)
@@ -132,25 +137,25 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     {
         Config a;
         size_t i = 0;
+        // std::cout << "before response ----------\n";
         response = test_request.parse_request((char *)state.header.c_str(), a);
-        while (i < servers.size())
+        while (i < servers.size() && response == "NONE")
         {
             ip_port = servers[i].get_ip();
-            if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
+            if (ip_port.first == test_request.get_Hostname() 
+                && ip_port.second == test_request.get_port())
+            {
+                response = m.GetMethod(a, test_request, servers[i]);
                 break;
+            }
             i++;
         }
-        if (response == "NONE")
-            response = m.GetMethod(a, test_request, servers[i]);
-        else
-        {
-            std::cout << "error in the get request\n";
-            response = ErrorResponse::Error_BadRequest(a);
-        }
+        // if (response != "NONE")
+        // {
+        //     std::cout << "error in the get request\n";
+        //     response = ErrorResponse::Error_BadRequest(a);
+        // }
     }
-    // else if (state.method == "DELETE")
-    // {
-    // }
     else if (state.method == "POST")
     {
         if (state.path == "/uploads" && !state.complete_upload)
@@ -162,8 +167,14 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         }
     }
 
+    if (response.empty())
+    {
+        // std::cout << "Throught here!\n";
+        response = ErrorResponse::Error_BadRequest(a);
+    }
     if (!response.empty())
     {
+        // std::cout << "ENDD!\n";
         _sendReaponse(response, fd_client);
     }
 }
