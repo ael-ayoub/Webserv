@@ -167,7 +167,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         }
     }
 
-    if (response.empty())
+    if (response.empty() || response == "NONE")
     {
         // std::cout << "Throught here!\n";
         response = ErrorResponse::Error_BadRequest(a);

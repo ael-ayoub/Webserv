@@ -36,10 +36,8 @@ std::string Request::check_requestline(std::string request_line, Config a)
     Vector_str args = ServerConfig::ft_splitv2(request_line, ' ');
     if (args.size() != 3)
         return ErrorResponse::Error_BadRequest(a);
-    std::cout << "methose is -" << args[0] << "-\n";
     if (args[0] != "GET" && args[0] != "POST" && args[0] != "DELETE")
     {
-        std::cout << "this is false!!!\n";
         return ErrorResponse::Error_BadRequest(a); // 405
     }
     if (args[1][0] != '/')
@@ -57,7 +55,7 @@ bool check_ip(std::string info)
     int num;
     Vector_str ip_port = ServerConfig::ft_splitv2(info, '.');
     if (ip_port.size() != 4)
-        throw Config::ErrorSyntax();
+        return false;
     // std::cout << "size is " << ip_port.size() << "\n";
     size_t j = 0;
     while (j < ip_port.size())
@@ -95,9 +93,9 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     }
     Vector_str args = ServerConfig::ft_splitv2(header_line, ' ');
     if (args.size() != 2)
-    return ErrorResponse::Error_BadRequest(a); // 400
+        return ErrorResponse::Error_BadRequest(a); // 400
     if (args[0] != "Host:")
-    return ErrorResponse::Error_BadRequest(a); // 400
+        return ErrorResponse::Error_BadRequest(a); // 400
     
     Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
     if (ip_port.size() != 2)
@@ -106,7 +104,10 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     }
     // std::cout << "it is ending here\n";
     if (ip_port[0] != "localhost" && check_ip(ip_port[0]) == false)
+    {
+        // std::cout << "Errorsadas\n";
         return ErrorResponse::Error_BadRequest(a); // 400
+    }
     // std::cout << "before\n";
     int start = ip_port[1].find('\r');
     // std::cout << "after\n";
