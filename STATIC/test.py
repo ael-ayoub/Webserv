@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+print("<html><body>")
+print("<h1>Hello from Python CGI!</h1>")
+print("<p>This is working!</p>")
+print("</body></html>")

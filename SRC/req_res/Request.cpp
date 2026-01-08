@@ -36,12 +36,8 @@ std::string Request::check_requestline(std::string request_line, Config a)
     Vector_str args = ServerConfig::ft_splitv2(request_line, ' ');
     if (args.size() != 3)
         return ErrorResponse::Error_BadRequest(a);
-    std::cout << "methose is -" << args[0] << "-\n";
     if (args[0] != "GET" && args[0] != "POST" && args[0] != "DELETE")
-    {
-        std::cout << "this is false!!!\n";
-        return ErrorResponse::Error_BadRequest(a); // 405
-    }
+        return ErrorResponse::Error_MethodeNotAllowed(a); // 405
     if (args[1][0] != '/')
         return ErrorResponse::Error_BadRequest(a);
     if (args[2] != "HTTP/1.1\r\n" && args[2] != "HTTP/1.0\r\n")
@@ -100,23 +96,28 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     return ErrorResponse::Error_BadRequest(a); // 400
     
     Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
+    std::cout << "asdadasdsa, size is: " << ip_port.size() << ", header line is: "<< header_line << "\n";
     if (ip_port.size() != 2)
-    {
         return ErrorResponse::Error_BadRequest(a); // 400
-    }
-    // std::cout << "it is ending here\n";
     if (ip_port[0] != "localhost" && check_ip(ip_port[0]) == false)
         return ErrorResponse::Error_BadRequest(a); // 400
-    // std::cout << "before\n";
-    int start = ip_port[1].find('\r');
-    // std::cout << "after\n";
+    std::cout << "before\n";
+    // Try to find \r or \n
+    size_t start = ip_port[1].find('\r');
+    if (start == std::string::npos)
+    {
+        start = ip_port[1].find('\n');
+    }
+    std::cout << "after\n";
+    if (start == std::string::npos)
+    {
+        return ErrorResponse::Error_BadRequest(a);
+    }
     std::string ip = ip_port[1].substr(0, start);
     int v_ip;
     std::istringstream ss(ip);
     ss >> v_ip;
     if (v_ip < 0 || v_ip > 65535)
-        return ErrorResponse::Error_BadRequest(a);
-    if (ip_port[1][start] != '\r' && ip_port[1][start + 1] != '\r')
         return ErrorResponse::Error_BadRequest(a);
     port = v_ip;
     hostname = ip_port[0];
@@ -140,32 +141,22 @@ std::string Request::check_request(std::string str, Config a)
     size_t first = str.find('\n');
     if (first == std::string::npos)
     {
-        // std::cout << "Error\n";
+        std::cout << "Error\n";
         return "NONE";
     }
     request_line = str.substr(0, first + 1);
     from = first + 1;
     first = str.find('\n', from);
     header_line = str.substr(from, first - from + 1);
-    // std::cout << "header line is " << header_line << std::endl;
-    // std::cout << "after check!\n";
+    
     std::string response;
     response = check_requestline(request_line, a);
     if (response != "NONE")
-    {
-        // std::cout << "--------\n" << response << "\n---------" << std::endl;
-        return response;
-    }
-    // std::cout << "before check!\n";
-    
+    return response;
     response = check_headerline(header_line, a);
     if (response != "NONE")
-    {
-
-        // std::cout << "request line error\n";
         return response;
-    }
-    // std::cout << "Before line\n";
+    std::cout << "Before line\n";
     return "NONE";
 }
 
