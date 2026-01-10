@@ -1,6 +1,6 @@
 NAME = Webserv
 
-SRCS = main.cpp CGI.cpp SRC/ConfigFile/Config.cpp SRC/ConfigFile/ServerConfig.cpp \
+SRCS = main.cpp SRC/CGI.cpp SRC/ConfigFile/Config.cpp SRC/ConfigFile/ServerConfig.cpp \
 	SRC/ConfigFile/LocationConfig.cpp SRC/ConfigFile/Syntax_server.cpp \
 	SRC/ConfigFile/Syntax_location.cpp SRC/Socket.cpp\
 	SRC/Methodes/GetMethode.cpp SRC/req_res/Request.cpp\
@@ -25,6 +25,6 @@ fclean: clean
 	rm -f $(NAME)
 
 clean:
-	rm -f $(OBJ)
+	rm -f $(OBJ) ./SRC/temp/*
 
 re: fclean all

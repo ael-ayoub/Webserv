@@ -1,4 +1,4 @@
-#include "INCLUDES/CGI.hpp"
+#include "../INCLUDES/CGI.hpp"
 #include <sstream>
 
 CGI::CGI(const char *RequestType,
@@ -13,7 +13,7 @@ CGI::CGI(const char *RequestType,
 	execArg[0] = const_cast<char *>(cgiBinary);
 	execArg[1] = const_cast<char *>(Filepath);
 	execArg[2] = NULL;
-	file.open("temp.txt", std::ios::out);
+	file.open("./SRC/temp/temp.txt", std::ios::out);
 }
 
 bool CGI::CGIProccess()
@@ -120,7 +120,7 @@ int CGI::responseWrapper()
 	std::cout << "---lines---\n";
 	std::cout << lines << std::endl;
 
-	// Check if CGI script already provided headers
+	// TODO: Check if CGI script already provided headers
 	if (lines.find("Content-Type:") != lines.npos)
 	{
 		response = statusLine + lines;
