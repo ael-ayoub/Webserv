@@ -94,6 +94,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     if (!state.complete_header)
     {
         state.header = _getHeader(fd_client);
+        std::cout << "header is :" << state.header << std::endl;
         if (!state.header.empty())
         {
             state.complete_header = true;
@@ -110,18 +111,21 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         _sendReaponse(response, fd_client);
         return;
     }
-   
-    
+    // std::cout << "path is :" << state.path << std::endl;
     if (state.method == "POST" && !state.complete_metadata)
     {
         if (state.path == "/uploads")
-            state.metadata = _getMetadata(fd_client);
+            state.metadata = _getMetadata(fd_client); // 
         else
         {
             char buffer[1000];
             size_t b = read(fd_client, buffer, 1000);
-            if (b < 0)
+            if (b == std::string::npos) // replacing b < 0 with npos
+            {
+                response = ErrorResponse::Error_BadRequest(a);
+                _sendReaponse(response, fd_client);
                 return;
+            }
             buffer[b] = '\0';
             state.metadata = std::string(buffer, b);
         }
@@ -130,8 +134,8 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         state.complete_metadata = true;
     }
 
-    std::cout << state.header << std::endl;
-    // std::cout << state.metadata << std::endl;
+    std::cout << "header is :\n" << state.header << std::endl;
+    std::cout << "\nmetadata is:\n" << state.metadata << std::endl;
 
     if (state.method == "GET" || state.method == "DELETE")
     {

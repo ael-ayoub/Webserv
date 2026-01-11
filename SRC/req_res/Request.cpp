@@ -16,11 +16,9 @@ std::string Request::check_requestline(std::string request_line, Config a)
     int newline = 0;
     int car = 0;
     size_t i = 0;
-    // std::cout << "requ : " << request_line << std::endl;
+
     while (request_line[i])
     {
-        // if (i == request_line.size())
-        //     std::cout << "int: " << static_cast<int>(request_line[i]) << std::endl;
         if (request_line[i] == ' ')
             spaces++;
         if (request_line.size() > 5 && i == request_line.size() - 1 && request_line[i] == '\n')
@@ -130,43 +128,45 @@ std::string Request::check_headerline(std::string header_line, Config &a)
 
 std::string Request::check_request(std::string str, Config a)
 {
-    // size_t i = 0;
-    int from = 0;
-    // bool request = false;
-    std::string request_line;
+    std::vector<std::string> args;
 
-    // bool header = false;
-    std::string header_line;
-
-    size_t first = str.find('\n');
-    if (first == std::string::npos)
+    std::string tmp;
+    for (size_t b = 0; b < str.size(); b++)
     {
-        // std::cout << "Error\n";
-        return "NONE";
+        if (str[b] != '\n')
+            tmp += str[b];
+        else
+        {
+            tmp += '\n';
+            args.push_back(tmp);
+            tmp.clear();
+        }
     }
-    request_line = str.substr(0, first + 1);
-    from = first + 1;
-    first = str.find('\n', from);
-    header_line = str.substr(from, first - from + 1);
-    // std::cout << "header line is " << header_line << std::endl;
-    // std::cout << "after check!\n";
+    for (size_t b = 0; b < args.size(); b++)
+    {
+        std::cout << b << ": " << args[b] << std::endl;
+    }
+
     std::string response;
-    response = check_requestline(request_line, a);
-    if (response != "NONE")
-    {
-        // std::cout << "--------\n" << response << "\n---------" << std::endl;
-        return response;
-    }
-    // std::cout << "before check!\n";
-    
-    response = check_headerline(header_line, a);
-    if (response != "NONE")
-    {
 
-        // std::cout << "request line error\n";
+    response = check_requestline(args[0], a);
+    if (response != "NONE")
         return response;
+
+    response = check_headerline(args[1], a);
+    if (response != "NONE")
+        return response;
+
+    for (size_t b = 2; b < args.size() && get_method() == "POST"; b++)
+    {
+        std::vector<std::string> tmp = ServerConfig::ft_splitv2(args[b], ' ');
+        if (tmp.size() != 2)
+            return ErrorResponse::Error_BadRequest(a);
+        if (tmp[0] == "Content-Length:")
+            std::cout << "it is content lenght\n"; //create a content lenght func same to the type
+        if (tmp[0] == "Content-Type:")
+            std::cout << "it is content type\n";
     }
-    // std::cout << "Before line\n";
     return "NONE";
 }
 
