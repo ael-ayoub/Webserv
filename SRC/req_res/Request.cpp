@@ -16,11 +16,9 @@ std::string Request::check_requestline(std::string request_line, Config a)
     int newline = 0;
     int car = 0;
     size_t i = 0;
-    // std::cout << "requ : " << request_line << std::endl;
+
     while (request_line[i])
     {
-        // if (i == request_line.size())
-        //     std::cout << "int: " << static_cast<int>(request_line[i]) << std::endl;
         if (request_line[i] == ' ')
             spaces++;
         if (request_line.size() > 5 && i == request_line.size() - 1 && request_line[i] == '\n')
@@ -37,7 +35,9 @@ std::string Request::check_requestline(std::string request_line, Config a)
     if (args.size() != 3)
         return ErrorResponse::Error_BadRequest(a);
     if (args[0] != "GET" && args[0] != "POST" && args[0] != "DELETE")
-        return ErrorResponse::Error_MethodeNotAllowed(a); // 405
+    {
+        return ErrorResponse::Error_BadRequest(a); // 405
+    }
     if (args[1][0] != '/')
         return ErrorResponse::Error_BadRequest(a);
     if (args[2] != "HTTP/1.1\r\n" && args[2] != "HTTP/1.0\r\n")
@@ -53,7 +53,7 @@ bool check_ip(std::string info)
     int num;
     Vector_str ip_port = ServerConfig::ft_splitv2(info, '.');
     if (ip_port.size() != 4)
-        throw Config::ErrorSyntax();
+        return false;
     // std::cout << "size is " << ip_port.size() << "\n";
     size_t j = 0;
     while (j < ip_port.size())
@@ -91,28 +91,22 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     }
     Vector_str args = ServerConfig::ft_splitv2(header_line, ' ');
     if (args.size() != 2)
-    return ErrorResponse::Error_BadRequest(a); // 400
+        return ErrorResponse::Error_BadRequest(a); // 400
     if (args[0] != "Host:")
-    return ErrorResponse::Error_BadRequest(a); // 400
+        return ErrorResponse::Error_BadRequest(a); // 400
     
     Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
     std::cout << "asdadasdsa, size is: " << ip_port.size() << ", header line is: "<< header_line << "\n";
     if (ip_port.size() != 2)
         return ErrorResponse::Error_BadRequest(a); // 400
     if (ip_port[0] != "localhost" && check_ip(ip_port[0]) == false)
+    {
+        // std::cout << "Errorsadas\n";
         return ErrorResponse::Error_BadRequest(a); // 400
-    std::cout << "before\n";
-    // Try to find \r or \n
-    size_t start = ip_port[1].find('\r');
-    if (start == std::string::npos)
-    {
-        start = ip_port[1].find('\n');
     }
-    std::cout << "after\n";
-    if (start == std::string::npos)
-    {
-        return ErrorResponse::Error_BadRequest(a);
-    }
+    // std::cout << "before\n";
+    int start = ip_port[1].find('\r');
+    // std::cout << "after\n";
     std::string ip = ip_port[1].substr(0, start);
     int v_ip;
     std::istringstream ss(ip);
@@ -130,33 +124,45 @@ std::string Request::check_headerline(std::string header_line, Config &a)
 
 std::string Request::check_request(std::string str, Config a)
 {
-    // size_t i = 0;
-    int from = 0;
-    // bool request = false;
-    std::string request_line;
+    std::vector<std::string> args;
 
-    // bool header = false;
-    std::string header_line;
-
-    size_t first = str.find('\n');
-    if (first == std::string::npos)
+    std::string tmp;
+    for (size_t b = 0; b < str.size(); b++)
     {
-        std::cout << "Error\n";
-        return "NONE";
+        if (str[b] != '\n')
+            tmp += str[b];
+        else
+        {
+            tmp += '\n';
+            args.push_back(tmp);
+            tmp.clear();
+        }
     }
-    request_line = str.substr(0, first + 1);
-    from = first + 1;
-    first = str.find('\n', from);
-    header_line = str.substr(from, first - from + 1);
-    
+    for (size_t b = 0; b < args.size(); b++)
+    {
+        std::cout << b << ": " << args[b] << std::endl;
+    }
+
     std::string response;
-    response = check_requestline(request_line, a);
-    if (response != "NONE")
-    return response;
-    response = check_headerline(header_line, a);
+
+    response = check_requestline(args[0], a);
     if (response != "NONE")
         return response;
-    std::cout << "Before line\n";
+
+    response = check_headerline(args[1], a);
+    if (response != "NONE")
+        return response;
+
+    for (size_t b = 2; b < args.size() && get_method() == "POST"; b++)
+    {
+        std::vector<std::string> tmp = ServerConfig::ft_splitv2(args[b], ' ');
+        if (tmp.size() != 2)
+            return ErrorResponse::Error_BadRequest(a);
+        if (tmp[0] == "Content-Length:")
+            std::cout << "it is content lenght\n"; //create a content lenght func same to the type
+        if (tmp[0] == "Content-Type:")
+            std::cout << "it is content type\n";
+    }
     return "NONE";
 }
 
