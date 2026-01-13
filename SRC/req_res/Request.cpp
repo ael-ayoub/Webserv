@@ -124,10 +124,11 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     return "NONE";
 }
 
-bool CheckContentLenght(std::string str, Config a)
+bool CheckContentLenght(std::string str)
 {
-    int num;
-    size_t i = 0;
+    ServerConfig x;
+    size_t num;
+
     for (size_t i = 0; i < str.size(); i++)
     {
         if (!isdigit(str[i]))
@@ -135,7 +136,19 @@ bool CheckContentLenght(std::string str, Config a)
     }
     std::stringstream s(str);
     s >> num;
+    if (num > x.GetClientMaxBodySize())
+        return true;
+    return false;
+}
 
+bool CheckContentType(std::vector<std::string> &str)
+{
+    if (str[1] != "multipart/form-data;")
+        return true;
+    std::pair<std::string, std::string> tmp = ServerConfig::ft_splito(str[2], '=');
+    if (tmp.first != "boundary")
+        return true;
+        //safe the data
 }
 
 std::string Request::check_request(std::string str, Config a)
@@ -160,27 +173,44 @@ std::string Request::check_request(std::string str, Config a)
     }
 
     std::string response;
-
     response = check_requestline(args[0], a);
     if (response != "NONE")
         return response;
-
+        
     response = check_headerline(args[1], a);
     if (response != "NONE")
         return response;
-
+    
+    bool lenght = false;
+    bool type = false;
     for (size_t b = 2; b < args.size() && get_method() == "POST"; b++)
     {
         std::vector<std::string> tmp = ServerConfig::ft_splitv2(args[b], ' ');
-        if (tmp.size() != 2)
+        // std::cout << tmp[0] << std::endl;
+        if ((tmp[0] != "Content-Type:" && tmp.size() != 2)
+            || (tmp[0] == "Content-Type:" && tmp.size() != 3))
             return ErrorResponse::Error_BadRequest(a);
+        
         if (tmp[0] == "Content-Length:")
         {
-            std::cout << "it is content lenght\n"; //create a content lenght func same to the type
-            return CheckContentLenght(tmp[0], a);
+            lenght = true;
+            if (CheckContentLenght(tmp[0]) == true)
+                return ErrorResponse::Error_BadRequest(a);
+            // std::cout << "He pass the test\n";
         }
         if (tmp[0] == "Content-Type:")
-            std::cout << "it is content type\n";
+        {
+            type = true;
+            if (CheckContentType(tmp) == true)
+                return ErrorResponse::Error_BadRequest(a);
+            // std::cout << "it is content type\n";
+        }
+    }
+    // std::cout << "type is " << type << ", lenghtis " << lenght << std::endl;
+    if (type == false || lenght == false)
+    {
+        // std::cout << "AGREEEEED\n";
+        return ErrorResponse::Error_BadRequest(a);
     }
     return "NONE";
 }

@@ -95,13 +95,18 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     {
 
         state.header = _getHeader(fd_client);
-        std::cout << "been here <<" << state.header << "\n";
+        // std::cout << "been here <<" << state.header << "\n";
 
         if (!state.header.empty())
         {
             state.complete_header = true;
             response = test_request.parse_request(state.header, a);
-            std::cout << "responnse is :" << response << "." << std::endl;
+            if (response != "NONE")
+            {
+                _sendReaponse(response, fd_client);
+                return;
+            }
+            // std::cout << "responnse is :" << response << "." << std::endl;
             // if (response == "NONE")
             state.method = test_request.get_method();
             state.path = test_request.get_path();
