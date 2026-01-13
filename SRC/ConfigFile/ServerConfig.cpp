@@ -10,6 +10,11 @@ std::pair<std::string, int> ServerConfig::get_ip()
     return ip_port;
 }
 
+size_t ServerConfig::GetClientMaxBodySize()
+{
+    return client_max_body_size;
+}
+
 int right_path(std::string Config_path, std::string path)
 {
     int i = 0;

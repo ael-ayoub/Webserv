@@ -18,6 +18,7 @@ class ServerConfig
         std::vector<std::map<int, std::string> > errorStatus_pathError;
 
     public:
+        size_t GetClientMaxBodySize();
         LocationConfig get_Location_Config(std::string path);
         
         std::pair<std::string, int> get_ip();
