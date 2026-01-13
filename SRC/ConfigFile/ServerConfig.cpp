@@ -1,5 +1,9 @@
 #include "../../INCLUDES/ServerConfig.hpp"
 
+ServerConfig::ServerConfig()
+{
+}
+
 std::vector<std::map<int, std::string> > ServerConfig::get_error_status()
 {
     return errorStatus_pathError;
@@ -10,9 +14,11 @@ std::pair<std::string, int> ServerConfig::get_ip()
     return ip_port;
 }
 
-size_t ServerConfig::GetClientMaxBodySize()
+bool ServerConfig::CheckClientMaxBodySize(size_t num)
 {
-    return client_max_body_size;
+    if (num > client_max_body_size)
+        return true;
+    return false;
 }
 
 int right_path(std::string Config_path, std::string path)
