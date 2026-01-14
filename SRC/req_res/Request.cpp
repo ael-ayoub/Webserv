@@ -96,7 +96,6 @@ std::string Request::check_headerline(std::string header_line, Config &a)
         return ErrorResponse::Error_BadRequest(a); // 400
     
     Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
-    std::cout << "asdadasdsa, size is: " << ip_port.size() << ", header line is: "<< header_line << "\n";
     if (ip_port.size() != 2)
         return ErrorResponse::Error_BadRequest(a); // 400
     if (ip_port[0] != "localhost" && check_ip(ip_port[0]) == false)
@@ -120,7 +119,7 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     return "NONE";
 }
 
-bool CheckContentLenght(std::string str)
+std::string CheckContentLenght(std::string str, Config a)
 {
     // ServerConfig x;
     size_t num;
@@ -130,20 +129,20 @@ bool CheckContentLenght(std::string str)
         if (!isdigit(str[i]))
         {
             // std::cout << str[i] << ".\n";
-            return true;
+            return ErrorResponse::Error_BadRequest(a);
         }
     }
 
     std::stringstream s(str);
     s >> num;
     if (ServerConfig::CheckClientMaxBodySize(num) == true)
-        return true;
-    return false;
+        return ErrorResponse::Error_PayloadTooLarge(a);
+    return "NONE";
 }
 
 bool CheckContentType(std::vector<std::string> &str)
 {
-    std::cout << "first str is " << str[1] << ", the seconde is " << str[2] << std::endl;
+    // std::cout << "first str is " << str[1] << ", the seconde is " << str[2] << std::endl;
     if (str[1] != "multipart/form-data;")
         return true;
     std::pair<std::string, std::string> tmp = ServerConfig::ft_splito(str[2], '=');
@@ -169,40 +168,46 @@ std::string Request::check_request(std::string str, Config a)
             tmp.clear();
         }
     }
-    for (size_t b = 0; b < args.size(); b++)
-    {
-        std::cout << b << ": " << args[b] << std::endl;
-    }
+    // for (size_t b = 0; b < args.size(); b++)
+    // {
+    //     std::cout << b << ": " << args[b] << std::endl;
+    // }
 
     std::string response;
     response = check_requestline(args[0], a);
     if (response != "NONE")
+    {
+        // std::cout << "first err\n";
         return response;
+    }
         
     response = check_headerline(args[1], a);
     if (response != "NONE")
+    {
+        // std::cout << "seconde err\n";
         return response;
-    
+    }
+    // std::cout << "been here\n";
     bool lenght = false;
     bool type = false;
+    std::string res;
     for (size_t b = 2; b < args.size() && get_method() == "POST"; b++)
     {
         std::vector<std::string> tmp = ServerConfig::ft_splitv2(args[b], ' ');
         // std::cout << tmp[0] << std::endl;
-        if ((tmp[0] != "Content-Type:" && tmp.size() != 2)
-            || (tmp[0] == "Content-Type:" && tmp.size() != 3)
+        if ((tmp[0] == "Content-Type:" && tmp.size() != 3)
             || (tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 1] != '\n')
             || (tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 2] != '\r'))
+        {
             return ErrorResponse::Error_BadRequest(a);
+        }
         
         if (tmp[0] == "Content-Length:")
         {
             lenght = true;
-            if (CheckContentLenght(tmp[1]) == true)
-            {
-                // std::cout << "The first cause\n";   
-                return ErrorResponse::Error_BadRequest(a);
-            }
+            res = CheckContentLenght(tmp[1], a);
+            if (res != "NONE")
+                return res;
             // std::cout << "He pass the test\n";
         }
         if (tmp[0] == "Content-Type:")
@@ -217,8 +222,9 @@ std::string Request::check_request(std::string str, Config a)
         }
     }
 
-    if (type == false || lenght == false)
+    if ((type == false || lenght == false) && get_method() == "POST")
     {
+        std::cout << "here\n";
         return ErrorResponse::Error_BadRequest(a);
     }
     return "NONE";

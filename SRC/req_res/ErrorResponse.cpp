@@ -37,7 +37,7 @@ std::string ErrorResponse::default_response_error(std::string status_code)
     if (status_code == "403")
         body += "  <h1>403 Forbidden</h1>\n";
     if (status_code == "413")
-        body += "  <h1>413 Method Not Allowed</h1>\n";
+        body += "  <h1>413 Payload Too Large</h1>\n";
 
     if (status_code == "404")
         body += "  <p>The requested resource could not be found on this server.</p>\n";
@@ -224,6 +224,23 @@ std::string ErrorResponse::Error_BadRequest(Config &a)
         return default_response_error("400");
         
     header += Responde(a, path, header, "400");
+    return header;
+}
+
+std::string ErrorResponse::Error_PayloadTooLarge(Config &a)
+{
+    std::string path, line, body, s;
+
+    ServerConfig tmp = a.get_server_config();
+
+    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
+
+    std::string header = check_errorstatus(error, 400, path);
+
+    if (header.empty() == true)
+        return default_response_error("413");
+        
+    header += Responde(a, path, header, "413");
     return header;
 }
 

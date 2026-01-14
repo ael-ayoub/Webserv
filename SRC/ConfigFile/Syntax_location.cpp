@@ -1,10 +1,10 @@
 #include "../../INCLUDES/Syntax_location.hpp"
 
 syntax_location::syntax_location()
-    : methods(false), upload_enable(false), upload_store(false),
-     cgi(false), root(false), auto_index(false)
-{
-}
+    : methods(false), upload_enable(false), upload_store(false), cgi(false),
+    root(false), index(false), auto_index(false)
+{}
+
 void syntax_location::check_locations(Vector_str str, int *i)
 {
     size_t store_i = *i;

@@ -103,6 +103,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
             response = test_request.parse_request(state.header, a);
             if (response != "NONE")
             {
+                // std::cout << "err\n";
                 _sendReaponse(response, fd_client);
                 return;
             }
@@ -123,27 +124,40 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     if (state.method == "POST" && !state.complete_metadata)
     {
+        // std::cout << "state is : " << state.path << std::endl;
         if (state.path == "/uploads")
+        {
+            // std::cout << "in post!\n";
             state.metadata = _getMetadata(fd_client);
+
+        }
         else
         {
             char bufferr[1000];
-            size_t b = read(fd_client, bufferr, 1000);
+            ssize_t b = read(fd_client, bufferr, 1000);
             if (b < 0)
+            {
+                response = ErrorResponse::Error_BadRequest(a);
+                _sendReaponse(response, fd_client);
                 return;
+            }
             bufferr[b] = '\0';
             state.metadata = std::string(bufferr, b);
         }
         if (state.metadata.empty())
+        {
+            response = ErrorResponse::Error_BadRequest(a);
+            _sendReaponse(response, fd_client);
             return;
+        }
         state.complete_metadata = true;
     }
 
-    std::cout << state.header << std::endl;
+    // std::cout << state.header << std::endl;
     // std::cout << state.metadata << std::endl;
-    std::cout << "--------\n"
-              << state.header << std::endl;
-    std::cout << state.metadata << "\n---------" << std::endl;
+    // std::cout << "--------\n"
+    //           << state.header << std::endl;
+    // std::cout << state.metadata << "\n---------" << std::endl;
 
     if (state.method == "GET" || state.method == "DELETE")
     {
