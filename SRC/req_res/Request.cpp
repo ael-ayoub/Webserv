@@ -140,7 +140,6 @@ bool CheckContentLenght(std::string str)
 
     std::stringstream s(str);
     s >> num;
-    std::cout << "num is: " << num << ", client size is: " << ServerConfig::CheckClientMaxBodySize(num) << "\n";
     if (ServerConfig::CheckClientMaxBodySize(num) == true)
         return true;
     return false;
@@ -221,10 +220,9 @@ std::string Request::check_request(std::string str, Config a)
             // std::cout << "it is content type\n";
         }
     }
-    // std::cout << "type is " << type << ", lenghtis " << lenght << std::endl;
+
     if (type == false || lenght == false)
     {
-        // std::cout << "AGREEEEED\n";
         return ErrorResponse::Error_BadRequest(a);
     }
     return "NONE";

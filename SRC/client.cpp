@@ -79,8 +79,6 @@ std::string _getMetadata(int fd_client)
     return metadata;
 }
 
-int i = 0;
-
 void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
 {
 
@@ -140,8 +138,8 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         state.complete_metadata = true;
     }
 
-    std::cout << state.header << std::endl;
-    // std::cout << state.metadata << std::endl;
+    std::cout << "--------\n" << state.header << std::endl;
+    std::cout << state.metadata <<"\n---------"<< std::endl;
 
     if (state.method == "GET" || state.method == "DELETE")
     {
