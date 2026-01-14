@@ -173,19 +173,23 @@ std::string Request::check_request(std::string str, Config a)
             tmp.clear();
         }
     }
-    for (size_t b = 0; b < args.size(); b++)
-    {
-        std::cout << b << ": " << args[b] << std::endl;
-    }
+    // for (size_t b = 0; b < args.size(); b++)
+    // {
+    //     std::cout << b << ": " << args[b] << std::endl;
+    // }
 
     std::string response;
     response = check_requestline(args[0], a);
     if (response != "NONE")
+    {
         return response;
+    }
         
     response = check_headerline(args[1], a);
     if (response != "NONE")
+    {
         return response;
+    }
     
     bool lenght = false;
     bool type = false;
@@ -221,7 +225,7 @@ std::string Request::check_request(std::string str, Config a)
         }
     }
 
-    if (type == false || lenght == false)
+    if ((type == false || lenght == false) && get_method() == "POST")
     {
         return ErrorResponse::Error_BadRequest(a);
     }
