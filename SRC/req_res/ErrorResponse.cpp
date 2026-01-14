@@ -18,6 +18,8 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         headers += " Not Found\r\n";
     else if (status_code == "405")
         headers += " Method Not Allowed\r\n";
+    else if (status_code == "413")
+        headers += " Payload Too Large\r\n";
     body = "<!DOCTYPE html>\n";
     body += "<html>\n";
     body += "<head>\n";
@@ -34,6 +36,8 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         body += "  <h1>400 Bad Request</h1>\n";
     if (status_code == "403")
         body += "  <h1>403 Forbidden</h1>\n";
+    if (status_code == "413")
+        body += "  <h1>413 Method Not Allowed</h1>\n";
 
     if (status_code == "404")
         body += "  <p>The requested resource could not be found on this server.</p>\n";
@@ -43,6 +47,8 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         body += "  <p>Your browser sent a request that this server could not understand.</p>\n";
     if (status_code == "403")
         body += "  <p>You don’t have permission to access this resource.</p>\n";
+    if (status_code == "413")
+        body += "  <p>The size of the request entity exceeds the maximum allowed limit.</p>\n";
         
     body += "</body>\n";
     body += "</html>\n";

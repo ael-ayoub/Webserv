@@ -79,8 +79,6 @@ std::string _getMetadata(int fd_client)
     return metadata;
 }
 
-int i = 0;
-
 void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
 {
 
@@ -93,12 +91,21 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     if (!state.complete_header)
     {
+
         state.header = _getHeader(fd_client);
-        std::cout << "header is :" << state.header << std::endl;
+        // std::cout << "been here <<" << state.header << "\n";
+
         if (!state.header.empty())
         {
             state.complete_header = true;
-            test_request.parse_request((char *)state.header.c_str(), a);
+            response = test_request.parse_request(state.header, a);
+            if (response != "NONE")
+            {
+                _sendReaponse(response, fd_client);
+                return;
+            }
+            // std::cout << "responnse is :" << response << "." << std::endl;
+            // if (response == "NONE")
             state.method = test_request.get_method();
             state.path = test_request.get_path();
         }
@@ -118,31 +125,27 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
             state.metadata = _getMetadata(fd_client); // 
         else
         {
-            char buffer[1000];
-            size_t b = read(fd_client, buffer, 1000);
-            if (b == std::string::npos) // replacing b < 0 with npos
-            {
-                response = ErrorResponse::Error_BadRequest(a);
-                _sendReaponse(response, fd_client);
+            char bufferr[1000];
+            size_t b = read(fd_client, bufferr, 1000);
+            if (b < 0)
                 return;
-            }
-            buffer[b] = '\0';
-            state.metadata = std::string(buffer, b);
+            bufferr[b] = '\0';
+            state.metadata = std::string(bufferr, b);
         }
         if (state.metadata.empty())
             return;
         state.complete_metadata = true;
     }
 
-    std::cout << "header is :\n" << state.header << std::endl;
-    std::cout << "\nmetadata is:\n" << state.metadata << std::endl;
+    std::cout << "--------\n" << state.header << std::endl;
+    std::cout << state.metadata <<"\n---------"<< std::endl;
 
     if (state.method == "GET" || state.method == "DELETE")
     {
         Config a;
         size_t i = 0;
         // std::cout << "before response ----------\n";
-        response = test_request.parse_request((char *)state.header.c_str(), a);
+        response = test_request.parse_request(state.header, a);
         while (i < servers.size() && response == "NONE")
         {
             ip_port = servers[i].get_ip();
