@@ -79,6 +79,8 @@ std::string _getMetadata(int fd_client)
     return metadata;
 }
 
+int i = 0;
+
 void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
 {
 
@@ -118,11 +120,11 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         _sendReaponse(response, fd_client);
         return;
     }
-    // std::cout << "path is :" << state.path << std::endl;
+
     if (state.method == "POST" && !state.complete_metadata)
     {
         if (state.path == "/uploads")
-            state.metadata = _getMetadata(fd_client); // 
+            state.metadata = _getMetadata(fd_client);
         else
         {
             char bufferr[1000];
@@ -137,8 +139,11 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         state.complete_metadata = true;
     }
 
-    std::cout << "--------\n" << state.header << std::endl;
-    std::cout << state.metadata <<"\n---------"<< std::endl;
+    std::cout << state.header << std::endl;
+    // std::cout << state.metadata << std::endl;
+    std::cout << "--------\n"
+              << state.header << std::endl;
+    std::cout << state.metadata << "\n---------" << std::endl;
 
     if (state.method == "GET" || state.method == "DELETE")
     {
@@ -149,8 +154,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         while (i < servers.size() && response == "NONE")
         {
             ip_port = servers[i].get_ip();
-            if (ip_port.first == test_request.get_Hostname() 
-                && ip_port.second == test_request.get_port())
+            if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
             {
                 response = m.GetMethod(a, test_request, servers[i]);
                 break;

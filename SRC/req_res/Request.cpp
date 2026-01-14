@@ -96,11 +96,9 @@ std::string Request::check_headerline(std::string header_line, Config &a)
         return ErrorResponse::Error_BadRequest(a); // 400
     
     Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
+    std::cout << "asdadasdsa, size is: " << ip_port.size() << ", header line is: "<< header_line << "\n";
     if (ip_port.size() != 2)
-    {
         return ErrorResponse::Error_BadRequest(a); // 400
-    }
-    // std::cout << "it is ending here\n";
     if (ip_port[0] != "localhost" && check_ip(ip_port[0]) == false)
     {
         // std::cout << "Errorsadas\n";
@@ -114,8 +112,6 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     std::istringstream ss(ip);
     ss >> v_ip;
     if (v_ip < 0 || v_ip > 65535)
-        return ErrorResponse::Error_BadRequest(a);
-    if (ip_port[1][start] != '\r' && ip_port[1][start + 1] != '\r')
         return ErrorResponse::Error_BadRequest(a);
     port = v_ip;
     hostname = ip_port[0];

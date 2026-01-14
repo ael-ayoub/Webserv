@@ -1,4 +1,5 @@
 #include "../../INCLUDES/Response.hpp"
+#include "../../INCLUDES/CGI.hpp"
 
 std::string gcwdd()
 {
@@ -111,6 +112,29 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
         {
             last_path = gcwdd() + info_location.get_root() + test_request.get_path();
             // std::cout << "pathh: " << last_path << std::endl;
+
+            const size_t dot = last_path.rfind('.');
+            if (dot != std::string::npos)
+            {
+                const std::string ext = last_path.substr(dot);
+                if (ext == ".py" || ext == ".php")
+                {
+                    static const char *default_env[] = {
+                        "REQUEST_METHOD=GET",
+                        "QUERY_STRING=",
+                        "CONTENT_LENGTH=0",
+                        "CONTENT_TYPE=",
+                        "GATEWAY_INTERFACE=CGI/1.1",
+                        "SERVER_PROTOCOL=HTTP/1.1",
+                        NULL
+                    };
+                    const char *binary = (ext == ".py") ? "/usr/bin/python3" : "/usr/bin/php";
+                    CGI cgi("GET", last_path.c_str(), ext.c_str(), binary, default_env);
+                    if (cgi.CGIProccess())
+                        return cgi.response;
+                    return ErrorResponse::default_response_error("500");
+                }
+            }
             return Response::Display_file(last_path, a);
         }
     }

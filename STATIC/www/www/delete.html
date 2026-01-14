@@ -95,7 +95,7 @@
         }
         
         function deleteSpecificFile(filename) {
-            const url = '/uploads/' + encodeURIComponent(filename);
+            const url ="../../upload/" + encodeURIComponent(filename);
             
             fetch(url, {
                 method: 'DELETE'
