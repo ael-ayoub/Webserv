@@ -3,126 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POST Form - Webserv</title>
+    <title>FORM - WEBSERV</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <header>
-        <h1>POST Method Test</h1>
+        <div class="title-block">
+            <h1 class="brutalist-title">FORM</h1>
+        </div>
+        <nav>
+            <a href="/index.html">HOME</a>
+            <a href="/about.html">ABOUT</a>
+            <a href="/upload.html">UPLOAD</a>
+            <a href="/form.html">FORM</a>
+            <a href="/search.html">SEARCH</a>
+            <a href="/delete.html">DELETE</a>
+        </nav>
     </header>
-    
-    <nav>
-        <ul>
-            <li><a href="/index.html">Home</a></li>
-            <li><a href="/about.html">About</a></li>
-            <li><a href="/upload.html">Upload File</a></li>
-            <li><a href="/form.html">POST Form</a></li>
-            <li><a href="/search.html">Search (GET)</a></li>
-            <li><a href="/delete.html">Delete Test</a></li>
-        </ul>
-    </nav>
-    
+
     <main>
-        <section>
-            <h2>Contact Form (POST)</h2>
-            <p>This form tests POST method with application/x-www-form-urlencoded</p>
-            
-            <form action="/test.php" method="POST" class="contact-form">
-                <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="subject">Subject:</label>
-                    <input type="text" id="subject" name="subject" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="message">Message:</label>
-                    <textarea id="message" name="message" rows="5" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="category">Category:</label>
-                    <select id="category" name="category">
-                        <option value="general">General</option>
-                        <option value="support">Support</option>
-                        <option value="feedback">Feedback</option>
-                        <option value="bug">Bug Report</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" name="subscribe" value="yes">
-                        Subscribe to newsletter
-                    </label>
-                </div>
-                
-                <button type="submit">Send Message</button>
-            </form>
+        <section class="page-header">
+            <h1>POST METHOD TEST</h1>
+            <p style="margin-top: 1rem; color: var(--text-secondary);">APPLICATION/X-WWW-FORM-URLENCODED</p>
         </section>
-        
-        <section>
-            <h2>Login Form (POST to Python)</h2>
-            <form action="/login" method="POST" class="login-form">
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                
-                <button type="submit">Login</button>
-            </form>
+
+        <section class="content-section">
+            <h2 class="section-title">CONTACT FORM</h2>
+            <div class="brutalist-box">
+                <span class="box-number">01</span>
+                <form action="/test.php" method="POST">
+                    <div class="form-group">
+                        <label for="name">NAME:</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">EMAIL:</label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">SUBJECT:</label>
+                        <input type="text" id="subject" name="subject" required placeholder="Message subject">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">MESSAGE:</label>
+                        <textarea id="message" name="message" rows="6" required placeholder="Enter your message"></textarea>
+                    </div>
+                    <button type="submit">SEND MESSAGE →</button>
+                </form>
+            </div>
         </section>
-        
-        <section>
-            <h2>Large Data POST Test</h2>
-            <p>Test POST with large request body</p>
-            <form action="/test.php" method="POST">
-                <div class="form-group">
-                    <label for="largetext">Large Text Data:</label>
-                    <textarea id="largetext" name="largetext" rows="10" placeholder="Paste large amount of text here to test body size limits..."></textarea>
+
+        <section class="content-section" style="background: var(--bg-primary); padding: 4rem 2rem;">
+            <h2 class="section-title">REGISTRATION FORM</h2>
+            <div class="brutalist-box">
+                <span class="box-number">02</span>
+                <form action="/test.php" method="POST">
+                    <div class="form-group">
+                        <label for="username">USERNAME:</label>
+                        <input type="text" id="username" name="username" required placeholder="Choose username">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg_email">EMAIL:</label>
+                        <input type="email" id="reg_email" name="reg_email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">PASSWORD:</label>
+                        <input type="password" id="password" name="password" required placeholder="Strong password">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">COUNTRY:</label>
+                        <select id="country" name="country">
+                            <option value="">SELECT COUNTRY</option>
+                            <option value="usa">United States</option>
+                            <option value="uk">United Kingdom</option>
+                            <option value="france">France</option>
+                            <option value="germany">Germany</option>
+                            <option value="japan">Japan</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="terms" required style="width: auto; margin-right: 0.5rem;">
+                            I AGREE TO THE TERMS
+                        </label>
+                    </div>
+                    <button type="submit">REGISTER →</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2 class="section-title">FEEDBACK FORM</h2>
+            <div class="brutalist-box">
+                <span class="box-number">03</span>
+                <form action="/test.php" method="POST">
+                    <div class="form-group">
+                        <label for="rating">RATING:</label>
+                        <select id="rating" name="rating">
+                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ Good</option>
+                            <option value="3">⭐⭐⭐ Average</option>
+                            <option value="2">⭐⭐ Poor</option>
+                            <option value="1">⭐ Very Poor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedback">YOUR FEEDBACK:</label>
+                        <textarea id="feedback" name="feedback" rows="5" required placeholder="Share your thoughts"></textarea>
+                    </div>
+                    <button type="submit">SUBMIT FEEDBACK →</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="image-gallery">
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">FORM PARSING</div>
+                    </div>
                 </div>
-                <button type="submit">Submit Large Data</button>
-            </form>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">DATA VALIDATION</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">RESPONSE</div>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
-    
+
     <footer>
-        <p><a href="/index.html">Back to Home</a></p>
+        <p>© 2026 WEBSERV PROJECT | C++98 COMPLIANT</p>
     </footer>
 </body>
 </html>
-
-<!-- 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Login</title>
-    <script>
-if (document.cookie.includes('session_id')) {
-    window.location.href = '/dashboard';
-}
-</script>
-</head>
-<body>
-  <h2>Login Page</h2>
-  <form id="login-form" action="/login" method="POST" ">
-    <label>Username: <input type="text" name="username"></label><br>
-    <label>Password: <input type="password" name="password"></label><br>
-    <button type="submit">Login</button>
-  </form>
-</body>
-</html> -->

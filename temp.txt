@@ -252,10 +252,10 @@ Content-Type: text/html; charset=utf-8
         <div class="main-grid">
             <div class="clock-container">
                 <div class="digital-clock" id="digitalClock">
-17:54:30
+11:26:23
 </div>
                 <div class="clock-date" id="dateDisplay">
-Wednesday, January 14, 2026
+Friday, January 16, 2026
 </div>
             </div>
             
@@ -264,7 +264,7 @@ Wednesday, January 14, 2026
                     <div class="stat-content">
                         <div class="stat-label">⏱️ Uptime</div>
                         <div class="stat-value">
-157d 2h 0m
+19d 12h 48m
 </div>
                         <div class="stat-subtext">System running time</div>
                     </div>
@@ -274,7 +274,7 @@ Wednesday, January 14, 2026
                     <div class="stat-content">
                         <div class="stat-label">🔧 Processes</div>
                         <div class="stat-value">
-551
+485
 </div>
                         <div class="stat-subtext">Running processes</div>
                     </div>
@@ -284,14 +284,14 @@ Wednesday, January 14, 2026
                     <div class="stat-content">
                         <div class="stat-label">💾 RAM Usage</div>
                         <div class="stat-value">
-48%
+36%
 </div>
                         <div class="stat-subtext">
-6.22 / 15.31 GB
+5.02 / 15.31 GB
 </div>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 
-48.3%
+36.4%
 ;"></div>
                         </div>
                     </div>
@@ -301,12 +301,12 @@ Wednesday, January 14, 2026
                     <div class="stat-content">
                         <div class="stat-label">⚡ CPU Load</div>
                         <div class="stat-value">
-4%
+2%
 </div>
                         <div class="stat-subtext">Processor usage</div>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 
-4.0%
+2.5%
 ;"></div>
                         </div>
                     </div>
@@ -319,14 +319,14 @@ Wednesday, January 14, 2026
                 <div class="large-stat-content">
                     <div class="large-stat-label">📦 Storage</div>
                     <div class="large-stat-value">
-29%
+30%
 </div>
                     <div class="large-stat-subtext">
-45.08 / 162.22 GB used
+46.85 / 162.22 GB used
 </div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: 
-29.3%
+30.4%
 ; background: linear-gradient(90deg, #ff6b00, #ff9500);"></div>
                     </div>
                 </div>

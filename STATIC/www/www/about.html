@@ -3,65 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About - Webserv</title>
+    <title>ABOUT - WEBSERV</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <header>
-        <h1>About Webserv</h1>
+        <div class="title-block">
+            <h1 class="brutalist-title">ABOUT</h1>
+        </div>
+        <nav>
+            <a href="/index.html">HOME</a>
+            <a href="/about.html">ABOUT</a>
+            <a href="/upload.html">UPLOAD</a>
+            <a href="/form.html">FORM</a>
+            <a href="/search.html">SEARCH</a>
+            <a href="/delete.html">DELETE</a>
+        </nav>
     </header>
-    
-    <nav>
-        <ul>
-            <li><a href="/index.html">Home</a></li>
-            <li><a href="/about.html">About</a></li>
-            <li><a href="/upload.html">Upload File</a></li>
-            <li><a href="/form.html">POST Form</a></li>
-            <li><a href="/search.html">Search (GET)</a></li>
-            <li><a href="/delete.html">Delete Test</a></li>
-        </ul>
-    </nav>
-    
+
     <main>
-        <section>
-            <h2>About This Project</h2>
-            <p>Webserv is a custom HTTP server implementation written in C++ 98.</p>
-            
-            <h3>Features Implemented:</h3>
-            <ul>
-                <li>HTTP/1.1 protocol support</li>
-                <li>Non-blocking I/O using poll() or select()</li>
-                <li>Multiple port listening</li>
-                <li>GET, POST, and DELETE methods</li>
-                <li>Static file serving</li>
-                <li>CGI execution (PHP, Python)</li>
-                <li>File upload handling</li>
-                <li>Custom error pages</li>
-                <li>HTTP redirections</li>
-                <li>Directory listing</li>
-                <li>Configuration file parsing</li>
-            </ul>
-            
-            <h3>Technical Details:</h3>
-            <p><strong>Language:</strong> C++ 98</p>
-            <p><strong>I/O Model:</strong> Non-blocking with poll()/select()</p>
-            <p><strong>Compatibility:</strong> Works with standard web browsers</p>
+        <section class="hero-section">
+            <div class="content-split">
+                <div class="hero-text">
+                    <h2>THE PROJECT</h2>
+                    <p class="description">A FULLY FUNCTIONAL HTTP/1.1 SERVER BUILT FROM SCRATCH IN C++98</p>
+                    <p style="margin-bottom: 2rem;">This project implements a complete web server following the HTTP/1.1 protocol specification. It handles multiple simultaneous connections, serves static files, and executes CGI scripts for dynamic content generation.</p>
+                </div>
+                <div class="hero-image">
+                    <div class="image-placeholder">
+                        <img src="images/main.jpg" alt="Server architecture diagram">
+                        <div class="img-label">SERVER ARCHITECTURE</div>
+                    </div>
+                </div>
+            </div>
         </section>
-        
-        <section>
-            <h2>Testing Information</h2>
-            <p>This server is designed to be tested with:</p>
-            <ul>
-                <li>Web browsers (Chrome, Firefox, Safari)</li>
-                <li>curl command line tool</li>
-                <li>telnet for raw HTTP requests</li>
-                <li>Custom test scripts</li>
-            </ul>
+
+        <section class="feature-section" style="background: var(--bg-primary);">
+            <h2 class="section-title">TECHNICAL SPECIFICATIONS</h2>
+            <div class="brutalist-grid">
+                <div class="brutalist-box">
+                    <span class="box-number">A</span>
+                    <h3>ARCHITECTURE</h3>
+                    <ul>
+                        <li>C++98 Standard Compliant</li>
+                        <li>Non-blocking I/O with poll()</li>
+                        <li>Multi-port listening</li>
+                        <li>Configurable via .conf file</li>
+                    </ul>
+                </div>
+                <div class="brutalist-box">
+                    <span class="box-number">B</span>
+                    <h3>HTTP METHODS</h3>
+                    <ul>
+                        <li>GET - Resource retrieval</li>
+                        <li>POST - Data submission</li>
+                        <li>DELETE - Resource removal</li>
+                        <li>Full header parsing</li>
+                    </ul>
+                </div>
+                <div class="brutalist-box">
+                    <span class="box-number">C</span>
+                    <h3>CGI SUPPORT</h3>
+                    <ul>
+                        <li>PHP script execution</li>
+                        <li>Python script execution</li>
+                        <li>Fork/execve implementation</li>
+                        <li>Environment variable passing</li>
+                    </ul>
+                </div>
+                <div class="brutalist-box">
+                    <span class="box-number">D</span>
+                    <h3>FILE HANDLING</h3>
+                    <ul>
+                        <li>Static file serving</li>
+                        <li>Multipart file upload</li>
+                        <li>MIME type detection</li>
+                        <li>Directory indexing</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2 class="section-title">IMPLEMENTATION DETAILS</h2>
+            
+            <div class="brutalist-box" style="margin-bottom: 2rem;">
+                <span class="box-number">01</span>
+                <h3>SOCKET MANAGEMENT</h3>
+                <p>The server creates listening sockets for each configured port and uses poll() to monitor multiple file descriptors simultaneously. This allows handling many concurrent connections without blocking.</p>
+            </div>
+
+            <div class="brutalist-box" style="margin-bottom: 2rem;">
+                <span class="box-number">02</span>
+                <h3>REQUEST PARSING</h3>
+                <p>HTTP requests are parsed into method, URI, headers, and body components. The parser handles chunked encoding, multipart form data, and URL-encoded payloads.</p>
+            </div>
+
+            <div class="brutalist-box" style="margin-bottom: 2rem;">
+                <span class="box-number">03</span>
+                <h3>RESPONSE GENERATION</h3>
+                <p>Responses include proper HTTP headers, status codes, and content. The server determines MIME types, handles redirects, and generates error pages for common HTTP errors.</p>
+            </div>
+
+            <div class="brutalist-box">
+                <span class="box-number">04</span>
+                <h3>CGI EXECUTION</h3>
+                <p>When a CGI script is requested, the server forks a child process, sets up environment variables, and executes the script. Output is captured via pipe and wrapped in HTTP response format.</p>
+            </div>
+        </section>
+
+        <section class="image-gallery">
+            <h2 class="section-title">PROJECT STRUCTURE</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">SOURCE CODE</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">CONFIG FILES</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">STATIC ASSETS</div>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
-    
+
     <footer>
-        <p><a href="/index.html">Back to Home</a></p>
+        <p>© 2026 WEBSERV PROJECT | C++98 COMPLIANT</p>
     </footer>
 </body>
 </html>

@@ -3,132 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DELETE Method - Webserv</title>
+    <title>DELETE - WEBSERV</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <header>
-        <h1>DELETE Method Test</h1>
+        <div class="title-block">
+            <h1 class="brutalist-title">DELETE</h1>
+        </div>
+        <nav>
+            <a href="/index.html">HOME</a>
+            <a href="/about.html">ABOUT</a>
+            <a href="/upload.html">UPLOAD</a>
+            <a href="/form.html">FORM</a>
+            <a href="/search.html">SEARCH</a>
+            <a href="/delete.html">DELETE</a>
+        </nav>
     </header>
-    
-    <nav>
-        <ul>
-            <li><a href="/index.html">Home</a></li>
-            <li><a href="/about.html">About</a></li>
-            <li><a href="/upload.html">Upload File</a></li>
-            <li><a href="/form.html">POST Form</a></li>
-            <li><a href="/search.html">Search (GET)</a></li>
-            <li><a href="/delete.html">Delete Test</a></li>
-        </ul>
-    </nav>
-    
+
     <main>
-        <section>
-            <h2>Delete File Test</h2>
-            <p>Use JavaScript to send DELETE requests to the server</p>
-            
-            <div class="delete-section">
-                <h3>Delete Uploaded Files</h3>
+        <section class="page-header">
+            <h1>DELETE METHOD TEST</h1>
+            <p style="margin-top: 1rem; color: var(--text-secondary);">HTTP DELETE REQUEST VIA JAVASCRIPT</p>
+        </section>
+
+        <section class="content-section">
+            <h2 class="section-title">DELETE FILE</h2>
+            <div class="brutalist-box">
+                <span class="box-number">01</span>
                 <div class="form-group">
-                    <label for="filename">File to Delete:</label>
+                    <label for="filename">FILENAME TO DELETE:</label>
                     <input type="text" id="filename" placeholder="e.g., test.txt">
                 </div>
-                <button onclick="deleteFile()">Delete File</button>
-                <div id="deleteResult" class="result"></div>
+                <button onclick="deleteFile()">DELETE FILE →</button>
+                <div id="deleteResult" class="result" style="display: none;"></div>
             </div>
         </section>
-        
-        <section>
-            <h2>Manage Files</h2>
-            <p>Test files for deletion (create these first via upload):</p>
-            <ul>
-                <li>test.txt</li>
-                <li>sample.html</li>
-                <li>data.json</li>
-            </ul>
-            
-            <div class="file-list">
-                <h3>Quick Delete Buttons:</h3>
-                <button onclick="deleteSpecificFile('test.txt')">Delete test.txt</button>
-                <button onclick="deleteSpecificFile('sample.html')">Delete sample.html</button>
-                <button onclick="deleteSpecificFile('data.json')">Delete data.json</button>
+
+        <section class="content-section" style="background: var(--bg-primary); padding: 4rem 2rem;">
+            <h2 class="section-title">DELETE RESOURCE</h2>
+            <div class="brutalist-box">
+                <span class="box-number">02</span>
+                <div class="form-group">
+                    <label for="resourcePath">RESOURCE PATH:</label>
+                    <input type="text" id="resourcePath" placeholder="/uploads/yourfile.txt">
+                </div>
+                <button onclick="deleteResource()">DELETE RESOURCE →</button>
+                <div id="resourceResult" class="result" style="display: none;"></div>
             </div>
         </section>
-        
-        <section>
-            <h2>Testing Instructions</h2>
-            <ol>
-                <li>First, upload some test files using the <a href="/upload.html">Upload page</a></li>
-                <li>Note the filenames of uploaded files</li>
-                <li>Return here and enter the filename to delete</li>
-                <li>Click "Delete File" button</li>
-                <li>Check the response status (should be 200 or 204 on success)</li>
-            </ol>
-            
-            <h3>Test with curl:</h3>
-            <pre><code>curl -X DELETE http://localhost:8080/uploads/test.txt</code></pre>
-            
-            <h3>Expected Responses:</h3>
-            <ul>
-                <li><strong>200 OK</strong> or <strong>204 No Content</strong> - File deleted successfully</li>
-                <li><strong>404 Not Found</strong> - File doesn't exist</li>
-                <li><strong>403 Forbidden</strong> - No permission to delete</li>
-                <li><strong>405 Method Not Allowed</strong> - DELETE not allowed for this resource</li>
-            </ul>
+
+        <section class="content-section">
+            <h2 class="section-title">TEST FILES</h2>
+            <div class="brutalist-box">
+                <span class="box-number">03</span>
+                <p style="margin-bottom: 1rem;">CREATE THESE FILES VIA UPLOAD FIRST:</p>
+                <ul style="margin-bottom: 2rem;">
+                    <li>test.txt</li>
+                    <li>sample.html</li>
+                    <li>data.json</li>
+                    <li>demo.md</li>
+                </ul>
+                <div class="endpoint-list">
+                    <div class="endpoint-item" style="cursor: pointer;" onclick="quickDelete('test.txt')">
+                        <span class="endpoint-method">DELETE</span>
+                        <span class="endpoint-path">test.txt</span>
+                        <span class="endpoint-desc">Quick delete test file</span>
+                    </div>
+                    <div class="endpoint-item" style="cursor: pointer;" onclick="quickDelete('sample.html')">
+                        <span class="endpoint-method">DELETE</span>
+                        <span class="endpoint-path">sample.html</span>
+                        <span class="endpoint-desc">Quick delete sample file</span>
+                    </div>
+                    <div class="endpoint-item" style="cursor: pointer;" onclick="quickDelete('data.json')">
+                        <span class="endpoint-method">DELETE</span>
+                        <span class="endpoint-path">data.json</span>
+                        <span class="endpoint-desc">Quick delete data file</span>
+                    </div>
+                </div>
+                <div id="quickResult" class="result" style="display: none; margin-top: 1rem;"></div>
+            </div>
+        </section>
+
+        <section class="image-gallery">
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">DELETE REQUEST</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">RESOURCE REMOVAL</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">STATUS RESPONSE</div>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
-    
+
     <footer>
-        <p><a href="/index.html">Back to Home</a></p>
+        <p>© 2026 WEBSERV PROJECT | C++98 COMPLIANT</p>
     </footer>
-    
+
     <script>
         function deleteFile() {
-            const filename = document.getElementById('filename').value.trim();
+            const filename = document.getElementById('filename').value;
+            const resultDiv = document.getElementById('deleteResult');
+            
             if (!filename) {
-                document.getElementById('deleteResult').innerHTML = 
-                    '<p style="color: red;">Please enter a filename</p>';
+                showResult(resultDiv, 'PLEASE ENTER A FILENAME', 'error');
                 return;
             }
             
-            deleteSpecificFile(filename);
-        }
-        
-        function deleteSpecificFile(filename) {
-            const url ="../../upload/" + encodeURIComponent(filename);
-            
-            fetch(url, {
+            fetch('/uploads/' + filename, {
                 method: 'DELETE'
             })
             .then(response => {
-                const resultDiv = document.getElementById('deleteResult') || createResultDiv();
-                
                 if (response.ok) {
-                    resultDiv.innerHTML = 
-                        `<p style="color: green;">✓ File "${filename}" deleted successfully (Status: ${response.status})</p>`;
+                    showResult(resultDiv, 'FILE DELETED SUCCESSFULLY: ' + filename, 'success');
                 } else {
-                    resultDiv.innerHTML = 
-                        `<p style="color: red;">✗ Failed to delete "${filename}" (Status: ${response.status} ${response.statusText})</p>`;
+                    showResult(resultDiv, 'DELETE FAILED: ' + response.status, 'error');
                 }
-                
-                return response.text();
-            })
-            .then(text => {
-                console.log('Server response:', text);
             })
             .catch(error => {
-                const resultDiv = document.getElementById('deleteResult') || createResultDiv();
-                resultDiv.innerHTML = 
-                    `<p style="color: red;">Error: ${error.message}</p>`;
+                showResult(resultDiv, 'ERROR: ' + error.message, 'error');
             });
         }
-        
-        function createResultDiv() {
-            const div = document.createElement('div');
-            div.id = 'deleteResult';
-            div.className = 'result';
-            document.querySelector('.file-list').appendChild(div);
-            return div;
+
+        function deleteResource() {
+            const resourcePath = document.getElementById('resourcePath').value;
+            const resultDiv = document.getElementById('resourceResult');
+            
+            if (!resourcePath) {
+                showResult(resultDiv, 'PLEASE ENTER A RESOURCE PATH', 'error');
+                return;
+            }
+            
+            fetch(resourcePath, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    showResult(resultDiv, 'RESOURCE DELETED: ' + resourcePath, 'success');
+                } else {
+                    showResult(resultDiv, 'DELETE FAILED: ' + response.status, 'error');
+                }
+            })
+            .catch(error => {
+                showResult(resultDiv, 'ERROR: ' + error.message, 'error');
+            });
+        }
+
+        function quickDelete(filename) {
+            const resultDiv = document.getElementById('quickResult');
+            
+            fetch('/uploads/' + filename, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    showResult(resultDiv, 'DELETED: ' + filename, 'success');
+                } else {
+                    showResult(resultDiv, 'FAILED TO DELETE: ' + filename + ' (STATUS: ' + response.status + ')', 'error');
+                }
+            })
+            .catch(error => {
+                showResult(resultDiv, 'ERROR: ' + error.message, 'error');
+            });
+        }
+
+        function showResult(element, message, type) {
+            element.textContent = message;
+            element.className = 'result ' + type;
+            element.style.display = 'block';
+            
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
         }
     </script>
 </body>

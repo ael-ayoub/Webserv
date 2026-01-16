@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Webserv</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body data-theme="light">
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span>
+    </div>
+    
+    <header class="glass-header">
+        <div class="header-content">
+            <h1>About Webserv</h1>
+            <p>C++ HTTP Server Implementation</p>
+        </div>
+    </header>
+    
+    <nav class="glass-nav">
+        <ul>
+            <li><a href="/index.html" class="nav-link">Home</a></li>
+            <li><a href="/about.html" class="nav-link">About</a></li>
+            <li><a href="/upload.html" class="nav-link">Upload</a></li>
+            <li><a href="/form.html" class="nav-link">Form</a></li>
+            <li><a href="/search.html" class="nav-link">Search</a></li>
+            <li><a href="/delete.html" class="nav-link">Delete</a></li>
+        </ul>
+    </nav>
+    
+    <main class="container">
+        <section class="glass-card">
+            <h2>📚 About This Project</h2>
+            <p class="intro-text">Webserv is a custom HTTP server implementation written in <strong>C++ 98</strong>.</p>
+            
+            <h3>✨ Features Implemented:</h3>
+            <ul class="feature-list">
+                <li>HTTP/1.1 protocol support</li>
+                <li>Non-blocking I/O using poll()/select()</li>
+                <li>Multiple port listening</li>
+                <li>GET, POST, DELETE methods</li>
+                <li>Static file serving</li>
+                <li>CGI execution (PHP, Python)</li>
+                <li>File upload handling</li>
+                <li>Custom error pages</li>
+                <li>HTTP redirections</li>
+                <li>Directory listing</li>
+                <li>Configuration file parsing</li>
+            </ul>
+        </section>
+        
+        <section class="glass-card">
+            <h2>⚙️ Technical Details</h2>
+            <div class="tech-grid">
+                <div class="glass-box">
+                    <h3>Language</h3>
+                    <p>C++ 98</p>
+                </div>
+                <div class="glass-box">
+                    <h3>I/O Model</h3>
+                    <p>Non-blocking with poll()/select()</p>
+                </div>
+                <div class="glass-box">
+                    <h3>Compatibility</h3>
+                    <p>All modern web browsers</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="glass-card">
+            <h2>🧪 Testing Tools</h2>
+            <ul class="feature-list">
+                <li>Web browsers (Chrome, Firefox, Safari)</li>
+                <li>curl command line tool</li>
+                <li>telnet for raw HTTP requests</li>
+                <li>Custom test scripts</li>
+            </ul>
+        </section>
+    </main>
+    
+    <footer class="glass-footer">
+        <p><a href="/index.html" class="footer-link">← Back to Home</a></p>
+    </footer>
+    
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon();
+        }
+        
+        function updateThemeIcon() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const icon = document.getElementById('theme-icon');
+            icon.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            updateThemeIcon();
+        });
+    </script>
+</body>
+</html>

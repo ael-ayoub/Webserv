@@ -3,111 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search (GET) - Webserv</title>
+    <title>SEARCH - WEBSERV</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <header>
-        <h1>GET Method Test with Query Parameters</h1>
+        <div class="title-block">
+            <h1 class="brutalist-title">SEARCH</h1>
+        </div>
+        <nav>
+            <a href="/index.html">HOME</a>
+            <a href="/about.html">ABOUT</a>
+            <a href="/upload.html">UPLOAD</a>
+            <a href="/form.html">FORM</a>
+            <a href="/search.html">SEARCH</a>
+            <a href="/delete.html">DELETE</a>
+        </nav>
     </header>
-    
-    <nav>
-        <ul>
-            <li><a href="/index.html">Home</a></li>
-            <li><a href="/about.html">About</a></li>
-            <li><a href="/upload.html">Upload File</a></li>
-            <li><a href="/form.html">POST Form</a></li>
-            <li><a href="/search.html">Search (GET)</a></li>
-            <li><a href="/delete.html">Delete Test</a></li>
-        </ul>
-    </nav>
-    
+
     <main>
-        <section>
-            <h2>Search Form (GET Method)</h2>
-            <p>This form uses GET method - parameters appear in URL</p>
-            
-            <form action="/test.php" method="GET" class="search-form">
-                <div class="form-group">
-                    <label for="query">Search Query:</label>
-                    <input type="text" id="query" name="query" placeholder="Enter search terms...">
-                </div>
-                
-                <div class="form-group">
-                    <label for="category">Category:</label>
-                    <select id="category" name="category">
-                        <option value="all">All</option>
-                        <option value="web">Web</option>
-                        <option value="images">Images</option>
-                        <option value="videos">Videos</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="sort">Sort By:</label>
-                    <select id="sort" name="sort">
-                        <option value="relevance">Relevance</option>
-                        <option value="date">Date</option>
-                        <option value="popularity">Popularity</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="limit">Results per page:</label>
-                    <input type="number" id="limit" name="limit" value="10" min="1" max="100">
-                </div>
-                
-                <button type="submit">Search</button>
-            </form>
+        <section class="page-header">
+            <h1>GET METHOD TEST</h1>
+            <p style="margin-top: 1rem; color: var(--text-secondary);">QUERY PARAMETERS IN URL</p>
         </section>
-        
-        <section>
-            <h2>Direct GET Links with Query Parameters</h2>
-            <p>Click these links to test GET with different query strings:</p>
-            <ul>
-                <li><a href="/test.php?query=hello&category=all">Simple GET: query=hello&category=all</a></li>
-                <li><a href="/test.php?id=123&action=view">GET: id=123&action=view</a></li>
-                <li><a href="/test.php?user=john&role=admin&status=active">Multiple params: user, role, status</a></li>
-                <li><a href="/test.py?search=webserv&lang=cpp&year=2024">Python CGI with params</a></li>
-                <li><a href="/test.php?text=Hello%20World&special=%40%23%24">URL encoded special characters</a></li>
-            </ul>
+
+        <section class="content-section">
+            <h2 class="section-title">BASIC SEARCH</h2>
+            <div class="brutalist-box">
+                <span class="box-number">01</span>
+                <form action="/test.php" method="GET">
+                    <div class="form-group">
+                        <label for="query">SEARCH QUERY:</label>
+                        <input type="text" id="query" name="query" placeholder="Enter search terms..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">CATEGORY:</label>
+                        <select id="category" name="category">
+                            <option value="all">ALL</option>
+                            <option value="web">WEB</option>
+                            <option value="images">IMAGES</option>
+                            <option value="videos">VIDEOS</option>
+                            <option value="news">NEWS</option>
+                        </select>
+                    </div>
+                    <button type="submit">SEARCH →</button>
+                </form>
+            </div>
         </section>
-        
-        <section>
-            <h2>Filter Form (GET)</h2>
-            <form action="/test.py" method="GET" class="filter-form">
-                <fieldset>
-                    <legend>Filters:</legend>
-                    
-                    <label>
-                        <input type="checkbox" name="filter" value="new">
-                        New
-                    </label>
-                    
-                    <label>
-                        <input type="checkbox" name="filter" value="popular">
-                        Popular
-                    </label>
-                    
-                    <label>
-                        <input type="checkbox" name="filter" value="featured">
-                        Featured
-                    </label>
-                </fieldset>
-                
-                <div class="form-group">
-                    <label>Price Range:</label>
-                    <input type="number" name="min_price" placeholder="Min" value="0">
-                    <input type="number" name="max_price" placeholder="Max" value="1000">
+
+        <section class="content-section" style="background: var(--bg-primary); padding: 4rem 2rem;">
+            <h2 class="section-title">ADVANCED SEARCH</h2>
+            <div class="brutalist-box">
+                <span class="box-number">02</span>
+                <form action="/test.php" method="GET">
+                    <div class="form-group">
+                        <label for="keywords">KEYWORDS:</label>
+                        <input type="text" id="keywords" name="keywords" placeholder="space separated keywords">
+                    </div>
+                    <div class="form-group">
+                        <label for="sort">SORT BY:</label>
+                        <select id="sort" name="sort">
+                            <option value="relevance">RELEVANCE</option>
+                            <option value="date">DATE</option>
+                            <option value="popularity">POPULARITY</option>
+                            <option value="rating">RATING</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="time">TIME RANGE:</label>
+                        <select id="time" name="time">
+                            <option value="any">ANY TIME</option>
+                            <option value="day">PAST 24 HOURS</option>
+                            <option value="week">PAST WEEK</option>
+                            <option value="month">PAST MONTH</option>
+                            <option value="year">PAST YEAR</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="results">RESULTS PER PAGE:</label>
+                        <select id="results" name="results">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    <button type="submit">ADVANCED SEARCH →</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2 class="section-title">FILTER SEARCH</h2>
+            <div class="brutalist-box">
+                <span class="box-number">03</span>
+                <form action="/test.php" method="GET">
+                    <div class="form-group">
+                        <label for="filter_query">SEARCH:</label>
+                        <input type="text" id="filter_query" name="q" placeholder="What are you looking for?">
+                    </div>
+                    <div class="form-group">
+                        <label>FILE TYPE:</label>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <label style="text-transform: none; font-weight: normal;">
+                                <input type="checkbox" name="pdf" value="1" style="width: auto; margin-right: 0.25rem;">
+                                PDF
+                            </label>
+                            <label style="text-transform: none; font-weight: normal;">
+                                <input type="checkbox" name="doc" value="1" style="width: auto; margin-right: 0.25rem;">
+                                DOC
+                            </label>
+                            <label style="text-transform: none; font-weight: normal;">
+                                <input type="checkbox" name="txt" value="1" style="width: auto; margin-right: 0.25rem;">
+                                TXT
+                            </label>
+                            <label style="text-transform: none; font-weight: normal;">
+                                <input type="checkbox" name="html" value="1" style="width: auto; margin-right: 0.25rem;">
+                                HTML
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="language">LANGUAGE:</label>
+                        <select id="language" name="lang">
+                            <option value="any">ANY LANGUAGE</option>
+                            <option value="en">ENGLISH</option>
+                            <option value="fr">FRENCH</option>
+                            <option value="de">GERMAN</option>
+                            <option value="es">SPANISH</option>
+                            <option value="ja">JAPANESE</option>
+                        </select>
+                    </div>
+                    <button type="submit">FILTER SEARCH →</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="image-gallery">
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">QUERY PARSING</div>
+                    </div>
                 </div>
-                
-                <button type="submit">Apply Filters</button>
-            </form>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">PARAMETER HANDLING</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">URL ENCODING</div>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
-    
+
     <footer>
-        <p><a href="/index.html">Back to Home</a></p>
+        <p>© 2026 WEBSERV PROJECT | C++98 COMPLIANT</p>
     </footer>
 </body>
 </html>

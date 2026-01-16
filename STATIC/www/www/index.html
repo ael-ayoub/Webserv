@@ -3,71 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webserv - Home</title>
+    <title>WEBSERV</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <header>
-        <h1>Welcome to Webserv</h1>
-        <p>HTTP Server Test Page</p>
+        <div class="title-block">
+            <h1 class="brutalist-title">TRIPLE-A WEBSERV</h1>
+        </div>
+        <nav>
+            <a href="/index.html">HOME</a>
+            <a href="/about.html">ABOUT</a>
+            <a href="/upload.html">UPLOAD</a>
+            <a href="/form.html">FORM</a>
+            <a href="/search.html">SEARCH</a>
+            <a href="/delete.html">DELETE</a>
+        </nav>
     </header>
-    
-    <nav>
-        <ul>
-            <li><a href="/index.html">Home</a></li>
-            <li><a href="/about.html">About</a></li>
-            <li><a href="/upload.html">Upload File</a></li>
-            <li><a href="/form.html">POST Form</a></li>
-            <li><a href="/search.html">Search (GET)</a></li>
-            <li><a href="/delete.html">Delete Test</a></li>
-        </ul>
-    </nav>
-    
+
     <main>
-        <section>
-            <h2>Server Features Test</h2>
-            <div class="feature-grid">
-                <div class="feature">
-                    <h3>Static Content</h3>
-                    <p>Testing HTML, CSS, JS, and image serving</p>
-                    <img src="/image.jpg" alt="Test Image" width="200">
+        <section class="hero-section">
+            <div class="content-split">
+                <div class="hero-text">
+                    <p class="date">16/01/2026</p>
+                    <h2>A C++ HTTP/1.1 SERVER</h2>
+                    <p class="description">NON-BLOCKING I/O • CGI SUPPORT • MULTI-PORT CONFIGURATION</p>
+                    <a href="#features" class="brutalist-link">KNOW MORE ↗</a>
                 </div>
-                
-                <div class="feature">
-                    <h3>HTTP Methods</h3>
-                    <ul>
-                        <li>✓ GET requests</li>
-                        <li>✓ POST requests</li>
-                        <li>✓ DELETE requests</li>
-                    </ul>
-                </div>
-                
-                <div class="feature">
-                    <h3>CGI Support</h3>
-                    <p><a href="/dir/test.php">Test PHP CGI</a></p>
-                    <p><a href="/dir/test.py">Test Python CGI</a></p>
-                </div>
-                
-                <div class="feature">
-                    <h3>Directory Listing</h3>
-                    <p><a href="/dir/">View Directory</a></p>
+                <div class="image-placeholder">
+                    <img src="images/main.jpg"
+                        alt="Server architecture diagram">
+                    <div class="img-label">SERVER ARCHITECTURE</div>
                 </div>
             </div>
         </section>
-        
-        <section>
-            <h2>Error Pages Test</h2>
-            <ul>
-                <li><a href="/404_notfound.html">Test 404 Error</a></li>
-                <li><a href="/403_forbidden.html">Test 403 Error</a></li>
-            </ul>
+
+        <section id="features" class="feature-section">
+            <h2 class="section-title">CORE FEATURES</h2>
+            <div class="brutalist-grid">
+                <div class="brutalist-box">
+                    <span class="box-number">01</span>
+                    <h3>NON-BLOCKING I/O</h3>
+                    <p>Built with poll() for efficient concurrent connections</p>
+                </div>
+                <div class="brutalist-box">
+                    <span class="box-number">02</span>
+                    <h3>CGI EXECUTION</h3>
+                    <p>Execute PHP and Python scripts</p>
+                </div>
+                <div class="brutalist-box">
+                    <span class="box-number">03</span>
+                    <h3>STATIC FILES</h3>
+                    <p>Fast serving of HTML, CSS, JavaScript, images</p>
+                </div>
+                <div class="brutalist-box">
+                    <span class="box-number">04</span>
+                    <h3>HTTP/1.1 METHODS</h3>
+                    <p>GET • POST • DELETE</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="test-section">
+            <h2 class="section-title">TEST ENDPOINTS</h2>
+            <div class="endpoint-list">
+                <a href="/upload.html" class="endpoint-item">
+                    <span class="endpoint-method">POST</span>
+                    <span class="endpoint-path">/upload.html</span>
+                    <span class="endpoint-desc">File Upload (multipart/form-data)</span>
+                </a>
+                <a href="/form.html" class="endpoint-item">
+                    <span class="endpoint-method">POST</span>
+                    <span class="endpoint-path">/form.html</span>
+                    <span class="endpoint-desc">Form Submission Test</span>
+                </a>
+                <a href="/search.html" class="endpoint-item">
+                    <span class="endpoint-method">GET</span>
+                    <span class="endpoint-path">/search.html</span>
+                    <span class="endpoint-desc">Query String Parameters</span>
+                </a>
+                <a href="/delete.html" class="endpoint-item">
+                    <span class="endpoint-method">DELETE</span>
+                    <span class="endpoint-path">/delete.html</span>
+                    <span class="endpoint-desc">Resource Deletion</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="image-gallery">
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <img src="images/cgi.png" alt="CGI process diagram">
+                        <div class="img-label-small">CGI PROCESS</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <img src="images/request.png" alt="HTTP request flow">
+                        <div class="img-label-small">REQUEST FLOW</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="image-placeholder-small">
+                        <div class="img-label-small">CONFIG PARSER</div>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
-    
+
     <footer>
-        <p>Webserv Project - C++ HTTP Server</p>
+        <p>© 2026 TRIPLE-A | C++98 COMPLIANT</p>
     </footer>
-    
-    <script src="/script.js"></script>
 </body>
 </html>
