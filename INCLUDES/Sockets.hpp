@@ -28,6 +28,7 @@ public:
 	std::pair<std::string, std::string> session;
 	int fd_upload;
 	bool complete_metadata;
+	int expected_content_length;
 	bool complete_header;
 	bool complete_upload;
 	std::vector<char> tail;

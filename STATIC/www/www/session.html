@@ -6,11 +6,10 @@
     <title>SESSION - WEBSERV</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        /* Specific styles for the session page to match your brutalist theme */
         .login-container {
-            border: 4px solid #000; /* Assuming black text based on your previous file */
+            border: 4px solid #000;
             padding: 2rem;
-            background: #f0f0f0;    /* Light gray background */
+            background: #f0f0f0;
             max-width: 600px;
             margin: 2rem auto;
             position: relative;
@@ -26,7 +25,7 @@
             font-size: 1.2rem;
             margin-bottom: 1rem;
             text-transform: uppercase;
-            box-sizing: border-box; /* Ensures padding doesn't break width */
+            box-sizing: border-box;
         }
 
         .login-input:focus {
@@ -53,7 +52,6 @@
             color: #000;
         }
 
-        /* Helper class to toggle views */
         .hidden {
             display: none;
         }
@@ -101,6 +99,24 @@
                     <input type="text" name="username" class="login-input" placeholder="ENTER USERNAME..." required>
                     <button type="submit" class="action-btn">CREATE SESSION</button>
                 </form>
+
+                <!-- NEW SECTION STARTS HERE -->
+
+                <hr style="margin: 2rem 0; border: 1px dashed #000;">
+
+                <h3>CHECK IF USER EXISTS</h3>
+                <p style="margin-bottom: 1rem;">VERIFY IF A USERNAME ALREADY EXISTS ON THE SERVER.</p>
+
+                <div>
+                    <input type="text" id="check-name" class="login-input" placeholder="ENTER NAME TO CHECK...">
+
+                    <button type="button" class="action-btn" onclick="checkUser()">CHECK USER</button>
+
+                    <div id="check-result" class="status-box hidden"></div>
+                </div>
+
+                <!-- NEW SECTION ENDS HERE -->
+
             </div>
         </section>
 
@@ -136,26 +152,51 @@
     </footer>
 
     <script>
-        // 1. Helper function to find a cookie by name
         function getCookie(name) {
             let value = "; " + document.cookie;
             let parts = value.split("; " + name + "=");
             if (parts.length === 2) return parts.pop().split(";").shift();
         }
 
-        // 2. Check for "session_id" (Make sure your C++ server names the cookie "session_id")
         let sessionCookie = getCookie("session_id");
 
-        // 3. Toggle Logic
         if (sessionCookie) {
-            // User HAS a cookie -> Show Profile, Hide Login
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('profile-section').classList.remove('hidden');
             document.getElementById('display-cookie').innerText = sessionCookie;
         } else {
-            // User has NO cookie -> Show Login, Hide Profile
             document.getElementById('login-section').classList.remove('hidden');
             document.getElementById('profile-section').classList.add('hidden');
+        }
+
+        // NEW FUNCTION TO CHECK USERNAME
+        function checkUser() {
+            let name = document.getElementById("check-name").value;
+            let resultBox = document.getElementById("check-result");
+
+            if (!name) {
+                resultBox.innerHTML = "PLEASE ENTER A NAME";
+                resultBox.classList.remove("hidden");
+                return;
+            }
+
+            fetch("/check_user?name=" + encodeURIComponent(name))
+                .then(response => response.text())
+                .then(data => {
+                    resultBox.classList.remove("hidden");
+
+                    if (data.trim() === "EXISTS") {
+                        resultBox.innerHTML = 
+                            "RESULT: <span style='color: green; font-weight: bold;'>USER EXISTS</span>";
+                    } else {
+                        resultBox.innerHTML = 
+                            "RESULT: <span style='color: red; font-weight: bold;'>USER NOT FOUND</span>";
+                    }
+                })
+                .catch(err => {
+                    resultBox.classList.remove("hidden");
+                    resultBox.innerHTML = "ERROR CONNECTING TO SERVER";
+                });
         }
     </script>
 </body>

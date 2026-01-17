@@ -207,6 +207,7 @@ std::string Request::check_request(std::string str, Config a)
         {
             // lenght = true;
             res = CheckContentLenght(tmp[1], a);
+            content_length = tmp[1];
             if (res != "NONE")
             {
                 // std::cout << "He pass the test\n";
@@ -253,3 +254,13 @@ std::string Request::get_path()
 }
 
 
+
+int Request::get_content_length()
+{
+    if (content_length == "NONE")
+        return -1;
+    int num;
+    std::istringstream ss(content_length);
+    ss >> num;
+    return num;
+}
