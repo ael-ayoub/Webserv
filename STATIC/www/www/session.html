@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SESSION - WEBSERV</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Specific styles for the session page to match your brutalist theme */
+        .login-container {
+            border: 4px solid #000; /* Assuming black text based on your previous file */
+            padding: 2rem;
+            background: #f0f0f0;    /* Light gray background */
+            max-width: 600px;
+            margin: 2rem auto;
+            position: relative;
+        }
+
+        .login-input {
+            width: 100%;
+            background: transparent;
+            border: 2px solid #000;
+            color: #000;
+            padding: 1rem;
+            font-family: inherit;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            box-sizing: border-box; /* Ensures padding doesn't break width */
+        }
+
+        .login-input:focus {
+            outline: none;
+            background: #000;
+            color: #fff;
+        }
+
+        .action-btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            border: 2px solid #000;
+        }
+
+        .action-btn:hover {
+            background: transparent;
+            color: #000;
+        }
+
+        /* Helper class to toggle views */
+        .hidden {
+            display: none;
+        }
+        
+        .status-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 2px dashed #000;
+            font-family: monospace;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="title-block">
+            <h1 class="brutalist-title">SESSION</h1>
+        </div>
+        <nav>
+            <a href="/index.html">HOME</a>
+            <a href="/about.html">ABOUT</a>
+            <a href="/upload.html">UPLOAD</a>
+            <a href="/session.html" style="text-decoration: underline;">SESSION</a> 
+            <a href="/form.html">FORM</a>
+            <a href="/search.html">SEARCH</a>
+            <a href="/delete.html">DELETE</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="hero-text" style="width: 100%; text-align: center;">
+                <h2>SESSION MANAGEMENT</h2>
+                <p class="description">STATE PERSISTENCE VIA COOKIES</p>
+            </div>
+        </section>
+
+        <section id="login-section" class="content-section">
+            <div class="login-container">
+                <span class="box-number">LOGIN</span>
+                <h3>IDENTIFY YOURSELF</h3>
+                <p style="margin-bottom: 1.5rem;">ENTER A USERNAME TO GENERATE A SESSION COOKIE.</p>
+                
+                <form action="/login" method="POST"> 
+                    <input type="text" name="username" class="login-input" placeholder="ENTER USERNAME..." required>
+                    <button type="submit" class="action-btn">CREATE SESSION</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="profile-section" class="content-section hidden">
+            <div class="login-container" style="background: #fff;">
+                <span class="box-number">USER</span>
+                <h3>WELCOME BACK</h3>
+                <div class="status-box">
+                    STATUS: <span style="color: green; font-weight: bold;">AUTHENTICATED</span><br>
+                    COOKIE ID: <span id="display-cookie">Loading...</span>
+                </div>
+                <br>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="action-btn" style="background: transparent; color: #000;">DESTROY SESSION (LOGOUT)</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="brutalist-box">
+                <span class="box-number">LOGIC</span>
+                <h3>HOW THIS WORKS</h3>
+                <p>1. <strong>POST /login</strong>: Server generates a Session ID and maps it to the Username in C++ memory.</p>
+                <p>2. <strong>Set-Cookie</strong>: Server sends the ID back in the HTTP Response Header.</p>
+                <p>3. <strong>Persistence</strong>: Browser stores the cookie and sends it automatically on future requests.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>© 2026 WEBSERV PROJECT | C++98 COMPLIANT</p>
+    </footer>
+
+    <script>
+        // 1. Helper function to find a cookie by name
+        function getCookie(name) {
+            let value = "; " + document.cookie;
+            let parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+
+        // 2. Check for "session_id" (Make sure your C++ server names the cookie "session_id")
+        let sessionCookie = getCookie("session_id");
+
+        // 3. Toggle Logic
+        if (sessionCookie) {
+            // User HAS a cookie -> Show Profile, Hide Login
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('profile-section').classList.remove('hidden');
+            document.getElementById('display-cookie').innerText = sessionCookie;
+        } else {
+            // User has NO cookie -> Show Login, Hide Profile
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('profile-section').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

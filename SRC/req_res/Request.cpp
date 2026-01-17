@@ -188,45 +188,48 @@ std::string Request::check_request(std::string str, Config a)
         return response;
     }
     // std::cout << "been here\n";
-    bool lenght = false;
-    bool type = false;
+    // bool lenght = false;
+    // bool type = false;
     std::string res;
     for (size_t b = 2; b < args.size() && get_method() == "POST"; b++)
     {
         std::vector<std::string> tmp = ServerConfig::ft_splitv2(args[b], ' ');
         // std::cout << tmp[0] << std::endl;
-        if ((tmp[0] == "Content-Type:" && tmp.size() != 3)
-            || (tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 1] != '\n')
+        // (tmp[0] == "Content-Type:" && tmp.size() != 3) // check thsi after
+        if ((tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 1] != '\n')
             || (tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 2] != '\r'))
         {
+            // std::cout << "dsadadasdadas\n\n";
             return ErrorResponse::Error_BadRequest(a);
         }
         
         if (tmp[0] == "Content-Length:")
         {
-            lenght = true;
+            // lenght = true;
             res = CheckContentLenght(tmp[1], a);
             if (res != "NONE")
-                return res;
-            // std::cout << "He pass the test\n";
-        }
-        if (tmp[0] == "Content-Type:")
-        {
-            type = true;
-            if (CheckContentType(tmp) == true)
             {
-                // std::cout << "The seconde cause\n";
-                return ErrorResponse::Error_BadRequest(a);
+                // std::cout << "He pass the test\n";
+                return res;
             }
-            // std::cout << "it is content type\n";
         }
+        // if (tmp[0] == "Content-Type:")
+        // {
+        //     type = true;
+        //     if (CheckContentType(tmp) == true)
+        //     {
+        //         std::cout << "The seconde cause\n";
+        //         return ErrorResponse::Error_BadRequest(a);
+        //     }
+        //     // std::cout << "it is content type\n";
+        // }
     }
 
-    if ((type == false || lenght == false) && get_method() == "POST")
-    {
-        std::cout << "here\n";
-        return ErrorResponse::Error_BadRequest(a);
-    }
+    // if ((type == false || lenght == false) && get_method() == "POST")
+    // {
+    //     std::cout << "here\n";
+    //     return ErrorResponse::Error_BadRequest(a);
+    // }
     return "NONE";
 }
 

@@ -95,7 +95,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     {
 
         state.header = _getHeader(fd_client);
-        // std::cout << "been here <<" << state.header << "\n";
+        // std::cout << "been here :" << state.header << "\n";
 
         if (!state.header.empty())
         {
@@ -114,6 +114,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         }
     }
 
+    // std::cout << "here\n";
     if (!state.complete_header)
     {
         // std::cout << "nothing found\n";
@@ -129,7 +130,6 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         {
             // std::cout << "in post!\n";
             state.metadata = _getMetadata(fd_client);
-
         }
         else
         {
