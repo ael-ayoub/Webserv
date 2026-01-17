@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SESSION - WEBSERV</title>
     <link rel="stylesheet" href="/style.css">
     <style>
@@ -12,192 +11,80 @@
             background: #f0f0f0;
             max-width: 600px;
             margin: 2rem auto;
-            position: relative;
         }
-
         .login-input {
             width: 100%;
-            background: transparent;
             border: 2px solid #000;
-            color: #000;
             padding: 1rem;
-            font-family: inherit;
-            font-size: 1.2rem;
             margin-bottom: 1rem;
             text-transform: uppercase;
-            box-sizing: border-box;
         }
-
-        .login-input:focus {
-            outline: none;
-            background: #000;
-            color: #fff;
-        }
-
         .action-btn {
+            width: 100%;
+            padding: 1rem;
             background: #000;
             color: #fff;
-            border: none;
-            padding: 1rem 2rem;
+            border: 2px solid #000;
             font-weight: bold;
             cursor: pointer;
-            width: 100%;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            border: 2px solid #000;
         }
-
         .action-btn:hover {
             background: transparent;
             color: #000;
         }
-
-        .hidden {
-            display: none;
-        }
-        
         .status-box {
             margin-top: 1rem;
             padding: 1rem;
             border: 2px dashed #000;
-            font-family: monospace;
             background: #fff;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="title-block">
-            <h1 class="brutalist-title">SESSION</h1>
+
+<header>
+    <h1>SESSION</h1>
+</header>
+
+<main>
+
+<section>
+    <div class="login-container">
+
+        <h3>CREATE SESSION</h3>
+
+        <!-- POST: save username -->
+        <form action="/login" method="POST">
+            <input type="text" name="username" class="login-input" placeholder="ENTER USERNAME" required>
+            <button class="action-btn" type="submit">CREATE SESSION</button>
+        </form>
+
+        <hr>
+
+        <h3>CHECK USER</h3>
+
+        <!-- GET: check username -->
+        <form action="/check_user" method="GET">
+            <input type="text" name="name" class="login-input" placeholder="ENTER NAME TO CHECK" required>
+            <button class="action-btn" type="submit">CHECK USER</button>
+        </form>
+
+        <!-- SERVER INJECTS RESULT HERE -->
+        <!--
+        <div class="status-box">
+            RESULT: USER EXISTS
         </div>
-        <nav>
-            <a href="/index.html">HOME</a>
-            <a href="/about.html">ABOUT</a>
-            <a href="/upload.html">UPLOAD</a>
-            <a href="/session.html" style="text-decoration: underline;">SESSION</a> 
-            <a href="/form.html">FORM</a>
-            <a href="/search.html">SEARCH</a>
-            <a href="/delete.html">DELETE</a>
-        </nav>
-    </header>
+        -->
 
-    <main>
-        <section class="hero-section">
-            <div class="hero-text" style="width: 100%; text-align: center;">
-                <h2>SESSION MANAGEMENT</h2>
-                <p class="description">STATE PERSISTENCE VIA COOKIES</p>
-            </div>
-        </section>
+    </div>
+</section>
 
-        <section id="login-section" class="content-section">
-            <div class="login-container">
-                <span class="box-number">LOGIN</span>
-                <h3>IDENTIFY YOURSELF</h3>
-                <p style="margin-bottom: 1.5rem;">ENTER A USERNAME TO GENERATE A SESSION COOKIE.</p>
-                
-                <form action="/login" method="POST"> 
-                    <input type="text" name="username" class="login-input" placeholder="ENTER USERNAME..." required>
-                    <button type="submit" class="action-btn">CREATE SESSION</button>
-                </form>
+</main>
 
-                <!-- NEW SECTION STARTS HERE -->
+<footer>
+    <p>© WEBSERV C++98</p>
+</footer>
 
-                <hr style="margin: 2rem 0; border: 1px dashed #000;">
-
-                <h3>CHECK IF USER EXISTS</h3>
-                <p style="margin-bottom: 1rem;">VERIFY IF A USERNAME ALREADY EXISTS ON THE SERVER.</p>
-
-                <div>
-                    <input type="text" id="check-name" class="login-input" placeholder="ENTER NAME TO CHECK...">
-
-                    <button type="button" class="action-btn" onclick="checkUser()">CHECK USER</button>
-
-                    <div id="check-result" class="status-box hidden"></div>
-                </div>
-
-                <!-- NEW SECTION ENDS HERE -->
-
-            </div>
-        </section>
-
-        <section id="profile-section" class="content-section hidden">
-            <div class="login-container" style="background: #fff;">
-                <span class="box-number">USER</span>
-                <h3>WELCOME BACK</h3>
-                <div class="status-box">
-                    STATUS: <span style="color: green; font-weight: bold;">AUTHENTICATED</span><br>
-                    COOKIE ID: <span id="display-cookie">Loading...</span>
-                </div>
-                <br>
-                <form action="/logout" method="POST">
-                    <button type="submit" class="action-btn" style="background: transparent; color: #000;">DESTROY SESSION (LOGOUT)</button>
-                </form>
-            </div>
-        </section>
-
-        <section class="content-section">
-            <div class="brutalist-box">
-                <span class="box-number">LOGIC</span>
-                <h3>HOW THIS WORKS</h3>
-                <p>1. <strong>POST /login</strong>: Server generates a Session ID and maps it to the Username in C++ memory.</p>
-                <p>2. <strong>Set-Cookie</strong>: Server sends the ID back in the HTTP Response Header.</p>
-                <p>3. <strong>Persistence</strong>: Browser stores the cookie and sends it automatically on future requests.</p>
-            </div>
-        </section>
-
-    </main>
-
-    <footer>
-        <p>© 2026 WEBSERV PROJECT | C++98 COMPLIANT</p>
-    </footer>
-
-    <script>
-        function getCookie(name) {
-            let value = "; " + document.cookie;
-            let parts = value.split("; " + name + "=");
-            if (parts.length === 2) return parts.pop().split(";").shift();
-        }
-
-        let sessionCookie = getCookie("session_id");
-
-        if (sessionCookie) {
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('profile-section').classList.remove('hidden');
-            document.getElementById('display-cookie').innerText = sessionCookie;
-        } else {
-            document.getElementById('login-section').classList.remove('hidden');
-            document.getElementById('profile-section').classList.add('hidden');
-        }
-
-        // NEW FUNCTION TO CHECK USERNAME
-        function checkUser() {
-            let name = document.getElementById("check-name").value;
-            let resultBox = document.getElementById("check-result");
-
-            if (!name) {
-                resultBox.innerHTML = "PLEASE ENTER A NAME";
-                resultBox.classList.remove("hidden");
-                return;
-            }
-
-            fetch("/check_user?name=" + encodeURIComponent(name))
-                .then(response => response.text())
-                .then(data => {
-                    resultBox.classList.remove("hidden");
-
-                    if (data.trim() === "EXISTS") {
-                        resultBox.innerHTML = 
-                            "RESULT: <span style='color: green; font-weight: bold;'>USER EXISTS</span>";
-                    } else {
-                        resultBox.innerHTML = 
-                            "RESULT: <span style='color: red; font-weight: bold;'>USER NOT FOUND</span>";
-                    }
-                })
-                .catch(err => {
-                    resultBox.classList.remove("hidden");
-                    resultBox.innerHTML = "ERROR CONNECTING TO SERVER";
-                });
-        }
-    </script>
 </body>
 </html>

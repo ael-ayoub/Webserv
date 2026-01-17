@@ -1,6 +1,11 @@
 #ifndef SOCKETCONFIG_HPP
 #define SOCKETCONFIG_HPP
 
+
+#include <iostream>
+#include <string>
+#include <sstream>
+
 #include "Webserv.hpp"
 
 class SockConf
