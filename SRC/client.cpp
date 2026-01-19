@@ -53,7 +53,6 @@ std::string _getHeader(int fd_client)
     std::string header;
     while (true)
     {
-        // std::cout
         std::string line = ft_getline(fd_client);
         if (line == "EWOULDBLOCK" || line == "ERROR")
             return "";
@@ -214,7 +213,7 @@ std::string extract_cookie_username(const std::string &request_string)
         }
     }
 
-    return ""; // Not found
+    return "";
 }
 
 /////////////////////////////////////////////////////////////
@@ -234,103 +233,60 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         if (!state.header.empty())
         {
             state.complete_header = true;
-            response = test_request.parse_request(state.header, a);
-            if (response != "NONE")
-            {
-                _sendReaponse(response, fd_client);
-                return;
-            }
-
             state.method = test_request.get_method();
             state.path = test_request.get_path();
 
-            // **FIX: Check Content-Length for POST requests**
-            if (state.method == "POST")
-            {
-                int content_length = test_request.get_content_length(); // You need to implement this
-
-                // If Content-Length is 0 or missing for POST, return error immediately
-                if (content_length <= 1)
-                {
-                    response = ErrorResponse::Error_BadRequest(a);
-                    _sendReaponse(response, fd_client);
-                    status.erase(fd_client);
-                    close(fd_client);
-                    return;
-                }
-
-                state.expected_content_length = content_length;
-            }
         }
-    }
-
-    if (!state.complete_header)
-    {
-        response = ErrorResponse::Error_BadRequest(a);
-        _sendReaponse(response, fd_client);
-        return;
-    }
-
-    if (state.method == "POST" && !state.complete_metadata && state.path != "/uploads")
-    {
-        // **FIX: Only try to read if we expect content**
-        if (state.expected_content_length <= 0)
+        else
         {
             response = ErrorResponse::Error_BadRequest(a);
             _sendReaponse(response, fd_client);
             return;
         }
+    }
+    std::cout << "Header received:\n" << state.header << std::endl;
+    std::cout << "Method: " << state.method << ", Path: " << state.path << std::endl;
 
+    if (state.method == "POST")
+    {
         if (state.path == "/uploads")
         {
+            int content_length = test_request.get_content_length();
+
+            if (content_length <= 1)
+            {
+                response = ErrorResponse::Error_BadRequest(a);
+                _sendReaponse(response, fd_client);
+                status.erase(fd_client);
+                close(fd_client);
+                return;
+            }
+            state.expected_content_length = content_length;
             state.metadata = _getMetadata(fd_client);
-        }
-        else
-        {
-            char bufferr[1000];
-            ssize_t b = read(fd_client, bufferr, 1000);
-            if (b < 0)
+            if (state.metadata.empty())
             {
                 response = ErrorResponse::Error_BadRequest(a);
                 _sendReaponse(response, fd_client);
                 return;
             }
-            bufferr[b] = '\0';
-            state.metadata = std::string(bufferr, b);
-            std::cout << "Header received:\n"
-                      << state.metadata << std::endl;
-        }
-
-        if (state.metadata.empty())
-        {
-            response = ErrorResponse::Error_BadRequest(a);
-            _sendReaponse(response, fd_client);
-            return;
-        }
-        state.complete_metadata = true;
-    }
-    std::string UserName;
-
-    if (state.method == "POST" && state.path == "/login")
-    {
-        std::vector<std::string> tmp = ServerConfig::ft_splitv2(state.metadata, '=');
-        if (tmp.size() != 2)
-            return;
-        UserName = tmp[1];
-    }
-    if (state.method == "POST")
-    {
-        if (state.path == "/uploads" && !state.complete_upload)
-        {
+            else
+                state.complete_metadata = true;
             if (_uploadFile(fd_client, state) == false)
                 return;
             state.complete_upload = true;
             response = generateSuccessMsg();
+            std::cout << "Upload complete, sending response.\n";
         }
-        else if (state.path == "/login")
+        else
         {
+            std::string UserName;
+            std::vector<std::string> tmp = ServerConfig::ft_splitv2(state.metadata, '=');
+            if (tmp.size() != 2)
+                return;
+            UserName = tmp[1];
             response = PostSession(UserName);
         }
+
     }
     else if (state.method == "GET" || state.method == "DELETE")
     {
@@ -374,3 +330,64 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         close(fd_client);
     }
 }
+
+/*
+what is the bihavior of this functoins ??
+
+
+handle client good ,
+
+the first thing is:
+1- read header
+2- parse header
+3- check if method is post
+4- read metadata
+5- check if path is /uploads
+6- upload file
+7- generate success message
+
+
+what is cases that i have ??
+- if header is not complete
+- if metadata is not complete
+- if upload is not complete
+- if method is get or delete
+
+i have get method
+- extract name from request line
+- extract cookie from header
+- compare name and cookie
+- generate response
+
+i have post method
+- if path is /uploads
+    - upload file
+    - generate success message
+- if path is /login
+    - extract username from metadata
+    - generate session response
+
+in case of post with uploads
+- read metadata
+- check if metadata is complete
+- upload file
+- generate success message
+
+else
+- wait for complete data
+- generate bad request
+
+
+i have delete method
+- not implemented yet
+
+
+when can i start first ??
+
+- when header is complete
+- when metadata is complete
+- when upload is complete
+
+
+
+*/
