@@ -218,118 +218,120 @@ std::string extract_cookie_username(const std::string &request_string)
 
 /////////////////////////////////////////////////////////////
 
-void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
-{
-    std::vector<ServerConfig> servers = a.get_allserver_config();
-    std::pair<std::string, int> ip_port;
-    Request test_request;
-    std::string response;
+// void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
+// {
+//     std::vector<ServerConfig> servers = a.get_allserver_config();
+//     std::pair<std::string, int> ip_port;
+//     Request test_request;
+//     std::string response;
 
-    ClientState &state = status[fd_client];
+//     ClientState &state = status[fd_client];
 
-    if (!state.complete_header)
-    {
-        state.header = _getHeader(fd_client);
-        if (!state.header.empty())
-        {
-            state.complete_header = true;
-            state.method = test_request.get_method();
-            state.path = test_request.get_path();
+//     if (!state.complete_header)
+//     {
+//         state.header = _getHeader(fd_client);
+//         if (!state.header.empty())
+//         {
+//             state.complete_header = true;
+//             test_request.parse_request((char *)state.header.c_str(), a);
+//             state.method = test_request.get_method();
+//             state.path = test_request.get_path();
+//         }
+//         else
+//         {
+//             // response = ErrorResponse::Error_BadRequest(a);
+//             // _sendReaponse(response, fd_client);
+//             return;
+//         }
+//     }
 
-        }
-        else
-        {
-            response = ErrorResponse::Error_BadRequest(a);
-            _sendReaponse(response, fd_client);
-            return;
-        }
-    }
-    std::cout << "Header received:\n" << state.header << std::endl;
-    std::cout << "Method: " << state.method << ", Path: " << state.path << std::endl;
+//     // std::cout << "Header received:\n" << state.header << std::endl;
+//     // std::cout << "Method: " << state.method << ", Path: " << state.path << std::endl;
 
-    if (state.method == "POST")
-    {
-        if (state.path == "/uploads")
-        {
-            int content_length = test_request.get_content_length();
+//     if (state.method == "POST")
+//     {
+//         state.expected_content_length = test_request.get_content_length();
+//         std::cout << "Expected Content-Length: " << state.expected_content_length << std::endl;
+//         if (state.expected_content_length <= 1)
+//         {
+//             response = ErrorResponse::Error_BadRequest(a);
+//             _sendReaponse(response, fd_client);
+//             status.erase(fd_client);
+//             close(fd_client);
+//             return;
+//         }
+//         if (!state.complete_metadata)
+//             state.metadata = _getMetadata(fd_client);
+//         if (state.metadata.empty())
+//             return;
+//         std::cout << "Metadata received:\n" << state.metadata << std::endl;
+//         state.complete_metadata = true;
 
-            if (content_length <= 1)
-            {
-                response = ErrorResponse::Error_BadRequest(a);
-                _sendReaponse(response, fd_client);
-                status.erase(fd_client);
-                close(fd_client);
-                return;
-            }
-            state.expected_content_length = content_length;
-            state.metadata = _getMetadata(fd_client);
-            if (state.metadata.empty())
-            {
-                response = ErrorResponse::Error_BadRequest(a);
-                _sendReaponse(response, fd_client);
-                return;
-            }
-            else
-                state.complete_metadata = true;
-            if (_uploadFile(fd_client, state) == false)
-                return;
-            state.complete_upload = true;
-            response = generateSuccessMsg();
-            std::cout << "Upload complete, sending response.\n";
-        }
-        else
-        {
-            std::string UserName;
-            std::vector<std::string> tmp = ServerConfig::ft_splitv2(state.metadata, '=');
-            if (tmp.size() != 2)
-                return;
-            UserName = tmp[1];
-            response = PostSession(UserName);
-        }
+//         if (state.path == "/uploads")
+//         {
+//             if (!state.complete_upload)
+//             {
+//                 if (_uploadFile(fd_client, state) == false)
+//                     return;
+//             }
+//             state.complete_upload = true;
+//             response = generateSuccessMsg();
+//             std::cout << "Upload complete, sending response.\n";
+//         }
+//         else if (state.path == "/login")
+//         {
+//             std::cout << "Processing /login\n";
+//             std::string UserName;
+//             std::vector<std::string> tmp = ServerConfig::ft_splitv2(state.metadata, '=');
+//             if (tmp.size() != 2)
+//                 return;
+//             UserName = tmp[1];
+//             std::cout << "Extracted username: " << UserName << std::endl;
+//             response = PostSession(UserName);
+//         }
+//     }
+//     else if (state.method == "GET" || state.method == "DELETE")
+//     {
 
-    }
-    else if (state.method == "GET" || state.method == "DELETE")
-    {
+//         std::string name = extract_name(state.header);
+//         std::string cookie = extract_cookie_username(state.header);
 
-        std::string name = extract_name(state.header);
-        std::string cookie = extract_cookie_username(state.header);
-
-        if (!name.empty() && !cookie.empty())
-        {
-            std::cout << "name: " << name << ", cookie: " << cookie << std::endl;
-            if (cookie == name)
-                response = CheckSession("FOOUND!");
-            else
-                response = CheckSession("NOT FOUND!");
-        }
-        else
-        {
-            Config a;
-            size_t i = 0;
-            response = test_request.parse_request(state.header, a);
-            while (i < servers.size() && response == "NONE")
-            {
-                ip_port = servers[i].get_ip();
-                if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
-                {
-                    response = m.GetMethod(a, test_request, servers[i]);
-                    break;
-                }
-                i++;
-            }
-        }
-    }
-    if (response.empty() || response == "NONE")
-    {
-        response = ErrorResponse::Error_BadRequest(a);
-    }
-    if (!response.empty())
-    {
-        _sendReaponse(response, fd_client);
-        status.erase(fd_client);
-        close(fd_client);
-    }
-}
+//         if (!name.empty() && !cookie.empty())
+//         {
+//             std::cout << "name: " << name << ", cookie: " << cookie << std::endl;
+//             if (cookie == name)
+//                 response = CheckSession("FOOUND!");
+//             else
+//                 response = CheckSession("NOT FOUND!");
+//         }
+//         else
+//         {
+//             Config a;
+//             size_t i = 0;
+//             response = test_request.parse_request(state.header, a);
+//             while (i < servers.size() && response == "NONE")
+//             {
+//                 ip_port = servers[i].get_ip();
+//                 if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
+//                 {
+//                     response = m.GetMethod(a, test_request, servers[i]);
+//                     break;
+//                 }
+//                 i++;
+//             }
+//         }
+//     }
+//     if (response.empty() || response == "NONE")
+//     {
+//         response = ErrorResponse::Error_BadRequest(a);
+//     }
+//     if (!response.empty())
+//     {
+//         _sendReaponse(response, fd_client);
+//         status.erase(fd_client);
+//         close(fd_client);
+//     }
+// }
 
 /*
 what is the bihavior of this functoins ??
@@ -391,3 +393,101 @@ when can i start first ??
 
 
 */
+
+void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
+{
+
+    std::vector<ServerConfig> servers = a.get_allserver_config();
+    std::pair<std::string, int> ip_port;
+    Request test_request;
+    std::string response;
+
+    ClientState &state = status[fd_client];
+
+    if (!state.complete_header)
+    {
+        state.header = _getHeader(fd_client);
+        if (!state.header.empty())
+        {
+            state.complete_header = true;
+            test_request.parse_request((char *)state.header.c_str(), a);
+            state.method = test_request.get_method();
+            state.path = test_request.get_path();
+        }
+    }
+
+    if (!state.complete_header)
+        return;
+
+    if (state.method == "POST" && !state.complete_metadata)
+    {
+        if (state.path == "/uploads")
+            state.metadata = _getMetadata(fd_client);
+        else
+        {
+            char buffer[1000];
+            size_t b = read(fd_client, buffer, 1000);
+            if (b < 0)
+                return;
+            buffer[b] = '\0';
+            state.metadata = std::string(buffer, b);
+        }
+        if (state.metadata.empty())
+            return;
+        state.complete_metadata = true;
+    }
+
+
+    if (state.method == "GET" || state.method == "DELETE")
+    {
+        std::string name = extract_name(state.header);
+        std::string cookie = extract_cookie_username(state.header);
+
+        if (!name.empty() && !cookie.empty())
+        {
+            std::cout << "name: " << name << ", cookie: " << cookie << std::endl;
+            if (cookie == name)
+                response = CheckSession("FOOUND!");
+            else
+                response = CheckSession("NOT FOUND!");
+        }
+        else 
+        {
+            size_t i = 0;
+            response = test_request.parse_request((char *)state.header.c_str(), a);
+            while (i < servers.size())
+            {
+                ip_port = servers[i].get_ip();
+                if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
+                break;
+                i++;
+            }
+            if (response == "NONE")
+            response = m.GetMethod(a, test_request, servers[i]);
+        }
+    }
+    else if (state.method == "POST")
+    {
+        if (state.path == "/uploads" && !state.complete_upload)
+        {
+            if (_uploadFile(fd_client, state) == false)
+                return;
+            state.complete_upload = true;
+            response = generateSuccessMsg();
+        }
+        else if (state.path == "/login")
+        {
+            std::string UserName;
+            std::vector<std::string> tmp = ServerConfig::ft_splitv2(state.metadata, '=');
+            if (tmp.size() != 2)
+                return;
+            UserName = tmp[1];
+            response = PostSession(UserName);
+        }
+    }
+
+    if (!response.empty())
+    {
+        _sendReaponse(response, fd_client);
+    }
+}

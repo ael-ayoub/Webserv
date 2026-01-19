@@ -144,6 +144,7 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
 std::string Response::Get_delete(std::string path, LocationConfig info_location,
                                     Request test_request, Config a)
 {
+
     (void)info_location, (void)test_request, (void)a;
     std::cout << path << std::endl;
     int status = remove(path.c_str());
