@@ -41,62 +41,6 @@
                 </form>
             </div>
         </section>
-
-        <section class="content-section" style="background: var(--bg-primary); padding: 4rem 2rem;">
-            <h2 class="section-title">MULTIPLE FILE UPLOAD</h2>
-            <div class="brutalist-box">
-                <span class="box-number">02</span>
-                <form action="/uploads" method="POST" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="files">SELECT MULTIPLE FILES:</label>
-                        <input type="file" id="files" name="files" multiple>
-                    </div>
-                    <button type="submit">UPLOAD FILES →</button>
-                </form>
-            </div>
-        </section>
-
-        <section class="content-section">
-            <h2 class="section-title">UPLOAD WITH METADATA</h2>
-            <div class="brutalist-box">
-                <span class="box-number">03</span>
-                <form action="/uploads" method="POST" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="title">FILE TITLE:</label>
-                        <input type="text" id="title" name="title" placeholder="Enter file title">
-                    </div>
-                    <div class="form-group">
-                        <label for="description">DESCRIPTION:</label>
-                        <textarea id="description" name="description" rows="4" placeholder="Enter description"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="upload_file">SELECT FILE:</label>
-                        <input type="file" id="upload_file" name="upload_file" required>
-                    </div>
-                    <button type="submit">UPLOAD WITH METADATA →</button>
-                </form>
-            </div>
-        </section>
-
-        <section class="image-gallery">
-            <div class="gallery-grid">
-                <div class="gallery-item">
-                    <div class="image-placeholder-small">
-                        <div class="img-label-small">UPLOAD PROCESS</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <div class="image-placeholder-small">
-                        <div class="img-label-small">FILE PARSING</div>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <div class="image-placeholder-small">
-                        <div class="img-label-small">STORAGE</div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
     <footer>
