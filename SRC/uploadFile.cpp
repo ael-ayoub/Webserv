@@ -36,7 +36,7 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 		return false;
 	}
 
-	std::string u_path = "STATIC/upload/" + filename;
+	std::string u_path = "www/upload/" + filename;
 
 	if (state.fd_upload < 0)
 	{
@@ -44,9 +44,8 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 		if (state.fd_upload < 0)
 		{
 
-			std::cerr << "Error: Failed to open/create file '" << u_path << "': "
-					  << strerror(errno) << std::endl;
-			return false;
+			std::string error_msg = "Error: Failed to open/create file '" + u_path + "': " + strerror(errno);
+			throw std::runtime_error(error_msg);
 		}
 	}
 	std::string end_boundary = "\r\n--"+ boundary + "--";
