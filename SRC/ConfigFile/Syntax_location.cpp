@@ -113,8 +113,18 @@ void syntax_location::check_regular(Vector_str str, int *i)
             if (tmp.size() != 2 || (tmp[1] != "off" && tmp[1] != "on"))
                 throw Config::ErrorSyntax();
         }
+        // else if (tmp[0] == "return")
+        // {
+        //     std::cout << "return here\n";
+        //     if (redirection == true)
+        //         throw Config::ErrorSyntax();
+        //     redirection = true;
+        //     if (tmp.size() != 3 || tmp[1] != "301")
+        //         throw Config::ErrorSyntax();
+        // }
         else
         {
+            // std::cout << "Errorfsdfs\n";
             throw Config::ErrorSyntax();
         }
         (*i)++;
@@ -126,6 +136,7 @@ void syntax_location::check_regular(Vector_str str, int *i)
     index = false;
     methods = false;
     root = false;
+    // redirection = false;
 }
 
 void syntax_location::check_cgi(Vector_str str, int *i)

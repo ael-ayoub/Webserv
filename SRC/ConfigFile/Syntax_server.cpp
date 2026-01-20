@@ -14,7 +14,6 @@ void syntax_server::check_server_syntax(Vector_str server)
     i++;
     while (i < server.size())
     {
-
         Vector_str tmp = ServerConfig::parse_line(server[i]);
         if (tmp[0] == "location")
         {

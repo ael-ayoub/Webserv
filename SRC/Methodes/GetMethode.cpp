@@ -50,6 +50,7 @@ std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Ser
             res += "HTTP/1.1 301 Moved Permanently\r\n";
             res += "Location: " + clean_string(test_request.get_path()) + '/' + "\r\n";
             res += "\r\n";
+            std::cout << "the red is :\n" << res << "\n";
             return res;
         }
     }
