@@ -2,7 +2,7 @@
 
 syntax_location::syntax_location()
     : methods(false), upload_enable(false), upload_store(false), cgi(false),
-    root(false), index(false), auto_index(false)
+    root(false), index(false), auto_index(false), redirection(false)
 {}
 
 void syntax_location::check_locations(Vector_str str, int *i)
@@ -113,15 +113,14 @@ void syntax_location::check_regular(Vector_str str, int *i)
             if (tmp.size() != 2 || (tmp[1] != "off" && tmp[1] != "on"))
                 throw Config::ErrorSyntax();
         }
-        // else if (tmp[0] == "return")
-        // {
-        //     std::cout << "return here\n";
-        //     if (redirection == true)
-        //         throw Config::ErrorSyntax();
-        //     redirection = true;
-        //     if (tmp.size() != 3 || tmp[1] != "301")
-        //         throw Config::ErrorSyntax();
-        // }
+        else if (tmp[0] == "return")
+        {
+            if (redirection == true)
+                throw Config::ErrorSyntax();
+            redirection = true;
+            if (tmp.size() != 3 || tmp[1] != "301")
+                throw Config::ErrorSyntax();
+        }
         else
         {
             // std::cout << "Errorfsdfs\n";
@@ -129,14 +128,13 @@ void syntax_location::check_regular(Vector_str str, int *i)
         }
         (*i)++;
     }
-    if (auto_index == false || root == false
-        || methods == false)
+    if (redirection == false && (auto_index == false || root == false || methods == false))
         throw Config::ErrorSyntax();
     auto_index = false;
     index = false;
     methods = false;
     root = false;
-    // redirection = false;
+    redirection = false;
 }
 
 void syntax_location::check_cgi(Vector_str str, int *i)

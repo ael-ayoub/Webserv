@@ -68,7 +68,7 @@ LocationConfig ServerConfig::get_Location_Config(std::string path)
     // {
         // std::cout << "returning this and the index is " << store_id << std::endl;
         // std::cout << "index is " << store_id << std::endl;
-        return Location_Config[store_id];
+    return Location_Config[store_id];
     // }
     // return tmp;
 }

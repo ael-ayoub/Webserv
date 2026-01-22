@@ -82,7 +82,7 @@ std::string Response::Display_file(std::string last_path, Config a)
     return response;
 }
 
-std::string Response::Get_response(std::string path, LocationConfig info_location,
+std::string Response::Get_response(std::string path, LocationConfig &info_location,
                                     Request test_request, Config a)
 {
     std::string last_path;
@@ -91,8 +91,20 @@ std::string Response::Get_response(std::string path, LocationConfig info_locatio
     //std::cout << pathh << std::endl;
     
     // std::cout << "path is : " << path << std::endl;
+
+    // std::cout << "reach here\n";
+    if (info_location.GetRedirectionBool() == true)
+    {
+        // std::cout << "path is : " << info_location.get_path() << "\n";
+        std::string res;
+        res += "HTTP/1.1 301 Moved Permanently\r\n";
+        res += "Location: " + info_location.GetLocationPath() + "\r\n";
+        res += "\r\n";
+        return res;
+    }
     if (stat(path.c_str(), &statbuf) == 0)
     {
+        // std::cout << "before anything here\n";
         if (S_ISDIR(statbuf.st_mode))
         {
             if (info_location.get_pathIndex() != "None")
@@ -146,18 +158,27 @@ std::string Response::Get_delete(std::string path, LocationConfig info_location,
 {
 
     (void)info_location, (void)test_request, (void)a;
-    std::cout << path << std::endl;
-    int status = remove(path.c_str());
-    if (status != 0)
+
+    struct stat path_stat;
+    stat(path.c_str(), &path_stat);
+    if (S_ISDIR(path_stat.st_mode))
+        return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
+
+    if (access(path.c_str(), W_OK) != 0)
     {
-        if (errno == ENOTEMPTY)
-            return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
-        else if (errno == EACCES)
+        if (errno == EACCES)
             return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
         else if (errno == ENOENT)
             return "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
-        else
-            return "HTTP/1.1 500 Internal Server Error\r\nConnection: close\r\n\r\n";
+    }
+
+    int status = remove(path.c_str());
+    if (status != 0)
+    {
+        if (errno == ENOTEMPTY || errno == EACCES)
+            return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
+        else if (errno == ENOENT)
+            return "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
     }
     return "HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n";
 }

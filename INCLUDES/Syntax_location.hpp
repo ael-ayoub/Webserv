@@ -12,7 +12,7 @@ class syntax_location
         bool root;
         bool index;
         bool auto_index;
-        // bool redirection;
+        bool redirection;
     public:
         syntax_location();
         void check_locations(Vector_str str, int *i);

@@ -92,11 +92,11 @@ void Socket::Monitor(Config &a)
     int MAX_EVENTS = 256;
     int fd_client;
     int current_fd;
-    socklen_t addr_size;
+    // socklen_t addr_size;
     int max_fds;
     epoll_event events[MAX_EVENTS];
     epoll_event event_client;
-    sockaddr_in addr_client;
+    // sockaddr_in addr_client;
     std::map<int, ClientState> status;
 
     while (true)
@@ -109,7 +109,7 @@ void Socket::Monitor(Config &a)
             if (index != -1)
             {
                 int &fd_socket = sockconf[index].fd_socket;
-                addr_size = sizeof(addr_client);
+                // addr_size = sizeof(addr_client);
                 fd_client = accept(fd_socket, NULL, NULL);
                 if (fd_client == -1)
                     throw std::runtime_error("cannot accept new client !!");
