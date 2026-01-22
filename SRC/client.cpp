@@ -396,7 +396,6 @@ when can i start first ??
 
 void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
 {
-
     std::vector<ServerConfig> servers = a.get_allserver_config();
     std::pair<std::string, int> ip_port;
     Request test_request;
@@ -426,7 +425,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         else
         {
             char buffer[1000];
-            size_t b = read(fd_client, buffer, 1000);
+            ssize_t b = read(fd_client, buffer, 1000);
             if (b < 0)
                 return;
             buffer[b] = '\0';

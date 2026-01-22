@@ -2,9 +2,21 @@
 
 LocationConfig::LocationConfig()
     : path_index("None"), autoindex(false), GET_methode(false),
-        post_methode(false), delete_methode(false), upload_enable(false)
+        post_methode(false), delete_methode(false), upload_enable(false),
+        redirection(false)
 {
     path_location = "None";
+    return_location.second = "";
+}
+
+std::string LocationConfig::GetLocationPath()
+{
+    return return_location.second;
+}
+
+bool LocationConfig::GetRedirectionBool()
+{
+    return redirection;
 }
 
 void LocationConfig::set_path_location()
@@ -54,6 +66,8 @@ bool LocationConfig::get_method(std::string request_method)
     if (post_methode == true && request_method == "POST")
         return true;
     if (delete_methode == true && request_method == "DELETE")
+        return true;
+    if (redirection == true)
         return true;
     return false;
 }
@@ -108,6 +122,7 @@ void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::st
         else if (a.first == "return")
         {
             int status_code;
+            redirection = true;
             std::pair<std::string, std::string> tmp = ServerConfig::ft_splito(a.second, ' ');
             std::istringstream(tmp.first) >> status_code;
             return_location = std::make_pair(status_code, tmp.second);

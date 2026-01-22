@@ -37,6 +37,7 @@ std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Ser
     //     return std::string(); /// check heree the favicon.co why he display everytime
     
     LocationConfig info_location = Servers_Config.get_conf(test_request.get_path());
+    
     // std::cout << "choose: " << info_location.get_path() << std::endl;
     // std::cout << "choose test_req: " << test_request.get_path() << std::endl;
     std::string path = gcwd() + info_location.get_root() + test_request.get_path();
@@ -50,13 +51,14 @@ std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Ser
             res += "HTTP/1.1 301 Moved Permanently\r\n";
             res += "Location: " + clean_string(test_request.get_path()) + '/' + "\r\n";
             res += "\r\n";
-            std::cout << "the red is :\n" << res << "\n";
             return res;
         }
     }
     info_location = Servers_Config.get_conf(clean_string(test_request.get_path()));
     // std::cout << "we have now configure : " << clean_string(test_request.get_path()) << std::endl;
     // std::cout << "location working with is : " << info_location.get_path() << std::endl;
+    // std::cout << "path is : " << info_location.GetLocationPath() << "\n";
+    // std::cout << "bool is : " << info_location.GetRedirectionBool() << "\n";
     
     if (test_request.get_method() == "GET" && info_location.get_method("GET") == true)
     {

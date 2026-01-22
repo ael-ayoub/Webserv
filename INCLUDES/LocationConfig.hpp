@@ -15,10 +15,13 @@ class LocationConfig
         bool delete_methode;
         bool upload_enable;
         std::pair<int, std::string> return_location;
+        bool redirection;
 
     public:
         LocationConfig();
 
+        std::string GetLocationPath();
+        bool GetRedirectionBool();
         void set_path_location();
         void set_methode();
         void set_autoindex();
