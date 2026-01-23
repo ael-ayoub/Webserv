@@ -18,9 +18,9 @@ std::string Config::get_mine(std::string path)
     if (dot == std::string::npos || dot == path.size() - 1)
         return "";
     std::string tmp = path.substr(dot + 1);
-    if (tmp == "html")
+    if (tmp == "html" || tmp == "HTML")
         return "text/html";
-    else if (tmp == "css")
+    else if (tmp == "css" || tmp == "CSS")
         return "text/css";
     else if (tmp == "js")
         return "application/javascript";
@@ -32,7 +32,11 @@ std::string Config::get_mine(std::string path)
         return "application/json";
     else if (tmp == "ico")
         return "image/x-icon";
-    return "text/plain";
+    else if (tmp == "png")
+        return "image/png";
+    else if (tmp == "jpg" || tmp == "jpeg")
+        return "image/jpeg";
+    return "application/octet-stream";
 }
 
 int Config::store_file(std::string path_of_Cfile)
