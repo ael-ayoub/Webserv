@@ -16,5 +16,10 @@
 #include <cstring>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <iostream>
+#include <ctime>
+#include <iomanip>
+
+void printCurrentTime();
 
 #endif

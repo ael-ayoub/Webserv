@@ -402,7 +402,11 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     std::string response;
 
     ClientState &state = status[fd_client];
-
+    printCurrentTime(); 
+    // printf ("-------"*120);
+    // std::cout << "-----------------------------------------------------------" << std::endl;
+    // std::cout << Request << std::endl;
+    // std::cout << "-----------------------------------------------------------" << std::endl;
     if (!state.complete_header)
     {
         state.header = _getHeader(fd_client);
@@ -417,7 +421,9 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     if (!state.complete_header)
         return;
-
+    std::cout << "----------------------------------------------------------------------" << std::endl;
+    std::cout << state.header << std::endl;
+    std::cout << "----------------------------------------------------------------------" << std::endl;
     if (state.method == "POST" && !state.complete_metadata)
     {
         if (state.path == "/uploads")

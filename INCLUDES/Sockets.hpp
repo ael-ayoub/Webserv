@@ -71,4 +71,6 @@ bool _removeName(std::string &responce);
 void _setCookies(ClientState& state);
 std::vector<std::pair<std::string, std::string> > _loadData();
 
+void printCurrentTime();
+
 #endif
