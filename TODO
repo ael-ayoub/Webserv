@@ -7,3 +7,65 @@ in POST: check the request if it is good *
 in POST: still just less of the content is uploaded *
 
 
+now what we have socket fd , 
+
+
+client start connection:
+two cases:
+    new connection:
+        - add to epoll and start monitoring
+
+    old connection:
+        receive request (non-blocking):
+            request line:
+                - method
+                - path / url
+                - http version
+
+            request headers:
+                - Host
+                - Connection
+                - Cookies
+                - Content-Type (+ boundary if multipart)
+                - Content-Length
+
+            metadata (multipart only):
+                - Content-Disposition
+                - Content-Type
+
+            body:
+                - form fields (x-www-form-urlencoded)
+                - file content (multipart)
+                - last boundary
+
+        build response:
+            - http version
+            - status code
+            - content type
+            - content length
+            - connection
+
+        send response:
+            - success or error
+            - print logs
+            - write to socket
+            - keep-alive or close
+
+
+
+logic each client !!!
+
+client can comme with what ?? 
+cleint fd_client 
+
+have many information should u handel it !!
+
+
+request response 
+
+close connection timeing 
+
+server one client , 
+!!!
+
+can i call maany 

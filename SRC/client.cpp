@@ -402,7 +402,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     std::string response;
 
     ClientState &state = status[fd_client];
-    printCurrentTime(); 
+    // printCurrentTime(); 
     // printf ("-------"*120);
     // std::cout << "-----------------------------------------------------------" << std::endl;
     // std::cout << Request << std::endl;
