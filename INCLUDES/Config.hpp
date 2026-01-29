@@ -36,6 +36,7 @@ class Config
         std::string get_mine(std::string path);
         LocationConfig get_info_location(std::string path);
 
+        void DefaultConfigFile();
         class ErrorSyntax : public std::exception
         {
             public:
