@@ -14,7 +14,7 @@
 #include <bits/stdc++.h>
 
 typedef std::vector<std::string> Vector_str;
-void run_server();
+void run_server(std::string av);
 #include "ServerConfig.hpp"
 #include "Config.hpp"
 #include "LocationConfig.hpp"

@@ -54,6 +54,7 @@ std::string _getHeader(int fd_client)
     while (true)
     {
         std::string line = ft_getline(fd_client);
+        // std::cout << line << " NOOOOOOO\n";
         if (line == "EWOULDBLOCK" || line == "ERROR")
             return "";
         if (line == "\r" || line.empty())
@@ -215,6 +216,120 @@ std::string extract_cookie_username(const std::string &request_string)
 
     return "";
 }
+
+void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
+{
+    std::vector<ServerConfig> servers = a.get_allserver_config();
+    std::pair<std::string, int> ip_port;
+    Request test_request;
+    std::string response;
+
+    
+    // std::cout << "KJFKASHFJKASHFKASFJK\n";
+    ClientState &state = status[fd_client];
+    // printCurrentTime(); 
+    // printf ("-------"*120);
+    // std::cout << "-----------------------------------------------------------" << std::endl;
+    // std::cout << Request << std::endl;
+    // std::cout << "-----------------------------------------------------------" << std::endl;
+    if (!state.complete_header)
+    {
+        state.header = _getHeader(fd_client);
+        // std::cout << "header is : " << state.header << "\n";
+        if (!state.header.empty())
+        {
+            state.complete_header = true;
+            test_request.parse_request((char *)state.header.c_str(), a);
+            state.method = test_request.get_method();
+            state.path = test_request.get_path();
+        }
+    }
+
+    if (!state.complete_header || state.header.empty())
+    {
+        response = ErrorResponse::Error_BadRequest(a);
+        _sendReaponse(response, fd_client);
+        return;
+    }
+    // std::cout << "----------------------------------------------------------------------" << std::endl;
+    // std::cout << state.header << std::endl;
+    // std::cout << "----------------------------------------------------------------------" << std::endl;
+    if (state.method == "POST" && !state.complete_metadata)
+    {
+        if (state.path == "/uploads")
+            state.metadata = _getMetadata(fd_client);
+        else
+        {
+            char buffer[1000];
+            ssize_t b = read(fd_client, buffer, 1000);
+            if (b < 0)
+                return;
+            buffer[b] = '\0';
+            state.metadata = std::string(buffer, b);
+        }
+        if (state.metadata.empty())
+            return;
+        state.complete_metadata = true;
+    }
+
+
+    if (state.method == "GET" || state.method == "DELETE")
+    {
+        std::string name = extract_name(state.header);
+        std::string cookie = extract_cookie_username(state.header);
+
+        if (!name.empty() && !cookie.empty())
+        {
+            std::cout << "name: " << name << ", cookie: " << cookie << std::endl;
+            if (cookie == name)
+                response = CheckSession("FOOUND!");
+            else
+                response = CheckSession("NOT FOUND!");
+        }
+        else 
+        {
+            size_t i = 0;
+            response = test_request.parse_request((char *)state.header.c_str(), a);
+            while (i < servers.size())
+            {
+                ip_port = servers[i].get_ip();
+                if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
+                    break;
+                i++;
+            }
+            // std::cout << "response is : " << response << std::endl;
+            if (response == "NONE")
+                response = m.GetMethod(a, test_request, servers[i]);
+        }
+    }
+    else if (state.method == "POST")
+    {
+        if (state.path == "/uploads" && !state.complete_upload)
+        {
+            if (_uploadFile(fd_client, state) == false)
+                return;
+            state.complete_upload = true;
+            response = generateSuccessMsg();
+        }
+        else if (state.path == "/login")
+        {
+            std::string UserName;
+            std::vector<std::string> tmp = ServerConfig::ft_splitv2(state.metadata, '=');
+            if (tmp.size() != 2)
+                return;
+            UserName = tmp[1];
+            response = PostSession(UserName);
+        }
+    }
+    // std::cout << "response is : " << response << std::endl;
+    if (response.empty())
+        response = ErrorResponse::Error_BadRequest(a);
+    if (!response.empty())
+    {
+        _sendReaponse(response, fd_client);
+    }
+}
+
 
 /////////////////////////////////////////////////////////////
 
@@ -393,106 +508,3 @@ when can i start first ??
 
 
 */
-
-void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
-{
-    std::vector<ServerConfig> servers = a.get_allserver_config();
-    std::pair<std::string, int> ip_port;
-    Request test_request;
-    std::string response;
-
-    ClientState &state = status[fd_client];
-    printCurrentTime(); 
-    // printf ("-------"*120);
-    // std::cout << "-----------------------------------------------------------" << std::endl;
-    // std::cout << Request << std::endl;
-    // std::cout << "-----------------------------------------------------------" << std::endl;
-    if (!state.complete_header)
-    {
-        state.header = _getHeader(fd_client);
-        if (!state.header.empty())
-        {
-            state.complete_header = true;
-            test_request.parse_request((char *)state.header.c_str(), a);
-            state.method = test_request.get_method();
-            state.path = test_request.get_path();
-        }
-    }
-
-    if (!state.complete_header)
-        return;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
-    std::cout << state.header << std::endl;
-    std::cout << "----------------------------------------------------------------------" << std::endl;
-    if (state.method == "POST" && !state.complete_metadata)
-    {
-        if (state.path == "/uploads")
-            state.metadata = _getMetadata(fd_client);
-        else
-        {
-            char buffer[1000];
-            ssize_t b = read(fd_client, buffer, 1000);
-            if (b < 0)
-                return;
-            buffer[b] = '\0';
-            state.metadata = std::string(buffer, b);
-        }
-        if (state.metadata.empty())
-            return;
-        state.complete_metadata = true;
-    }
-
-
-    if (state.method == "GET" || state.method == "DELETE")
-    {
-        std::string name = extract_name(state.header);
-        std::string cookie = extract_cookie_username(state.header);
-
-        if (!name.empty() && !cookie.empty())
-        {
-            std::cout << "name: " << name << ", cookie: " << cookie << std::endl;
-            if (cookie == name)
-                response = CheckSession("FOOUND!");
-            else
-                response = CheckSession("NOT FOUND!");
-        }
-        else 
-        {
-            size_t i = 0;
-            response = test_request.parse_request((char *)state.header.c_str(), a);
-            while (i < servers.size())
-            {
-                ip_port = servers[i].get_ip();
-                if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
-                break;
-                i++;
-            }
-            if (response == "NONE")
-            response = m.GetMethod(a, test_request, servers[i]);
-        }
-    }
-    else if (state.method == "POST")
-    {
-        if (state.path == "/uploads" && !state.complete_upload)
-        {
-            if (_uploadFile(fd_client, state) == false)
-                return;
-            state.complete_upload = true;
-            response = generateSuccessMsg();
-        }
-        else if (state.path == "/login")
-        {
-            std::string UserName;
-            std::vector<std::string> tmp = ServerConfig::ft_splitv2(state.metadata, '=');
-            if (tmp.size() != 2)
-                return;
-            UserName = tmp[1];
-            response = PostSession(UserName);
-        }
-    }
-
-    if (!response.empty())
-    {
-        _sendReaponse(response, fd_client);
-    }
-}
