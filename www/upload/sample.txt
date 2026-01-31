@@ -1,0 +1,22 @@
+Sample Text File in Upload Directory
+=====================================
+
+This text file demonstrates that:
+✓ Files can be uploaded to /uploads endpoint
+✓ Files are stored in www/upload/ directory
+✓ Files can be listed at /upload/ endpoint
+✓ Files can be downloaded/viewed by clicking them
+✓ CGI scripts (.py, .php) can be executed
+
+File Types Supported:
+- Text files (.txt)
+- HTML files (.html)
+- CSS files (.css)
+- JavaScript files (.js)
+- Python CGI (.py)
+- PHP CGI (.php)
+- Images (.jpg, .png, .gif)
+- Any other file type
+
+DELETE Method:
+Files can be deleted using the DELETE HTTP method.
