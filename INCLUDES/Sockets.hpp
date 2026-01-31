@@ -20,14 +20,26 @@ class ClientState
 {
 public:
 	std::string header;
+	std::string readstring;
 	std::string metadata;
 	std::string filename;
 	std::string boundary;
 	std::string method;
 	std::string path;
+
+	bool close;
+	bool cleanup;
+	bool send_data;
+	bool waiting;
+
+	std::string content_type;
+	std::string content_length;
+	std::string response;
+
+
 	std::pair<std::string, std::string> session;
 	int fd_upload;
-	bool complete_metadata;
+	bool complete_metadata;	
 	int expected_content_length;
 	bool complete_header;
 	bool complete_upload;
@@ -38,7 +50,11 @@ public:
 		complete_metadata = false;
 		complete_header = false;
 		complete_upload = false;
-		// data_send = false;
+		expected_content_length = 0;
+		close = false;
+		cleanup = false;
+		waiting = false;	
+		send_data = false;
 		fd_upload = -1;
 	}
 };
@@ -72,5 +88,6 @@ void _setCookies(ClientState& state);
 std::vector<std::pair<std::string, std::string> > _loadData();
 
 void printCurrentTime();
+void _sendReaponse(const std::string &response, int fd_client);
 
 #endif

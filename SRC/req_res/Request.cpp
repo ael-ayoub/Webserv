@@ -34,6 +34,7 @@ std::string Request::check_requestline(std::string request_line, Config a)
     Vector_str args = ServerConfig::ft_splitv2(request_line, ' ');
     if (args.size() != 3)
         return ErrorResponse::Error_BadRequest(a);
+    // std::cout << "first arg is " << args[0] << std::endl;
     if (args[0] != "GET" && args[0] != "POST" && args[0] != "DELETE")
     {
         return ErrorResponse::Error_BadRequest(a); // 405
@@ -65,6 +66,19 @@ bool check_ip(std::string info)
         j++;
     }
     return true;
+}
+
+bool CheckNumber(std::string str)
+{
+    int j = 0;
+    while (str[j])
+    {
+        // std::cout << "im in " << str[j] << "\n";
+        if (!std::isdigit(str[j]))
+            return true;
+        j++;
+    }
+    return false;
 }
 
 std::string Request::check_headerline(std::string header_line, Config &a)
@@ -105,8 +119,12 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     }
     // std::cout << "before\n";
     int start = ip_port[1].find('\r');
+    // if (ip_port[1][start + 1] != '\n')
+    //     return ErrorResponse::Error_BadRequest(a);
     // std::cout << "after\n";
     std::string ip = ip_port[1].substr(0, start);
+    if (CheckNumber(ip) == true)
+        return ErrorResponse::Error_BadRequest(a);
     int v_ip;
     std::istringstream ss(ip);
     ss >> v_ip;
@@ -165,14 +183,18 @@ std::string Request::check_request(std::string str, Config a)
         {
             tmp += '\n';
             args.push_back(tmp);
+            // std::cout << "str is : " << str << std::endl;
+            // if (str.size() - 1 == b)
+            // {
+            // }
             tmp.clear();
         }
     }
+
     // for (size_t b = 0; b < args.size(); b++)
     // {
     //     std::cout << b << ": " << args[b] << std::endl;
     // }
-
     std::string response;
     response = check_requestline(args[0], a);
     if (response != "NONE")
@@ -231,6 +253,9 @@ std::string Request::check_request(std::string str, Config a)
     //     std::cout << "here\n";
     //     return ErrorResponse::Error_BadRequest(a);
     // }
+    // std::cout << "i have this : " << str  << std::endl;
+    // if (str.substr(str.length() - 1) != "\r\n")
+    //     return ErrorResponse::Error_BadRequest(a);
     return "NONE";
 }
 

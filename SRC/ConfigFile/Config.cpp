@@ -39,21 +39,45 @@ std::string Config::get_mine(std::string path)
     return "application/octet-stream";
 }
 
+void Config::DefaultConfigFile()
+{
+    file_lines.push_back("server {");
+    file_lines.push_back("    listen localhost:1033;");
+    file_lines.push_back("    server_name ayoub;");
+    file_lines.push_back("    client_max_body_size 10000000;");
+    file_lines.push_back("    error_page 404 /errors/404_notfound.html;");
+    file_lines.push_back("    location / {");
+    file_lines.push_back("        root /www;");
+    file_lines.push_back("        methods GET;");
+    file_lines.push_back("        index index.html;");
+    file_lines.push_back("        autoindex on;");
+    file_lines.push_back("    }");
+    file_lines.push_back("}");
+}
+
 int Config::store_file(std::string path_of_Cfile)
 {
+    if (path_of_Cfile.empty())
+    {
+        DefaultConfigFile();
+        stores_config();
+        return 0;
+    }
+
     std::ifstream file(path_of_Cfile.c_str());
     if (!file.is_open())
     {
         std::cerr << "Error" << std::endl;
         return 1;
     }
+
     std::string line;
     while (std::getline(file, line))
     {
         file_lines.push_back(line);
     }
     file.close();
-    this->stores_config();
+    stores_config();
     return 0;
 }
 
