@@ -24,7 +24,8 @@ std::string gcwd()
     return "";
 }
 
-std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Servers_Config)
+// std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Servers_Config)
+std::string Methodes::GetMethod(Config& a, Request& test_request, ServerConfig& Servers_Config)
 {
     (void)a;
     std::string s;

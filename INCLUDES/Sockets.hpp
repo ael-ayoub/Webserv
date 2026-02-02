@@ -12,9 +12,9 @@
 #include <iostream>
 #include "Webserv.hpp"
 #include "socketConfig.hpp"
-
+// #include "Methodes.hpp"
 class Config;
-typedef std::vector<std::pair<std::string, std::string> > mysession;
+// typedef std::vector<std::pair<std::string, std::string> > mysession;
 
 class ClientState
 {
@@ -35,6 +35,8 @@ public:
 	std::string content_type;
 	std::string content_length;
 	std::string response;
+	std::string cookies;
+	unsigned long long timestamp;
 
 
 	std::pair<std::string, std::string> session;
@@ -89,5 +91,12 @@ std::vector<std::pair<std::string, std::string> > _loadData();
 
 void printCurrentTime();
 void _sendReaponse(const std::string &response, int fd_client);
+
+#define HEADER_SIZE 1024 * 16
+#define TIMEOUT 5000
+unsigned long long get_current_timestamp();
+bool check_timeout(unsigned long long timestamp, unsigned long long timeout);
+void cloce_connection( ClientState& state);
+
 
 #endif

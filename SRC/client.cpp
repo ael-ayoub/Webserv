@@ -174,235 +174,104 @@ std::string extract_name(const std::string &request_string)
     return ""; // Not found
 }
 
-std::string extract_cookie_username(const std::string &request_string)
+// std::string extract_cookie_username(const std::string &request_string)
+// {
+//     std::istringstream stream(request_string);
+//     std::string line;
+
+//     while (std::getline(stream, line))
+//     {
+//         if (!line.empty() && line[line.length() - 1] == '\r')
+//         {
+//             line.erase(line.length() - 1);
+//         }
+
+//         if (line.find("Cookie:") == 0)
+//         {
+//             size_t pos = line.find("username=");
+//             if (pos != std::string::npos)
+//             {
+//                 pos += 9;
+//                 size_t end = line.find_first_of(";\r\n", pos);
+//                 if (end != std::string::npos)
+//                 {
+//                     return line.substr(pos, end - pos);
+//                 }
+//                 else
+//                 {
+//                     return line.substr(pos);
+//                 }
+//             }
+//         }
+//     }
+
+//     return "";
+// }
+
+unsigned long long get_current_timestamp()
 {
-    std::istringstream stream(request_string);
-    std::string line;
-
-    while (std::getline(stream, line))
-    {
-        if (!line.empty() && line[line.length() - 1] == '\r')
-        {
-            line.erase(line.length() - 1);
-        }
-
-        if (line.find("Cookie:") == 0)
-        {
-            size_t pos = line.find("username=");
-            if (pos != std::string::npos)
-            {
-                pos += 9;
-                size_t end = line.find_first_of(";\r\n", pos);
-                if (end != std::string::npos)
-                {
-                    return line.substr(pos, end - pos);
-                }
-                else
-                {
-                    return line.substr(pos);
-                }
-            }
-        }
-    }
-
-    return "";
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (tv.tv_sec * 1000ULL) + (tv.tv_usec / 1000ULL);
 }
 
+bool check_timeout(unsigned long long timestamp, unsigned long long timeout)
+{
+    // sleep(1);
+    unsigned long long current_time = get_current_timestamp();
+    std::cout << "Checking timeout: current_time = " << current_time << ", timestamp = " << timestamp << ", timeout = " << timeout << std::endl;
+    std::cout << "Time elapsed: " << (current_time - timestamp) << " ms" << std::endl;
+    return (current_time - timestamp) <= timeout;
+}
 
-#define HEADER_SIZE 1024 * 16
+void cloce_connection(ClientState &state)
+{
+    state.close = true;
+    state.cleanup = true;
+    state.send_data = false;
+    state.waiting = false;
+}
 
 void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
 {
     std::vector<ServerConfig> servers = a.get_allserver_config();
     std::pair<std::string, int> ip_port;
-    Request test_request;
-    std::string response;
+    Request request;
 
     ClientState &state = status[fd_client];
-
+    state.timestamp = get_current_timestamp();
     if (!state.complete_header)
     {
-        std::cout << "Reading header from fd: " << fd_client << std::endl;
-        char buffer[4096];
-        ssize_t n = read(fd_client, buffer, sizeof(buffer));
-        if (n == 0)
-        {
-            std::cout << "Client disconnected fd: " << fd_client << std::endl;
-            state.close = true;
-            state.cleanup = true;
-            state.send_data = false;
-            state.waiting = false;
+        std::cout << "Starting to read header from fd: " << fd_client << std::endl;
+        if (!_parse_header(state, fd_client, request, a))
             return;
-        }
-        else if (n < 0)
-        {
-            if (errno == EAGAIN || errno == EWOULDBLOCK)
-            {
-                std::cout << "No data available to read from fd: " << fd_client << " (EAGAIN/EWOULDBLOCK)" << std::endl;
-                return;
-            }
-            std::cout << "Error reading from fd: " << fd_client << ", errno: " << errno << std::endl;
-            state.close = true;
-            state.cleanup = true;
-            state.send_data = false;
-            return;
-        }
-        else
-        {
-            std::cout << "Read " << n << " bytes from fd: " << fd_client << std::endl;
-            try{
-                std::cout << "Appending " << n << " bytes to readstring for fd: " << fd_client << std::endl;
-                state.readstring += std::string(buffer, n);
-            }
-            catch(const std::exception& e)
-            {
-                std::cerr << e.what() << '\n';
-                state.response = ErrorResponse::Error_BadRequest(a);
-                state.close = true;
-                state.cleanup = true;
-                state.send_data = true;
-                return;
-            }
-
-            std::cout << "Current readstring size for fd " << fd_client << " is: " << state.readstring.size() << " bytes." << std::endl;
-            size_t pos = state.readstring.find("\r\n\r\n");
-            if (pos != std::string::npos)
-            {
-                std::cout << "Complete header received from fd: " << fd_client << std::endl;
-                state.header = state.readstring.substr(0, pos + 4);
-                std::cout << "Header size for fd " << fd_client << " is: " << state.header.size() << " bytes." << std::endl;
-                if (state.header.size() > HEADER_SIZE)
-                {
-                    state.response = ErrorResponse::Error_BadRequest(a);
-                    state.close = true;
-                    state.cleanup = true;
-                    state.send_data = true;
-                    return;
-                }
-                state.complete_header = true;
-                std::cout << "remove header from readstring for fd: " << fd_client << std::endl;
-                state.readstring.erase(0, pos + 4);
-                std::cout << "after erasing, readstring size for fd " << fd_client << " is: " << state.readstring.size() << std::endl;
-                test_request.parse_request((char *)state.header.c_str(), a);
-                state.method = test_request.get_method();
-                state.path = test_request.get_path();
-            }
-            else
-            {
-                std::cout << "Incomplete header, waiting for more data from fd: " << fd_client << std::endl;
-                state.waiting = true;
-                return;
-            }
-        }
     }
 
-    if (!state.complete_header || state.header.empty())
-    {
-        state.response = ErrorResponse::Error_BadRequest(a);
-        state.close = true;
-        state.cleanup = true;
-        state.send_data = true;
-        return;
-    }
-
-    // if (state.path == "/uploads")
-    // {
-
-    //     size_t pos = state.readstring.find("\r\n\r\n");
-    //     if (pos == std::string::npos)
-    //     {
-    //         char buffer[4096];
-    //         ssize_t n = read(fd_client, buffer, sizeof(buffer));
-    //         if (n > 0)
-    //         {
-    //             state.readstring.append(buffer);
-    //             if (state.readstring.find("\r\n\r\n") == std::string::npos)
-    //             {
-    //                 // generate bad request and return
-    //                 response = ErrorResponse::Error_BadRequest(a);
-    //                 _sendReaponse(response, fd_client);
-    //                 // state.close = true;
-    //                 return;
-    //             }
-    //         }
-    //         else
-    //         {
-    //             if (errno == EAGAIN || errno == EWOULDBLOCK)
-    //                 return;
-    //             else
-    //             {
-    //                 response = ErrorResponse::Error_BadRequest(a);
-    //                 _sendReaponse(response, fd_client);
-
-    //                 return;
-    //             }
-    //             // state.close = true;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         state.metadata = state.readstring.substr(0, pos + 4);
-    //         state.readstring.erase(0, pos + 4);
-    //         state.complete_metadata = true;
-    //     }
-    // }
-
-    // else if (state.path == "/login")
-    // {
-    //     state.metadata = state.readstring;
-    //     state.readstring.erase(state.readstring.size());
-    // }
-
-
-    std::cout << "########### [..] handle method: " << state.method << " for fd: " << fd_client << std::endl;
     if (state.method == "GET" || state.method == "DELETE")
     {
-        // handle the request for GET ...
-        try
-        {
-            state.response = m.GetMethod(a, test_request, servers[0]);
-            state.send_data = true;
-            state.cleanup = true;
-
-            if (state.header.find("Connection: close") != std::string::npos)
-            {
-                std::cout << "the client send Connection: close header, so we close the connection after response.\n";
-                state.close = true;
-            }
-        }
-        catch(const std::exception& e)
-        {
-            std::cerr << e.what() << '\n';
-        }
-        
+        if (!_process_get_delete_request(fd_client, state, request, a, servers, m))
+            return;
     }
     else if (state.method == "POST")
     {
-        if (state.path == "/uploads" && !state.complete_upload)
+        if (!state.complete_metadata)
         {
-            std::cout << "-----------------------------------------------------\n";
-            std::cout << state.readstring << std::endl;
-            std::cout << "-----------------------------------------------------\n";
-            if (_uploadFile(fd_client, state) == false)
+            if (!_parse_metadata(state, fd_client, a))
                 return;
-            state.complete_upload = true;
-            response = generateSuccessMsg();
         }
-        else if (state.path == "/login")
+        if (state.complete_metadata)
         {
-            std::string UserName;
-            std::vector<std::string> tmp = ServerConfig::ft_splitv2(state.metadata, '=');
-            if (tmp.size() != 2)
+            std::cout << "############ [..] handle POST method for fd: " << fd_client << std::endl;
+            // Handle POST request here
+            if (!_process_post_request(fd_client, state, request, a, servers, m))
                 return;
-            UserName = tmp[1];
-            state.response = PostSession(UserName);
         }
-    }
-    else 
-    {
-        state.response = ErrorResponse::Error_BadRequest(a);
-        state.close = true;
-        state.cleanup = true;
-        state.send_data = true;
+        else
+        {
+            state.response = ErrorResponse::Error_BadRequest(a);
+            state.close = true;
+            state.cleanup = true;
+            state.send_data = true;
+        }
     }
 }

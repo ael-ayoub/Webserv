@@ -99,11 +99,35 @@ void Socket::Monitor(Config &a)
 
     while (true)
     {
-        max_fds = epoll_wait(fd_epoll, events, MAX_EVENTS, -1);
+        max_fds = epoll_wait(fd_epoll, events, MAX_EVENTS, 1000);
         if (max_fds == -1)
             throw(std::runtime_error("Error: epoll wait failed !!"));
         if (max_fds == 0)
+        {
+            std::cout << "Epoll wait timed out with no events." << std::endl;
+            for (std::map<int, ClientState>::iterator it = status.begin();
+                 it != status.end();)
+            {
+                if (!check_timeout(it->second.timestamp, TIMEOUT))
+                {
+                    int fd = it->first;
+
+                    epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd, NULL);
+                    close(fd);
+
+                    std::map<int, ClientState>::iterator to_erase = it;
+                    ++it;                   // ✅ advance FIRST
+                    status.erase(to_erase); // ✅ then erase
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
             continue;
+        }
+
         std::cout << "Epoll returned " << max_fds << " events." << std::endl;
         for (int i = 0; i < max_fds; i++)
         {
@@ -111,6 +135,7 @@ void Socket::Monitor(Config &a)
             int index = checkEvent(current_fd);
             if (index != -1)
             {
+                std::cout << "Accepting new client on socket fd: " << current_fd << std::endl;
                 int &fd_socket = sockconf[index].fd_socket;
                 // addr_size = sizeof(addr_client);
                 fd_client = accept(fd_socket, NULL, NULL);
@@ -119,6 +144,8 @@ void Socket::Monitor(Config &a)
                 set_nonblocking(fd_client);
                 event_client.data.fd = fd_client;
                 event_client.events = EPOLLIN;
+                status[fd_client] = ClientState();
+                status[fd_client].timestamp = get_current_timestamp();
                 if (epoll_ctl(fd_epoll, EPOLL_CTL_ADD, fd_client, &event_client) == -1)
                 {
                     close(fd_socket);
@@ -130,22 +157,32 @@ void Socket::Monitor(Config &a)
                 fd_client = events[i].data.fd;
                 std::cout << "Handling client on fd: " << fd_client << std::endl;
                 HandleClient(fd_client, a, status);
-                std::map<int,ClientState>::iterator it = status.find(fd_client);
+                std::map<int, ClientState>::iterator it = status.find(fd_client);
                 if (it != status.end())
                 {
                     if (it->second.waiting)
                     {
-                        std::cout << "Waiting for more data from fd: " << fd_client << std::endl;
-                        // Modify event to wait for more data
-                        event_client.data.fd = fd_client;
-                        event_client.events = EPOLLIN;
-                        if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
+                        std::cout << "checking timeout for fd: " << fd_client << std::endl;
+                        if (!check_timeout(it->second.timestamp, TIMEOUT))
                         {
-                            close(fd_client);
-                            perror("epoll_ctl MOD failed");
-                            throw(std::runtime_error("cannot modify client to epoll instance !"));
+                            std::cout << "Connection timed out for fd: " << fd_client << std::endl;
+                            cloce_connection(it->second);
+                            // continue;
                         }
-                        continue; // Wait for more data
+                        else
+                        {
+                            it->second.timestamp = get_current_timestamp();
+                            std::cout << "Waiting for more data from fd: " << fd_client << std::endl;
+                            event_client.data.fd = fd_client;
+                            event_client.events = EPOLLIN;
+                            if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
+                            {
+                                close(fd_client);
+                                perror("epoll_ctl MOD failed");
+                                throw(std::runtime_error("cannot modify client to epoll instance !"));
+                            }
+                            continue; // Wait for more data
+                        }
                     }
                     if (it->second.send_data)
                     {
@@ -164,7 +201,7 @@ void Socket::Monitor(Config &a)
                             _sendReaponse(it->second.response, fd_client);
                             status.erase(it);
                         }
-                        catch(const std::exception& e)
+                        catch (const std::exception &e)
                         {
                             std::cout << "Error sending response to fd: " << fd_client << std::endl;
                             std::cerr << e.what() << '\n';
@@ -180,8 +217,9 @@ void Socket::Monitor(Config &a)
                         epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
                         close(fd_client);
                     }
-                    else 
+                    else
                     {
+
                         std::cout << "Keeping connection alive for fd: " << fd_client << std::endl;
                         event_client.data.fd = fd_client;
                         event_client.events = EPOLLIN;
@@ -191,6 +229,13 @@ void Socket::Monitor(Config &a)
                             perror("epoll_ctl MOD failed");
                             throw(std::runtime_error("cannot modify client to epoll instance !"));
                         }
+                        it->second.header.clear();
+                        it->second.readstring.clear();
+                        it->second.metadata.clear();
+                        it->second.filename.clear();
+                        it->second.boundary.clear();
+                        it->second.method.clear();
+                        it->second.path.clear();
                         it->second = ClientState();
                     }
                 }
@@ -213,5 +258,3 @@ void Socket::run(Config &a)
         std::cout << e.what() << std::endl;
     }
 }
-
-
