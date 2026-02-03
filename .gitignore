@@ -2,3 +2,5 @@
 docs/
 YoupiBanane
 temp.txt
+*.o
+Webserv

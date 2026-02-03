@@ -15,7 +15,7 @@ std::string generat_random_id()
 	}
 	return random;
 }
-//@hello 
+
 static std::string ft_getline(int fd)
 {
 	if (fd < 0)
