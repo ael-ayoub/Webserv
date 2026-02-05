@@ -280,11 +280,11 @@ std::string Request::get_path()
 
 
 
-int Request::get_content_length()
+size_t Request::get_content_length()
 {
     if (content_length == "NONE")
-        return -1;
-    int num;
+        return 0;
+    size_t num;
     std::istringstream ss(content_length);
     ss >> num;
     return num;

@@ -15,192 +15,404 @@ std::string generat_random_id()
 	}
 	return random;
 }
-//@hello 
-static std::string ft_getline(int fd)
-{
-	if (fd < 0)
-		return "";
+//@hello
+// static std::string ft_getline(int fd)
+// {
+// 	if (fd < 0)
+// 		return "";
 
-	char ch;
-	int byte_read;
-	std::string line;
-	while ((byte_read = read(fd, &ch, 1)) > 0)
-	{
-		if (byte_read < 0)
-		{
-			std::cerr << "Error in read: " << strerror(errno) << std::endl;
-			return "";
-		}
-		if (ch == '\n')
-			break;
-		line += ch;
-	}
-	return line;
-}
+// 	char ch;
+// 	int byte_read;
+// 	std::string line;
+// 	while ((byte_read = read(fd, &ch, 1)) > 0)
+// 	{
+// 		if (byte_read < 0)
+// 		{
+// 			std::cerr << "Error in read: " << strerror(errno) << std::endl;
+// 			return "";
+// 		}
+// 		if (ch == '\n')
+// 			break;
+// 		line += ch;
+// 	}
+// 	return line;
+// }
 
-void Upload_files(std::string &response, const std::string &header, const int &fd_client)
+void Upload_files(ClientState &state, const int &fd_client, Config &a)
 {
 	if (fd_client < 0)
 	{
 		std::cerr << "Error: Invalid client file descriptor" << std::endl;
+		state.response = ErrorResponse::Error_InternalServerError();
+		state.close = true;
+		state.cleanup = true;
+		state.send_data = true;
+		state.waiting = false;
+		throw(std::runtime_error("Invalid client file descriptor"));
+	}
+	if (state.filename.empty())
+	{
+		std::cerr << "Error: No filename specified in upload" << std::endl;
+		state.response = ErrorResponse::Error_Forbidden(a);
+		state.close = true;
+		state.cleanup = true;
+		state.send_data = true;
+		state.waiting = false;
 		return;
 	}
-
-	std::string body = "<html><body><h1>File uploaded successfully!</h1></body></html>";
-	std::stringstream ss;
-	ss << body.size();
-	std::string success =
-		"HTTP/1.1 200 OK\r\n"
-		"Content-Type: text/html\r\n"
-		"Content-Length: " +
-		ss.str() + "\r\n"
-				   "Connection: close\r\n\r\n";
-	success += body;
-
-	body = "<html><body><h1>File upload failed!</h1></body></html>";
-	std::stringstream ss2;
-	ss2 << body.size();
-	std::string fail =
-		"HTTP/1.1 409 Conflict\r\n"
-		"Content-Type: text/html\r\n"
-		"Content-Length: " +
-		ss2.str() + "\r\n"
-					"Connection: close\r\n\r\n";
-	fail += body;
-
-	std::string boundary;
-	size_t pos = header.find("boundary=");
-	if (pos != std::string::npos)
+	if (state.boundary.empty())
 	{
-		pos += 9;
-		size_t end = header.find("\n", pos);
-		if (end != std::string::npos)
-			boundary = header.substr(pos, end - pos);
+		std::cerr << "Error: No boundary specified in upload" << std::endl;
+		state.response = ErrorResponse::Error_Forbidden(a);
+		state.close = true;
+		state.cleanup = true;
+		state.send_data = true;
+		state.waiting = false;
+		return;
+	}
+	if (state.content_length <= 0)
+	{
+		std::cerr << "Error: Content-Length is zero in upload" << std::endl;
+		state.response = ErrorResponse::Error_Forbidden(a);
+		state.close = true;
+		state.cleanup = true;
+		state.send_data = true;
+		state.waiting = false;
+		return;
+	}
+	state.filename_upload = "STATIC/upload/" + state.filename;
+	if (state.fd_upload == -1)
+	{
+		std::cout << "Creating upload file: " << state.filename_upload << std::endl;
+		state.fd_upload = open(state.filename_upload.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	}
 
-	std::string metadata;
-	std::string line;
+	if (state.fd_upload < 0)
+	{
+		std::cerr << "Error: Unable to create or open file '" << state.filename_upload << "': "
+				  << strerror(errno) << std::endl;
+		state.response = ErrorResponse::Error_InternalServerError();
+		state.close = true;
+		state.cleanup = true;
+		state.send_data = true;
+		state.waiting = false;
+		throw(std::runtime_error("Unable to create or open upload file"));
+	}
+
+	char buffer[4096];
+	std::vector<char> tail;
+	std::string to_write;
+
 	while (true)
 	{
-		line = ft_getline(fd_client);
-		if (line == "\r")
-			break;
-		metadata += line + "\n";
-	}
-
-	std::string filename;
-	size_t filename_pos = metadata.find("filename=\"");
-	if (filename_pos != std::string::npos)
-	{
-		filename_pos += 10;
-		size_t end_quote = metadata.find("\"", filename_pos);
-		if (end_quote != std::string::npos)
-			filename = metadata.substr(filename_pos, end_quote - filename_pos);
-	}
-
-	if (filename.empty())
-	{
-		std::cerr << "Error: No filename found in upload" << std::endl;
-		response = fail;
-		return;
-	}
-
-	std::string u_path = "STATIC/upload/" + filename;
-	int fd = open(u_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
-
-	if (fd < 0)
-	{
-		std::cerr << "Error: Failed to open/create file '" << u_path << "': "
-				  << strerror(errno) << std::endl;
-		response = fail;
-		return;
-	}
-	else
-	{
-		std::string end_boundary = "--" + boundary + "--";
-
-		char buffer[4096];
-		std::vector<char> tail;
-		bool found = false;
-
-		while (!found)
+		if(!check_timeout(state.timestamp, TIMEOUT))
 		{
-			ssize_t byte_read = read(fd_client, buffer, sizeof(buffer));
-			if (byte_read <= 0)
+			std::cout << "Connection timed out for fd: " << fd_client << std::endl;
+			state.response = ErrorResponse::Error_BadRequest(a);
+			cloce_connection(state);
+			return;
+		}
+		state.timestamp = get_current_timestamp();
+		if (state.readstring.find(state.end_boundary) != std::string::npos)
+		{
+			size_t end = state.readstring.find(state.end_boundary);
+			// size_t size_to_write =
+			std::string to_write = state.readstring.substr(0, end);
+			if (write(state.fd_upload, to_write.c_str(), to_write.size()) == -1)
 			{
-				if (byte_read < 0)
-					std::cout << "read function failed" << std::endl;
-				close(fd);
-				response = fail;
+				// genertae error
+				// remove file
+				std::cerr << "Error: Failed to write to file '" << state.filename_upload << "': "
+						  << strerror(errno) << std::endl;
+				close(state.fd_upload);
+				state.response = ErrorResponse::Error_InternalServerError();
+				state.close = true;
+				state.cleanup = true;
+				state.send_data = true;
+				state.waiting = false;
+				remove(state.filename_upload.c_str());
 				return;
 			}
-
-			std::vector<char> check;
-			check.reserve(tail.size() + byte_read);
-			check.insert(check.end(), tail.begin(), tail.end());
-			check.insert(check.end(), buffer, buffer + byte_read);
-
-			std::string check_str(check.begin(), check.end());
-			size_t pos = check_str.find(end_boundary);
-
-			if (pos != std::string::npos)
+			break;
+		}
+		else if (state.readstring.size() > 0)
+		{
+			if (state.readstring.find(state.end_boundary) != std::string::npos)
 			{
-				found = true;
-				if (write(fd, check.data(), pos) == -1)
-				{
-					std::cerr << "Error: Failed to write to file '" << u_path << "': "
-							  << strerror(errno) << std::endl;
-					close(fd);
-					response = fail;
-					return;
-				}
+				size_t end = state.readstring.find(state.end_boundary);
+				to_write = state.readstring.substr(0, end);
 			}
 			else
 			{
+				to_write = state.readstring;
+			}
+			if (write(state.fd_upload, to_write.c_str(), to_write.size()) == -1)
+			{
 
-				size_t write_size = check.size();
+				std::cerr << "Error: Failed to write to file '" << state.filename_upload << "': "
+						  << strerror(errno) << std::endl;
+				close(state.fd_upload);
+				state.response = ErrorResponse::Error_InternalServerError();
+				state.close = true;
+				state.cleanup = true;
+				state.send_data = true;
+				state.waiting = false;
+				remove(state.filename_upload.c_str());
+				return;
+			}
+			state.byte_uploaded += to_write.size();
+			state.readstring.clear();
+			to_write.clear();
+		}
+		if (state.byte_uploaded - state.metadata.size() >= state.content_length)
+		{
+			// finished upload
+			state.waiting = false;
+			buffer[0] = 0;
+			break;
+		}
+		else
+		{
+			size_t n = read(fd_client, buffer, sizeof(buffer));
 
-				if (write_size >= end_boundary.size())
+			if (n == 0)
+			{
+				// the cleint close the connection
+				std::cerr << "Error: Client closed connection during file upload" << std::endl;
+				close(state.fd_upload);
+				state.response = ErrorResponse::Error_BadRequest(a);
+				state.close = true;
+				state.cleanup = true;
+				state.send_data = true;
+				state.waiting = false;
+				remove(state.filename_upload.c_str());
+				return;
+			}
+			else if (n < 0)
+			{
+				if (errno == EAGAIN || errno == EWOULDBLOCK)
 				{
-					write_size = check.size() - (end_boundary.size() - 1);
-					tail.assign(check.begin() + write_size, check.end());
-				}
-				else
-				{
-					tail = check;
-					continue;
-				}
-				if (write(fd, check.data(), write_size) == -1)
-				{
-					std::cerr << "Error: Failed to write to file '" << u_path << "': "
-							  << strerror(errno) << std::endl;
-					close(fd);
-					response = fail;
+					// should wait for more data
+					state.waiting = true;
 					return;
 				}
+				// error happen on the server close the connection
+				std::cerr << "Error: Failed to read from client during file upload: "
+						  << strerror(errno) << std::endl;
+				close(state.fd_upload);
+				state.response = ErrorResponse::Error_InternalServerError();
+				state.close = true;
+				state.cleanup = true;
+				state.send_data = true;
+				state.waiting = false;
+				remove(state.filename_upload.c_str());
+				return;
+			}
+			else
+			{
+				state.readstring.append(buffer, n);
+				state.waiting = false;
 			}
 		}
-		close(fd);
+		state.timestamp = get_current_timestamp();
 	}
-	response = success;
+	close(state.fd_upload);
+	state.fd_upload = -1;
+	std::cout << "File upload completed: " << state.filename_upload << std::endl;
+	state.response =
+		"HTTP/1.1 200 OK\r\n"
+		"Content-Type: text/plain\r\n"
+		"Content-Length: 20\r\n";
+	if (state.header.find("Connection: close") != std::string::npos)
+		state.response += "Connection: close\r\n";
+	else
+		state.response += "Connection: keep-alive\r\n";
+	state.response += "\r\nFile uploaded successfully.";
 }
 
-std::string Methodes::PostMethod(Config& a, const int &fd_client,ClientState &state)
+std::string get_username_from_metadata(const std::string &metadata)
 {
-	if (state.path != "/uploads")
+	std::string username_key = "username=";
+	size_t pos = metadata.find(username_key);
+	if (pos != std::string::npos)
 	{
-		return ErrorResponse::Error_NotFound(a);
+		pos += username_key.length();
+		size_t end_pos = metadata.find("\r\n", pos);
+		if (end_pos != std::string::npos)
+		{
+			return metadata.substr(pos, end_pos - pos);
+		}
+		else
+		{
+			return metadata.substr(pos);
+		}
 	}
-	else if (state.path == "login")
+	return "";
+}
+
+void _handle_post_check_user(ClientState &state, Config&a)
+{
+	std::string username = get_username_from_metadata(state.metadata);
+	if (username.empty())
 	{
-		std::cout << "login post method called\n";
-		return ErrorResponse::Error_NotFound(a);
+		std::cout << "No username found in metadata" << std::endl;
+		state.response = ErrorResponse::Error_BadRequest(a);
+		state.close = true;
+		state.cleanup = true;
+		state.send_data = true;
+		return;
 	}
-	else 
+
+	if (username == state.cookies)
 	{
-		std::cout << "invalid path for post method \n";
-		return ErrorResponse::Error_NotFound(a);
+		std::string body = "User '" + username + "' is logged in.";
+		std::stringstream ss;
+		ss << body.size();
+		std::string response =
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: " +
+			ss.str() + "\r\n";
+		if (state.header.find("Connection: close") != std::string::npos)
+			response += "Connection: close\r\n";
+		else
+			response += "Connection: keep-alive\r\n";
+		response += "\r\n" + body;
+		state.response = response;
 	}
-	throw std::runtime_error("Not implemented yet");
-	// return response;
+	else
+	{
+		std::string body = "User '" + username + "' is not logged in.";
+		std::stringstream ss;
+		ss << body.size();
+		std::string response =
+			"HTTP/1.1 401 Unauthorized\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: " +
+			ss.str() + "\r\n";
+		if (state.header.find("Connection: close") != std::string::npos)
+			response += "Connection: close\r\n";
+		else
+			response += "Connection: keep-alive\r\n";
+		response += "\r\n" + body;
+		state.response = response;
+	}
+	state.close = true;
+	state.cleanup = true;
+	state.send_data = true;
+}
+
+
+void _handle_post_login(ClientState &state, Config &a)
+{
+	// Extract username from metadata
+	std::string username = get_username_from_metadata(state.metadata);
+	if (username.empty())
+	{
+		std::cout << "No username found in metadata" << std::endl;
+		state.response = ErrorResponse::Error_BadRequest(a);
+		state.close = true;
+		state.cleanup = true;
+		state.send_data = true;
+		return;
+	}
+
+	std::string body = "username \'" + username + "\' logged in successfully.";
+	std::stringstream ss;
+	ss << body.size();
+	std::string response =
+		"HTTP/1.1 200 OK\r\n"
+		"Content-Type: text/plain\r\n"
+		"Content-Length: " +
+		ss.str() + "\r\n"
+				   "Set-Cookie: username=" +
+		username + "; HttpOnly\r\n";
+	if (state.header.find("Connection: close") != std::string::npos)
+		response += "Connection: close\r\n";
+	else
+		response += "Connection: keep-alive\r\n";
+	response += "\r\n" + body;
+
+	state.response = response;
+	state.close = true;
+	state.cleanup = true;
+	state.send_data = true;
+
+	std::cout << "User '" << username << "' logged in with session ID: " << state.cookies << std::endl;
+}
+
+std::string _get_filename(const std::string &metadata)
+{
+	std::string filename_key = "filename=\"";
+	size_t pos = metadata.find(filename_key);
+	if (pos != std::string::npos)
+	{
+		pos += filename_key.length();
+		size_t end_quote = metadata.find("\"", pos);
+		if (end_quote != std::string::npos)
+		{
+			return metadata.substr(pos, end_quote - pos);
+		}
+	}
+	return "default_upload_" + generat_random_id();
+}
+
+std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &state)
+{
+	if (state.path == "/uploads")
+	{
+		std::cout << "------------ Handling /uploads POST request -----------" << std::endl;
+		if (state.content_type != "multipart/form-data" || state.boundary.empty() || state.metadata.empty())
+		{
+			state.response = ErrorResponse::Error_BadRequest(a);
+			state.close = true;
+			state.cleanup = true;
+			state.send_data = true;
+			return state.response;
+		}
+		else if (!state.complete_upload)
+		{
+			state.filename = _get_filename(state.metadata);
+			try
+			{
+				state.timestamp = get_current_timestamp();	
+				Upload_files(state, fd_client, a);
+			}
+			catch (const std::exception &e)
+			{
+				std::cerr << e.what() << '\n';
+				state.response = ErrorResponse::Error_PayloadTooLarge(a);
+				state.close = true;
+				state.cleanup = true;
+				state.send_data = true;
+				return state.response;
+			}
+
+			state.complete_upload = true;
+		}
+		state.send_data = true;
+		state.cleanup = true;
+		if (state.header.find("Connection: close") != std::string::npos)
+			state.close = true;
+		return state.response;
+	}
+	else if (state.path == "/login")
+	{
+		_handle_post_login(state, a);
+		return state.response;
+	}
+	else if (state.path == "/check_user")
+	{
+		_handle_post_check_user(state,a);
+		 return state.response;
+	}
+	else
+	{
+		std::cout << "this the correct path: " << state.path << std::endl;
+		state.response = ErrorResponse::Error_NotFound(a);
+		state.close = true;
+		state.cleanup = true;
+		state.send_data = true;
+		return state.response;
+	}
 }

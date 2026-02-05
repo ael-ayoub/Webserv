@@ -1,27 +1,43 @@
 #include "../INCLUDES/Webserv.hpp"
 
-std::string _getCookies(const std::string &header)
-{
-    if (header.empty())
-        return "";
+// std::string _getCookies(const std::string &header)
+// {
+//     std::string username_key = "username=";
+// 	size_t pos = header.find(username_key);
+// 	if (pos != std::string::npos)
+// 	{
+// 		pos += username_key.length();
+// 		size_t end_pos = header.find("\r\n", pos);
+// 		if (end_pos != std::string::npos)
+// 		{
+// 			return header.substr(pos, end_pos - pos);
+// 		}
+// 		else
+// 		{
+// 			return header.substr(pos);
+// 		}
+// 	}
+// 	return "";
+// }
 
-    size_t pos = header.find("Cookie:");
+size_t content_length(const std::string &header)
+{
+    size_t pos = header.find("Content-Length:");
     if (pos != std::string::npos)
     {
-        size_t end = header.find("\n", pos);
+        size_t end = header.find("\r\n", pos);
         if (end != std::string::npos)
         {
-            return header.substr(pos + 7, end - pos - 7);
-        }
-        else
-        {
-            return header.substr(pos + 7);
+            std::string len_str = header.substr(pos + 15, end - pos - 15);
+            // return static_cast<size_t>(std::stoul(len_str));
+            std::stringstream ss(len_str);
+            size_t length;
+            ss >> length;
+            return length;
         }
     }
-
-    return "";
+    return 0;
 }
-
 
 bool _parse_header(ClientState &state, int fd_client, Request &request, Config &a)
 {
@@ -88,21 +104,29 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
             state.complete_header = true;
             state.readstring.erase(0, pos + 4);
             request.parse_request(state.header, a);
+            int len =  request.get_content_length();
+            std::cout << "content_length: " << len << std::endl;
             state.method = request.get_method();
             state.path = request.get_path();
-            state.waiting = false;
-            state.content_length = request.get_content_length();
+            state.content_length = content_length(state.header);
+            // std::cout << "Content-Length: " << state.content_length << std::endl;
             state.timestamp = get_current_timestamp();
-            if (state.header.find("Content-type: multipart/form-data") != std::string::npos)
+            if (state.header.find("Content-Type: multipart/form-data") != std::string::npos)
             {
                 size_t boundary_pos = state.header.find("boundary=");
                 if (boundary_pos != std::string::npos)
                 {
-                    state.boundary = "--" + state.header.substr(boundary_pos + 9);
+                    state.boundary = "--" + state.header.substr(boundary_pos + 9, state.header.find("\r\n", boundary_pos) - (boundary_pos + 9));
+                    state.end_boundary = state.boundary + "--";
                 }
                 state.content_type = "multipart/form-data";
             }
-            state.cookies = _getCookies(state.header);
+            else 
+            {
+                state.content_type = "other";
+            }
+
+            state.cookies = get_username_from_metadata(state.header);
             return true;
         }
         else
@@ -171,6 +195,17 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
     }
     state.timestamp = get_current_timestamp();
     char buffer[4096];
+    // check if metatdata in readstring
+    size_t pos = state.readstring.find("\r\n\r\n");
+    if (pos != std::string::npos)
+    {
+        std::cout << "Complete metadata received from fd: " << fd_client << std::endl;
+        state.metadata = state.readstring.substr(0, pos + 4);
+        state.readstring.erase(0, pos + 4);
+        state.complete_metadata = true;
+        state.waiting = false;
+        return true;
+    }
     ssize_t n = read(fd_client, buffer, sizeof(buffer));
     if (n == 0)
     {
@@ -186,6 +221,10 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
         if (errno == EAGAIN || errno == EWOULDBLOCK)
         {
             std::cout << "No data available to read from fd: " << fd_client << " (EAGAIN/EWOULDBLOCK)" << std::endl;
+            state.waiting = true;
+            state.send_data = false;
+            state.cleanup = false;
+            state.close = false;
             return false;
         }
         std::cout << "Error reading from fd: " << fd_client << ", errno: " << errno << std::endl;
@@ -236,13 +275,8 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
 }
 
 
-bool _process_post_request(int fd_client, ClientState &state, Request &request, Config &a, std::vector<ServerConfig> &servers, Methodes &m)
+bool _process_post_request(int fd_client, ClientState &state, Config &a, Methodes &m)
 {
-    (void)request;
-    (void)servers;
-    try
-    {
-        std::cout << "############ [..] handle POST method for fd: " << fd_client << std::endl;
         if (!check_timeout(state.timestamp, TIMEOUT))
         {
             std::cout << "Connection timed out for fd: " << fd_client << std::endl;
@@ -251,7 +285,7 @@ bool _process_post_request(int fd_client, ClientState &state, Request &request, 
         }
         state.timestamp = get_current_timestamp();
 
-        state.response = m.PostMethod(a,fd_client, state);
+        m.PostMethod(a,fd_client, state);
         state.send_data = true;
         state.cleanup = true;
         if (state.header.find("Connection: close") != std::string::npos)
@@ -259,14 +293,6 @@ bool _process_post_request(int fd_client, ClientState &state, Request &request, 
             std::cout << "the client send Connection: close header, so we close the connection after response.\n";
             state.close = true;
         }
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << e.what() << '\n';
-        state.response = ErrorResponse::Error_BadRequest(a);
-        state.close = true;
-        state.cleanup = true;
-        state.send_data = true;
-    }
+    // }
     return true;
 }

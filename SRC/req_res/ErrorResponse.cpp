@@ -165,7 +165,7 @@ std::string ErrorResponse::Error_MethodeNotAllowed(Config a)
     return header;
 }
 
-std::string ErrorResponse::Responde(Config a, std::string path, std::string &head, std::string status)
+std::string ErrorResponse::Responde(Config &a, std::string path, std::string &head, std::string status)
 {
     std::string body, header, s, line;
     std::ifstream file((path).c_str() , std::ios::in);
@@ -193,7 +193,7 @@ std::string ErrorResponse::Responde(Config a, std::string path, std::string &hea
     return response;
 }
 
-std::string ErrorResponse::Error_NotFound(Config a)
+std::string ErrorResponse::Error_NotFound(Config &a)
 {
     std::string path, line, body, s;
 
@@ -244,7 +244,7 @@ std::string ErrorResponse::Error_PayloadTooLarge(Config &a)
     return header;
 }
 
-std::string ErrorResponse::Error_Forbidden(Config a)
+std::string ErrorResponse::Error_Forbidden(Config &a)
 {
     std::string path, line, body, s;
 
@@ -259,4 +259,9 @@ std::string ErrorResponse::Error_Forbidden(Config a)
         
     header += Responde(a, path, header, "403");
     return header;
+}
+
+std::string ErrorResponse::Error_InternalServerError()
+{
+    return default_response_error("500");
 }

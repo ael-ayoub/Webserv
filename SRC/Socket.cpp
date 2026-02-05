@@ -87,6 +87,42 @@ int Socket::checkEvent(int fd)
     return (-1);
 }
 
+std::string to_string(int num)
+{
+    std::stringstream ss;
+    ss << num;
+    return ss.str();
+}
+
+std::string format_timestamp(unsigned long long timestamp)
+{
+    time_t raw_time = timestamp / 1000; // Convert milliseconds to seconds
+    struct tm *time_info = localtime(&raw_time);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "[%Y-%m-%d %H:%M:%S]", time_info);
+    return std::string(buffer);
+}
+
+std::string generate_log_entry(ClientState &state)
+{
+    std::string log_entry;
+    // log_entry += "Timestamp: " + to_string(state.timestamp) + " | ";
+    log_entry += format_timestamp(state.timestamp) + " | ";
+    log_entry += "Method: " + state.method + " | ";
+    log_entry += "Path: " + state.path + " | ";
+    log_entry += "Response: " + (state.response.empty() ? "No response generated" : state.response.substr(0, 50) + "...") + " | ";
+    return log_entry;
+}
+
+void _print_logs(ClientState &state)
+{
+    std::string log_entry = generate_log_entry(state);
+    std::cout << log_entry << std::endl;
+}
+
+
+
+
 void Socket::Monitor(Config &a)
 {
     int MAX_EVENTS = 256;
@@ -104,7 +140,7 @@ void Socket::Monitor(Config &a)
             throw(std::runtime_error("Error: epoll wait failed !!"));
         if (max_fds == 0)
         {
-            std::cout << "Epoll wait timed out with no events." << std::endl;
+            // std::cout << "Epoll wait timed out with no events." << std::endl;
             for (std::map<int, ClientState>::iterator it = status.begin();
                  it != status.end();)
             {
@@ -197,9 +233,9 @@ void Socket::Monitor(Config &a)
                         }
                         try
                         {
-                            // std::cout << "Response to send:\n" << it->second.response << std::endl;
                             _sendReaponse(it->second.response, fd_client);
-                            status.erase(it);
+                            // status.erase(it);
+                            _print_logs(it->second);
                         }
                         catch (const std::exception &e)
                         {

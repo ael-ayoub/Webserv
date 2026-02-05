@@ -12,9 +12,11 @@
 #include <iostream>
 #include "Webserv.hpp"
 #include "socketConfig.hpp"
-// #include "Methodes.hpp"
+
 class Config;
-// typedef std::vector<std::pair<std::string, std::string> > mysession;
+
+#define HEADER_SIZE 1024 * 16
+#define TIMEOUT 5000
 
 class ClientState
 {
@@ -24,8 +26,11 @@ public:
 	std::string metadata;
 	std::string filename;
 	std::string boundary;
+	std::string end_boundary;
 	std::string method;
 	std::string path;
+	std::string filename_upload;
+	size_t byte_uploaded;
 
 	bool close;
 	bool cleanup;
@@ -33,15 +38,14 @@ public:
 	bool waiting;
 
 	std::string content_type;
-	std::string content_length;
+	size_t content_length;
 	std::string response;
 	std::string cookies;
 	unsigned long long timestamp;
 
-
 	std::pair<std::string, std::string> session;
 	int fd_upload;
-	bool complete_metadata;	
+	bool complete_metadata;
 	int expected_content_length;
 	bool complete_header;
 	bool complete_upload;
@@ -55,9 +59,11 @@ public:
 		expected_content_length = 0;
 		close = false;
 		cleanup = false;
-		waiting = false;	
+		waiting = false;
 		send_data = false;
 		fd_upload = -1;
+		timestamp = 0;
+		byte_uploaded = 0;
 	}
 };
 
@@ -83,20 +89,13 @@ std::string generateSuccessMsg();
 std::string generateFailerMsg();
 bool _uploadFile(const int &fd_client, ClientState &state);
 
-bool _setSession(std::string &response);
-bool _getSession(std::string &response);
-bool _removeName(std::string &responce);
-void _setCookies(ClientState& state);
-std::vector<std::pair<std::string, std::string> > _loadData();
+// void _setCookies(std::string &username);
 
 void printCurrentTime();
 void _sendReaponse(const std::string &response, int fd_client);
 
-#define HEADER_SIZE 1024 * 16
-#define TIMEOUT 5000
 unsigned long long get_current_timestamp();
 bool check_timeout(unsigned long long timestamp, unsigned long long timeout);
-void cloce_connection( ClientState& state);
-
+void cloce_connection(ClientState &state);
 
 #endif

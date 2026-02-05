@@ -21,7 +21,7 @@ class Request
         std::string parse_request(std::string buffer, Config a);
         std::string get_path();
         std::string get_method();
-        int get_content_length();
+        size_t get_content_length();
     
     
         int get_port();
