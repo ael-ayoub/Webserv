@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CGI Script Browser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .script-list {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        .script-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #007bff;
+        }
+        .script-link {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .script-link:hover {
+            text-decoration: underline;
+        }
+        .description {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        h1 {
+            color: #333;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 20px 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>CGI Script Tester</h1>
+    
+    <div class="warning">
+        <strong>Note:</strong> Scripts with infinite loops will timeout after 5 seconds.
+    </div>
+    
+    <div class="script-list">
+        <h2>Available Scripts</h2>
+        
+        <div class="script-item">
+            <a href="/dir/test.py" class="script-link">test.py</a>
+            <div class="description">Basic Python test script</div>
+        </div>
+        
+        <div class="script-item">
+            <a href="/dir/hello.py" class="script-link">hello.py</a>
+            <div class="description">Python hello world script</div>
+        </div>
+        
+        <div class="script-item">
+            <a href="/dir/slow_script.py" class="script-link">slow_script.py</a>
+            <div class="description">Slow Python script (tests timeout handling)</div>
+        </div>
+        
+        <div class="script-item">
+            <a href="/dir/infinite_loop.py" class="script-link">infinite_loop.py</a>
+            <div class="description">⚠️ Infinite loop script (will timeout after 5 seconds)</div>
+        </div>
+        
+        <div class="script-item">
+            <a href="/dir/test.php" class="script-link">test.php</a>
+            <div class="description">PHP test script</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px; font-size: 0.9em; color: #666;">
+        <p><strong>How to test:</strong></p>
+        <ul>
+            <li>Click on a script link to execute it via CGI</li>
+            <li>Watch the server output for timeout messages</li>
+            <li>Check that infinite loops are properly killed after 5 seconds</li>
+        </ul>
+    </div>
+</body>
+</html>

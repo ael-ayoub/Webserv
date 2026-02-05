@@ -19,6 +19,8 @@
 #include <iostream>
 #include <ctime>
 #include <iomanip>
+#include <signal.h>
+#include <fcntl.h>
 
 void printCurrentTime();
 
