@@ -16,6 +16,7 @@ class CGI{
 		const char *cgiBinary;
 		const char **env;
 		char **execArg;
+		bool timed_out;
 		int wrireToFile(std::ofstream &file, char *str);
 		int CGIOutput();
 		int responseWrapper();
@@ -23,6 +24,7 @@ class CGI{
 		std::string response;
 		CGI(const char *, const char *, const char *, const char *, const char **);
 		bool CGIProccess();
+		bool TimedOut() const { return timed_out; }
 		~CGI();
 };
 

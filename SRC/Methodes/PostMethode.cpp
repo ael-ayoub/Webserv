@@ -80,7 +80,18 @@ void Upload_files(ClientState &state, const int &fd_client, Config &a)
 		state.waiting = false;
 		return;
 	}
-	state.filename_upload = "STATIC/upload/" + state.filename;
+	if (state.filename.find("..") != std::string::npos || state.filename.find('/') != std::string::npos)
+	{
+		state.response = ErrorResponse::Error_Forbidden(a);
+		state.close = true;
+		state.cleanup = true;
+		state.send_data = true;
+		state.waiting = false;
+		return;
+	}
+	mkdir("www", 0755);
+	mkdir("www/upload", 0755);
+	state.filename_upload = "www/upload/" + state.filename;
 	if (state.fd_upload == -1)
 	{
 		std::cout << "Creating upload file: " << state.filename_upload << std::endl;

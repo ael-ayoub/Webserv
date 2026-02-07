@@ -20,6 +20,10 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         headers += " Method Not Allowed\r\n";
     else if (status_code == "413")
         headers += " Payload Too Large\r\n";
+    else if (status_code == "500")
+        headers += " Internal Server Error\r\n";
+    else if (status_code == "504")
+        headers += " Gateway Timeout\r\n";
     body = "<!DOCTYPE html>\n";
     body += "<html>\n";
     body += "<head>\n";
@@ -38,6 +42,10 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         body += "  <h1>403 Forbidden</h1>\n";
     if (status_code == "413")
         body += "  <h1>413 Payload Too Large</h1>\n";
+    if (status_code == "500")
+        body += "  <h1>500 Internal Server Error</h1>\n";
+    if (status_code == "504")
+        body += "  <h1>504 Gateway Timeout</h1>\n";
 
     if (status_code == "404")
         body += "  <p>The requested resource could not be found on this server.</p>\n";
@@ -49,6 +57,10 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         body += "  <p>You don’t have permission to access this resource.</p>\n";
     if (status_code == "413")
         body += "  <p>The size of the request entity exceeds the maximum allowed limit.</p>\n";
+    if (status_code == "500")
+        body += "  <p>The server encountered an internal error.</p>\n";
+    if (status_code == "504")
+        body += "  <p>The upstream CGI script did not respond in time.</p>\n";
         
     body += "</body>\n";
     body += "</html>\n";
@@ -144,7 +156,28 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
         header += " Not Found\r\n";
     else if (error_status == "405")
         header += " Method Not Allowed\r\n";
+    else if (error_status == "413")
+        header += " Payload Too Large\r\n";
+    else if (error_status == "500")
+        header += " Internal Server Error\r\n";
+    else if (error_status == "504")
+        header += " Gateway Timeout\r\n";
     // path = err_tmp->second;
+    return header;
+}
+
+std::string ErrorResponse::Error_GatewayTimeout(Config &a)
+{
+    std::string path;
+
+    ServerConfig tmp = a.get_server_config();
+    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
+    std::string header = check_errorstatus(error, 504, path);
+
+    if (header.empty() == true)
+        return default_response_error("504");
+
+    header += Responde(a, path, header, "504");
     return header;
 }
 

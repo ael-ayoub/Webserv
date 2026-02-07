@@ -87,8 +87,14 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
 {
     std::string last_path;
     struct stat statbuf;
-    std::string pathh = test_request.get_path();
-    //std::cout << pathh << std::endl;
+    std::string request_path = test_request.get_path();
+    std::string query_string;
+    size_t qpos = request_path.find('?');
+    if (qpos != std::string::npos)
+    {
+        query_string = request_path.substr(qpos + 1);
+        request_path = request_path.substr(0, qpos);
+    }
     
     // std::cout << "path is : " << path << std::endl;
 
@@ -122,29 +128,40 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
         }
         else
         {
-            last_path = gcwdd() + info_location.get_root() + test_request.get_path();
+            last_path = gcwdd() + info_location.get_root() + request_path;
             // std::cout << "pathh: " << last_path << std::endl;
 
             const size_t dot = last_path.rfind('.');
             if (dot != std::string::npos)
             {
                 const std::string ext = last_path.substr(dot);
-                if (ext == ".py" || ext == ".php")
+                const std::string binary = info_location.get_cgi_binary(ext);
+                if (!binary.empty())
                 {
-                    static const char *default_env[] = {
-                        "REQUEST_METHOD=GET",
-                        "QUERY_STRING=",
-                        "CONTENT_LENGTH=0",
-                        "CONTENT_TYPE=",
-                        "GATEWAY_INTERFACE=CGI/1.1",
-                        "SERVER_PROTOCOL=HTTP/1.1",
-                        NULL
-                    };
-                    const char *binary = (ext == ".py") ? "/usr/bin/python3" : "/usr/bin/php";
-                    CGI cgi("GET", last_path.c_str(), ext.c_str(), binary, default_env);
+                    std::vector<std::string> envs;
+                    envs.push_back("REQUEST_METHOD=" + test_request.get_method());
+                    envs.push_back("QUERY_STRING=" + query_string);
+                    {
+                        std::ostringstream oss;
+                        oss << test_request.get_content_length();
+                        envs.push_back("CONTENT_LENGTH=" + oss.str());
+                    }
+                    envs.push_back("CONTENT_TYPE=");
+                    envs.push_back("GATEWAY_INTERFACE=CGI/1.1");
+                    envs.push_back("SERVER_PROTOCOL=HTTP/1.1");
+                    envs.push_back("SCRIPT_NAME=" + request_path);
+
+                    std::vector<const char *> envp;
+                    for (size_t i = 0; i < envs.size(); i++)
+                        envp.push_back(envs[i].c_str());
+                    envp.push_back(NULL);
+
+                    CGI cgi(test_request.get_method().c_str(), last_path.c_str(), ext.c_str(), binary.c_str(), &envp[0]);
                     if (cgi.CGIProccess())
                         return cgi.response;
-                    return ErrorResponse::default_response_error("500");
+					if (cgi.TimedOut())
+						return ErrorResponse::Error_GatewayTimeout(a);
+					return ErrorResponse::default_response_error("500");
                 }
             }
             return Response::Display_file(last_path, a);

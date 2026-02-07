@@ -9,6 +9,7 @@ class LocationConfig
         std::string path_root;
         std::string path_index;
         std::string upload_store;
+        std::map<std::string, std::string> cgi_pass;
         bool autoindex;
         bool GET_methode;
         bool post_methode;
@@ -30,6 +31,11 @@ class LocationConfig
         std::string get_root();
         std::string get_pathIndex();
         bool get_autoIndex();
+        bool get_uploadEnable();
+        std::string get_uploadStore();
+
+        bool has_cgi_for_extension(const std::string &ext);
+        std::string get_cgi_binary(const std::string &ext);
         bool get_method(std::string request_method);
         void print_info();
         void parse_locationConfig(Vector_str str, size_t *start, std::string path);

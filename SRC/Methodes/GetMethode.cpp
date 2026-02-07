@@ -24,6 +24,14 @@ std::string gcwd()
     return "";
 }
 
+static std::string strip_query(const std::string &path)
+{
+    const size_t q = path.find('?');
+    if (q == std::string::npos)
+        return path;
+    return path.substr(0, q);
+}
+
 // std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Servers_Config)
 std::string Methodes::GetMethod(Config& a, Request& test_request, ServerConfig& Servers_Config)
 {
@@ -37,11 +45,12 @@ std::string Methodes::GetMethod(Config& a, Request& test_request, ServerConfig& 
     // if (test_request.get_path() == "/favicon.ico")
     //     return std::string(); /// check heree the favicon.co why he display everytime
     
-    LocationConfig info_location = Servers_Config.get_conf(test_request.get_path());
+    const std::string request_path = strip_query(test_request.get_path());
+    LocationConfig info_location = Servers_Config.get_conf(request_path);
     
     // std::cout << "choose: " << info_location.get_path() << std::endl;
     // std::cout << "choose test_req: " << test_request.get_path() << std::endl;
-    std::string path = gcwd() + info_location.get_root() + test_request.get_path();
+    std::string path = gcwd() + info_location.get_root() + request_path;
     // std::cout << "path: " << path<< std::endl;
     struct stat statbuf;
     if (stat((path).c_str(), &statbuf) == 0)
@@ -50,12 +59,12 @@ std::string Methodes::GetMethod(Config& a, Request& test_request, ServerConfig& 
         {
             std::string res;
             res += "HTTP/1.1 301 Moved Permanently\r\n";
-            res += "Location: " + clean_string(test_request.get_path()) + '/' + "\r\n";
+            res += "Location: " + clean_string(request_path) + '/' + "\r\n";
             res += "\r\n";
             return res;
         }
     }
-    info_location = Servers_Config.get_conf(clean_string(test_request.get_path()));
+    info_location = Servers_Config.get_conf(clean_string(request_path));
     // std::cout << "we have now configure : " << clean_string(test_request.get_path()) << std::endl;
     // std::cout << "location working with is : " << info_location.get_path() << std::endl;
     // std::cout << "path is : " << info_location.GetLocationPath() << "\n";

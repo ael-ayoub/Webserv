@@ -8,7 +8,7 @@ print()
 print("<html><body>")
 print("<h1>Starting slow script...</h1>")
 
-time.sleep(10)  # This will timeout before completing
+time.sleep(10)
 
 print("<p>If you see this, the timeout didn't work!</p>")
 print("</body></html>")

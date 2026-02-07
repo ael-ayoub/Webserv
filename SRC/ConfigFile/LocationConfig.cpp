@@ -44,6 +44,16 @@ bool LocationConfig::get_autoIndex()
     return autoindex;
 }
 
+bool LocationConfig::get_uploadEnable()
+{
+    return upload_enable;
+}
+
+std::string LocationConfig::get_uploadStore()
+{
+    return upload_store;
+}
+
 std::string LocationConfig::get_pathIndex()
 {
     return path_index;
@@ -57,6 +67,19 @@ std::string LocationConfig::get_root()
 std::string LocationConfig::get_path()
 {
     return path_location;
+}
+
+bool LocationConfig::has_cgi_for_extension(const std::string &ext)
+{
+    return cgi_pass.find(ext) != cgi_pass.end();
+}
+
+std::string LocationConfig::get_cgi_binary(const std::string &ext)
+{
+    std::map<std::string, std::string>::iterator it = cgi_pass.find(ext);
+    if (it == cgi_pass.end())
+        return "";
+    return it->second;
 }
 
 bool LocationConfig::get_method(std::string request_method)
@@ -116,9 +139,20 @@ void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::st
             }
         }
         else if (a.first == "upload_enable")
-            upload_enable = true;
+        {
+            if (a.second == "on")
+                upload_enable = true;
+            else
+                upload_enable = false;
+        }
         else if (a.first == "upload_store")
             upload_store = a.second;
+        else if (a.first == "cgi_pass")
+        {
+            Vector_str parts = ServerConfig::parse_line(a.second);
+            if (parts.size() == 2)
+                cgi_pass[parts[0]] = parts[1];
+        }
         else if (a.first == "return")
         {
             int status_code;

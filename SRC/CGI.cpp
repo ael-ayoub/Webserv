@@ -7,7 +7,7 @@ CGI::CGI(const char *RequestType,
 		const char *CgiBinary,
 		const char **Env) : requestType(RequestType),
 		Filepath(FilePath), language(Language),
-		cgiBinary(CgiBinary), env(Env)
+        cgiBinary(CgiBinary), env(Env), timed_out(false)
 {
 	execArg = new char*[3];
 	execArg[0] = const_cast<char *>(cgiBinary);
@@ -18,27 +18,12 @@ CGI::CGI(const char *RequestType,
 
 bool CGI::CGIProccess()
 {
-	int lvl = -1;
-	std::string s = this->language;
-	std::string supported[2] = {".php", ".py"}; // addable..
-	for (int i = 0; i < NSCGI; i++)
-	{
-		if (s == supported[i])
-		{
-			lvl = i;
-			break;
-		}
-	}
-	switch (lvl){
-		case PHP:
-			break;
-		case PYTHON:
-			break;
-		default:
-			return false;
-	}
-	if (CGIOutput())
-		return false;
+    if (!cgiBinary || !*cgiBinary || !Filepath || !*Filepath)
+        return false;
+    if (CGIOutput())
+    {
+        return false;
+    }
 	responseWrapper();
 	return true;
 }
@@ -105,9 +90,9 @@ int CGI::CGIOutput()
     }
 
     if (timed_out) {
+        this->timed_out = true;
         close(piped[0]);
         file.close();
-        std::cerr << "CGI script timed out after 5 seconds\n";
         return 1;
     }
 
@@ -125,27 +110,70 @@ int CGI::responseWrapper()
 	std::ifstream file("temp.txt");
 	std::stringstream output;
 	output << file.rdbuf();
-	std::string lines = output.str();
+    std::string lines = output.str();
 	file.close();
-	
-	std::cout << "---lines---\n";
-	std::cout << lines << std::endl;
 
-	if (lines.find("Content-Type:") != lines.npos)
-	{
-		response = statusLine + lines;
-	}
+    // Normalize CGI output to CRLF so HTTP clients parse headers reliably.
+    std::string normalized;
+    normalized.reserve(lines.size() + 16);
+    for (size_t i = 0; i < lines.size(); i++)
+    {
+        if (lines[i] == '\n')
+        {
+            if (i == 0 || lines[i - 1] != '\r')
+                normalized += "\r\n";
+            else
+                normalized += "\n";
+        }
+        else
+        {
+            normalized += lines[i];
+        }
+    }
+
+    if (normalized.find("Content-Type:") != normalized.npos)
+    {
+        size_t sep = normalized.find("\r\n\r\n");
+        if (sep == std::string::npos)
+        {
+            // If CGI didn't produce a valid header/body separator, treat as body.
+            std::ostringstream contentLengthStream;
+            contentLengthStream << normalized.length();
+            response = statusLine +
+                "Content-Type: text/html\r\n"
+                "Content-Length: " + contentLengthStream.str() + "\r\n"
+                "Connection: close\r\n\r\n" +
+                normalized;
+            return 0;
+        }
+
+        std::string cgi_headers = normalized.substr(0, sep);
+        std::string cgi_body = normalized.substr(sep + 4);
+        bool has_content_length = (cgi_headers.find("Content-Length:") != std::string::npos);
+        bool has_connection = (cgi_headers.find("Connection:") != std::string::npos);
+
+        std::string extra;
+        if (!has_content_length)
+        {
+            std::ostringstream contentLengthStream;
+            contentLengthStream << cgi_body.length();
+            extra += "Content-Length: " + contentLengthStream.str() + "\r\n";
+        }
+        if (!has_connection)
+            extra += "Connection: close\r\n";
+
+        response = statusLine + cgi_headers + "\r\n" + extra + "\r\n" + cgi_body;
+    }
 	else
 	{
 		std::ostringstream contentLengthStream;
-		contentLengthStream << lines.length();
+        contentLengthStream << normalized.length();
 		std::string header =
 			"Content-Type: text/html\r\n"
 			"Content-Length: " + contentLengthStream.str() + "\r\n\r\n";
 
-		response = statusLine + header + lines;
+        response = statusLine + header + normalized;
 	}
-	std::cout << "----response----\n" << response << std::endl;
 	return 0;
 }
 
