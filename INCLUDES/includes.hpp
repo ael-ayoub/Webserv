@@ -16,12 +16,5 @@
 #include <cstring>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <iostream>
-#include <ctime>
-#include <iomanip>
-#include <signal.h>
-#include <fcntl.h>
-
-void printCurrentTime();
 
 #endif

@@ -18,22 +18,3 @@ make
 ```
 
 By default it listens on `localhost:1033` (see `SRC/default.conf`).
-
-## CGI
-
-Configure CGI interpreters per `location` with `cgi_pass` (extension → interpreter path), for example:
-
-```conf
-location /upload/ {
-	root /www;
-	methods GET POST DELETE;
-	autoindex on;
-	cgi_pass .py /usr/bin/python3;
-	cgi_pass .php /usr/bin/php;
-}
-```
-
-## Uploads UI
-
-- Upload form: `http://localhost:1033/upload.html`
-- Uploads manager (open/delete): `http://localhost:1033/uploads_manager.html`

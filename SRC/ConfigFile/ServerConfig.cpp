@@ -24,20 +24,16 @@ bool ServerConfig::CheckClientMaxBodySize(size_t num)
 
 int right_path(std::string Config_path, std::string path)
 {
-    if (Config_path.empty() || path.empty())
+    int i = 0;
+    while (path[i] && Config_path[i] && path[i] == Config_path[i])
+    {
+        i++;
+    }
+    if (Config_path[i] && path[i])
         return -1;
-    if (path.size() < Config_path.size())
+    if (i != 0 && (Config_path[i - 1] != '/' || path[i - 1] != '/'))
         return -1;
-    if (path.compare(0, Config_path.size(), Config_path) != 0)
-        return -1;
-    // If it's an exact match, accept it.
-    if (path.size() == Config_path.size())
-        return (int)Config_path.size();
-    // For prefix matches, require the location path to end with '/'
-    // so that '/upload/' matches '/upload/file' but '/up' doesn't.
-    if (Config_path[Config_path.size() - 1] != '/')
-        return -1;
-    return (int)Config_path.size();
+    return i;
 }
 std::string get_current_pathh()
 {
@@ -50,8 +46,7 @@ std::string get_current_pathh()
 LocationConfig ServerConfig::get_Location_Config(std::string path)
 {
     LocationConfig tmp;
-    int store_id = -1;
-    int best_match = -1;
+    int store_id = -1, j_old = -1;
 
     size_t i = 0;
     while (i < Location_Config.size())
@@ -59,11 +54,12 @@ LocationConfig ServerConfig::get_Location_Config(std::string path)
         if (Location_Config[i].get_path() == path)
             return Location_Config[i];
         int j = right_path(Location_Config[i].get_path(), path);
-		if (j > best_match)
-		{
-			best_match = j;
-			store_id = (int)i;
-		}
+        
+        if (j > j_old)
+            store_id = i;
+
+        if (j != j_old)
+            j_old = j;
         i++;
     }
     // std::cout << "first location is : " << Location_Config[0].get_path() << std::endl;
@@ -72,9 +68,7 @@ LocationConfig ServerConfig::get_Location_Config(std::string path)
     // {
         // std::cout << "returning this and the index is " << store_id << std::endl;
         // std::cout << "index is " << store_id << std::endl;
-    if (store_id < 0)
-        return tmp;
-    return Location_Config[store_id];
+        return Location_Config[store_id];
     // }
     // return tmp;
 }

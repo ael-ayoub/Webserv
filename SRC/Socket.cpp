@@ -87,101 +87,35 @@ int Socket::checkEvent(int fd)
     return (-1);
 }
 
-std::string to_string(int num)
-{
-    std::stringstream ss;
-    ss << num;
-    return ss.str();
-}
-
-std::string format_timestamp(unsigned long long timestamp)
-{
-    time_t raw_time = timestamp / 1000; // Convert milliseconds to seconds
-    struct tm *time_info = localtime(&raw_time);
-    char buffer[80];
-    strftime(buffer, sizeof(buffer), "[%Y-%m-%d %H:%M:%S]", time_info);
-    return std::string(buffer);
-}
-
-std::string generate_log_entry(ClientState &state)
-{
-    std::string log_entry;
-    // log_entry += "Timestamp: " + to_string(state.timestamp) + " | ";
-    log_entry += format_timestamp(state.timestamp) + " | ";
-    log_entry += "Method: " + state.method + " | ";
-    log_entry += "Path: " + state.path + " | ";
-    log_entry += "Response: " + (state.response.empty() ? "No response generated" : state.response.substr(0, 50) + "...") + " | ";
-    return log_entry;
-}
-
-void _print_logs(ClientState &state)
-{
-    std::string log_entry = generate_log_entry(state);
-    std::cout << log_entry << std::endl;
-}
-
-
-
-
 void Socket::Monitor(Config &a)
 {
     int MAX_EVENTS = 256;
     int fd_client;
     int current_fd;
+    socklen_t addr_size;
     int max_fds;
     epoll_event events[MAX_EVENTS];
     epoll_event event_client;
+    sockaddr_in addr_client;
     std::map<int, ClientState> status;
 
     while (true)
     {
-        max_fds = epoll_wait(fd_epoll, events, MAX_EVENTS, 1000);
-        if (max_fds == -1)
-            throw(std::runtime_error("Error: epoll wait failed !!"));
-        if (max_fds == 0)
-        {
-            // std::cout << "Epoll wait timed out with no events." << std::endl;
-            for (std::map<int, ClientState>::iterator it = status.begin();
-                 it != status.end();)
-            {
-                if (!check_timeout(it->second.timestamp, TIMEOUT))
-                {
-                    int fd = it->first;
-
-                    epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd, NULL);
-                    close(fd);
-
-                    std::map<int, ClientState>::iterator to_erase = it;
-                    ++it;                   // ✅ advance FIRST
-                    status.erase(to_erase); // ✅ then erase
-                }
-                else
-                {
-                    ++it;
-                }
-            }
-
-            continue;
-        }
-
-        std::cout << "Epoll returned " << max_fds << " events." << std::endl;
+        max_fds = epoll_wait(fd_epoll, events, MAX_EVENTS, -1);
         for (int i = 0; i < max_fds; i++)
         {
             current_fd = events[i].data.fd;
             int index = checkEvent(current_fd);
             if (index != -1)
             {
-                std::cout << "Accepting new client on socket fd: " << current_fd << std::endl;
                 int &fd_socket = sockconf[index].fd_socket;
-                // addr_size = sizeof(addr_client);
+                addr_size = sizeof(addr_client);
                 fd_client = accept(fd_socket, NULL, NULL);
                 if (fd_client == -1)
                     throw std::runtime_error("cannot accept new client !!");
                 set_nonblocking(fd_client);
                 event_client.data.fd = fd_client;
                 event_client.events = EPOLLIN;
-                status[fd_client] = ClientState();
-                status[fd_client].timestamp = get_current_timestamp();
                 if (epoll_ctl(fd_epoll, EPOLL_CTL_ADD, fd_client, &event_client) == -1)
                 {
                     close(fd_socket);
@@ -191,88 +125,25 @@ void Socket::Monitor(Config &a)
             else
             {
                 fd_client = events[i].data.fd;
-                std::cout << "Handling client on fd: " << fd_client << std::endl;
                 HandleClient(fd_client, a, status);
-                std::map<int, ClientState>::iterator it = status.find(fd_client);
+                std::map<int,ClientState>::iterator it = status.find(fd_client);
                 if (it != status.end())
                 {
-                    if (it->second.waiting)
+                    bool should_cleanup = false;
+
+                    if (it->second.complete_upload)
+                        should_cleanup = true;
+                    else if (it->second.path != "/uploads")
+                        should_cleanup = true;
+
+                    if (should_cleanup)
                     {
-                        std::cout << "checking timeout for fd: " << fd_client << std::endl;
-                        if (!check_timeout(it->second.timestamp, TIMEOUT))
-                        {
-                            std::cout << "Connection timed out for fd: " << fd_client << std::endl;
-                            cloce_connection(it->second);
-                            // continue;
-                        }
-                        else
-                        {
-                            it->second.timestamp = get_current_timestamp();
-                            std::cout << "Waiting for more data from fd: " << fd_client << std::endl;
-                            event_client.data.fd = fd_client;
-                            event_client.events = EPOLLIN;
-                            if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
-                            {
-                                close(fd_client);
-                                perror("epoll_ctl MOD failed");
-                                throw(std::runtime_error("cannot modify client to epoll instance !"));
-                            }
-                            continue; // Wait for more data
-                        }
-                    }
-                    if (it->second.send_data)
-                    {
-                        std::cout << "Sending response to fd: " << fd_client << std::endl;
-                        event_client.data.fd = fd_client;
-                        event_client.events = EPOLLOUT;
-                        if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
-                        {
-                            close(fd_client);
-                            perror("epoll_ctl MOD failed");
-                            throw(std::runtime_error("cannot modify client to epoll instance !"));
-                        }
-                        try
-                        {
-                            _sendReaponse(it->second.response, fd_client);
-                            // status.erase(it);
-                            _print_logs(it->second);
-                        }
-                        catch (const std::exception &e)
-                        {
-                            std::cout << "Error sending response to fd: " << fd_client << std::endl;
-                            std::cerr << e.what() << '\n';
-                            it->second.close = true;
-                            it->second.cleanup = true;
-                        }
-                    }
-                    if (it->second.header.find("Connection: close") != std::string::npos || it->second.close)
-                    {
-                        std::cout << "Closing connection for fd: " << fd_client << std::endl;
-                        if (it->second.cleanup)
-                            status.erase(it);
+                        if (it->second.fd_upload >= 0)
+                            close(it->second.fd_upload);
+
+                        status.erase(it);
                         epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
                         close(fd_client);
-                    }
-                    else
-                    {
-
-                        std::cout << "Keeping connection alive for fd: " << fd_client << std::endl;
-                        event_client.data.fd = fd_client;
-                        event_client.events = EPOLLIN;
-                        if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
-                        {
-                            close(fd_client);
-                            perror("epoll_ctl MOD failed");
-                            throw(std::runtime_error("cannot modify client to epoll instance !"));
-                        }
-                        it->second.header.clear();
-                        it->second.readstring.clear();
-                        it->second.metadata.clear();
-                        it->second.filename.clear();
-                        it->second.boundary.clear();
-                        it->second.method.clear();
-                        it->second.path.clear();
-                        it->second = ClientState();
                     }
                 }
             }

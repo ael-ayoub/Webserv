@@ -12,10 +12,9 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <bits/stdc++.h>
-// #include "ClientState.hpp"
 
 typedef std::vector<std::string> Vector_str;
-void run_server(std::string av);
+void run_server();
 #include "ServerConfig.hpp"
 #include "Config.hpp"
 #include "LocationConfig.hpp"
@@ -27,15 +26,3 @@ void run_server(std::string av);
 #include "Response.hpp"
 #include "ErrorResponse.hpp"
 #include "socketConfig.hpp"
-#include <sys/time.h>
-
-bool _parse_header(ClientState &state, int fd_client, Request &request, Config &a);
-bool _process_get_delete_request(int fd_client, ClientState &state, Request &request, Config &a, std::vector<ServerConfig> &servers, Methodes &m);
-bool _parse_metadata(ClientState &state, int fd_client, Config &a);
-bool _process_post_request(int fd_client, ClientState &state, Config &a, Methodes &m);
-std::string PostSession(const std::string& username);
-std::string CheckSession(const std::string& message);
-std::string get_username_from_metadata(const std::string &metadata);
-unsigned long long get_current_timestamp();
-bool check_timeout(unsigned long long timestamp, unsigned long long timeout);
-void cloce_connection(ClientState &state);

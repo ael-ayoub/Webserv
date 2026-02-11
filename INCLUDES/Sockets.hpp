@@ -14,35 +14,17 @@
 #include "socketConfig.hpp"
 
 class Config;
-
-#define HEADER_SIZE 1024 * 16
-#define TIMEOUT 5000
+typedef std::vector<std::pair<std::string, std::string> > mysession;
 
 class ClientState
 {
 public:
 	std::string header;
-	std::string readstring;
 	std::string metadata;
 	std::string filename;
 	std::string boundary;
-	std::string end_boundary;
 	std::string method;
 	std::string path;
-	std::string filename_upload;
-	size_t byte_uploaded;
-
-	bool close;
-	bool cleanup;
-	bool send_data;
-	bool waiting;
-
-	std::string content_type;
-	size_t content_length;
-	std::string response;
-	std::string cookies;
-	unsigned long long timestamp;
-
 	std::pair<std::string, std::string> session;
 	int fd_upload;
 	bool complete_metadata;
@@ -56,14 +38,8 @@ public:
 		complete_metadata = false;
 		complete_header = false;
 		complete_upload = false;
-		expected_content_length = 0;
-		close = false;
-		cleanup = false;
-		waiting = false;
-		send_data = false;
+		// data_send = false;
 		fd_upload = -1;
-		timestamp = 0;
-		byte_uploaded = 0;
 	}
 };
 
@@ -89,13 +65,10 @@ std::string generateSuccessMsg();
 std::string generateFailerMsg();
 bool _uploadFile(const int &fd_client, ClientState &state);
 
-// void _setCookies(std::string &username);
-
-void printCurrentTime();
-void _sendReaponse(const std::string &response, int fd_client);
-
-unsigned long long get_current_timestamp();
-bool check_timeout(unsigned long long timestamp, unsigned long long timeout);
-void cloce_connection(ClientState &state);
+bool _setSession(std::string &response);
+bool _getSession(std::string &response);
+bool _removeName(std::string &responce);
+void _setCookies(ClientState& state);
+std::vector<std::pair<std::string, std::string> > _loadData();
 
 #endif

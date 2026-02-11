@@ -82,35 +82,17 @@ std::string Response::Display_file(std::string last_path, Config a)
     return response;
 }
 
-std::string Response::Get_response(std::string path, LocationConfig &info_location,
+std::string Response::Get_response(std::string path, LocationConfig info_location,
                                     Request test_request, Config a)
 {
     std::string last_path;
     struct stat statbuf;
-    std::string request_path = test_request.get_path();
-    std::string query_string;
-    size_t qpos = request_path.find('?');
-    if (qpos != std::string::npos)
-    {
-        query_string = request_path.substr(qpos + 1);
-        request_path = request_path.substr(0, qpos);
-    }
+    std::string pathh = test_request.get_path();
+    //std::cout << pathh << std::endl;
     
     // std::cout << "path is : " << path << std::endl;
-
-    // std::cout << "reach here\n";
-    if (info_location.GetRedirectionBool() == true)
-    {
-        // std::cout << "path is : " << info_location.get_path() << "\n";
-        std::string res;
-        res += "HTTP/1.1 301 Moved Permanently\r\n";
-        res += "Location: " + info_location.GetLocationPath() + "\r\n";
-        res += "\r\n";
-        return res;
-    }
     if (stat(path.c_str(), &statbuf) == 0)
     {
-        // std::cout << "before anything here\n";
         if (S_ISDIR(statbuf.st_mode))
         {
             if (info_location.get_pathIndex() != "None")
@@ -128,40 +110,29 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
         }
         else
         {
-            last_path = gcwdd() + info_location.get_root() + request_path;
+            last_path = gcwdd() + info_location.get_root() + test_request.get_path();
             // std::cout << "pathh: " << last_path << std::endl;
 
             const size_t dot = last_path.rfind('.');
             if (dot != std::string::npos)
             {
                 const std::string ext = last_path.substr(dot);
-                const std::string binary = info_location.get_cgi_binary(ext);
-                if (!binary.empty())
+                if (ext == ".py" || ext == ".php")
                 {
-                    std::vector<std::string> envs;
-                    envs.push_back("REQUEST_METHOD=" + test_request.get_method());
-                    envs.push_back("QUERY_STRING=" + query_string);
-                    {
-                        std::ostringstream oss;
-                        oss << test_request.get_content_length();
-                        envs.push_back("CONTENT_LENGTH=" + oss.str());
-                    }
-                    envs.push_back("CONTENT_TYPE=");
-                    envs.push_back("GATEWAY_INTERFACE=CGI/1.1");
-                    envs.push_back("SERVER_PROTOCOL=HTTP/1.1");
-                    envs.push_back("SCRIPT_NAME=" + request_path);
-
-                    std::vector<const char *> envp;
-                    for (size_t i = 0; i < envs.size(); i++)
-                        envp.push_back(envs[i].c_str());
-                    envp.push_back(NULL);
-
-                    CGI cgi(test_request.get_method().c_str(), last_path.c_str(), ext.c_str(), binary.c_str(), &envp[0]);
+                    static const char *default_env[] = {
+                        "REQUEST_METHOD=GET",
+                        "QUERY_STRING=",
+                        "CONTENT_LENGTH=0",
+                        "CONTENT_TYPE=",
+                        "GATEWAY_INTERFACE=CGI/1.1",
+                        "SERVER_PROTOCOL=HTTP/1.1",
+                        NULL
+                    };
+                    const char *binary = (ext == ".py") ? "/usr/bin/python3" : "/usr/bin/php";
+                    CGI cgi("GET", last_path.c_str(), ext.c_str(), binary, default_env);
                     if (cgi.CGIProccess())
                         return cgi.response;
-					if (cgi.TimedOut())
-						return ErrorResponse::Error_GatewayTimeout(a);
-					return ErrorResponse::default_response_error("500");
+                    return ErrorResponse::default_response_error("500");
                 }
             }
             return Response::Display_file(last_path, a);
@@ -175,27 +146,18 @@ std::string Response::Get_delete(std::string path, LocationConfig info_location,
 {
 
     (void)info_location, (void)test_request, (void)a;
-
-    struct stat path_stat;
-    stat(path.c_str(), &path_stat);
-    if (S_ISDIR(path_stat.st_mode))
-        return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
-
-    if (access(path.c_str(), W_OK) != 0)
-    {
-        if (errno == EACCES)
-            return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
-        else if (errno == ENOENT)
-            return "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
-    }
-
+    std::cout << path << std::endl;
     int status = remove(path.c_str());
     if (status != 0)
     {
-        if (errno == ENOTEMPTY || errno == EACCES)
+        if (errno == ENOTEMPTY)
+            return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
+        else if (errno == EACCES)
             return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
         else if (errno == ENOENT)
             return "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+        else
+            return "HTTP/1.1 500 Internal Server Error\r\nConnection: close\r\n\r\n";
     }
     return "HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n";
 }
