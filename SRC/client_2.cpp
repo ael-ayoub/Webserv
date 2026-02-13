@@ -162,7 +162,7 @@ bool _process_get_delete_request(int fd_client, ClientState &state, Request &req
             return false;
         }
         state.timestamp = get_current_timestamp();
-
+        
         state.response = m.GetMethod(a, request, servers[0]);
         state.send_data = true;
         state.cleanup = true;

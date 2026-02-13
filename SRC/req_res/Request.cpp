@@ -87,7 +87,8 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     int newline = 0;
     int car = 0;
     size_t i = 0;
-    // std::cout << "str: " << header_line << std::endl;
+
+    // std::cout << "-------------str: " << header_line << std::endl;
     while (header_line[i])
     {
         if (header_line[i] == ' ')
@@ -178,19 +179,35 @@ std::string Request::check_request(std::string str, Config a)
     for (size_t b = 0; b < str.size(); b++)
     {
         if (str[b] != '\n')
+        {
+            // if (str[b] == '\r')
+            //     std::cout << "YYYYYYYYYYEEEEEEs\n";
             tmp += str[b];
-        else
+            // std::cout << "tmp is : " << tmp << ", and b is : " << b << std::endl;
+        }
+        else if (str[b] == '\n')
         {
             tmp += '\n';
             args.push_back(tmp);
-            // std::cout << "str is : " << str << std::endl;
+            // std::cout << "str is : " << tmp << std::endl;
+            // std::cout << "b is : " << b << ", size total is : " << str.size() << std::endl;
             // if (str.size() - 1 == b)
             // {
             // }
             tmp.clear();
         }
-    }
+        if (b + 1 == str.size())
+        {
+            tmp += '\n';
+            args.push_back(tmp);
+            tmp.clear();
 
+        }
+    }
+    
+    // std::cout << "tmp: " << tmp <<std::endl;
+    // std::cout << "lenght first one is : " << args[0].size() << std::endl;
+    // std::cout << "lenght seconde one is : " << tmp.size() << std::endl;
     // for (size_t b = 0; b < args.size(); b++)
     // {
     //     std::cout << b << ": " << args[b] << std::endl;
@@ -199,10 +216,12 @@ std::string Request::check_request(std::string str, Config a)
     response = check_requestline(args[0], a);
     if (response != "NONE")
     {
-        // std::cout << "first err\n";
         return response;
     }
-        
+    // std::cout << "first has : " << args[0].size() << std::endl;
+    // std::cout << " sec: " << args[1].size() << std::endl;
+    // std::cout << "NONEEEEEEEE" << std::endl;
+    // std::cout << args[0] << std::endl;
     response = check_headerline(args[1], a);
     if (response != "NONE")
     {
@@ -224,7 +243,7 @@ std::string Request::check_request(std::string str, Config a)
             // std::cout << "dsadadasdadas\n\n";
             return ErrorResponse::Error_BadRequest(a);
         }
-        
+
         if (tmp[0] == "Content-Length:")
         {
             // lenght = true;
