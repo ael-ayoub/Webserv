@@ -378,9 +378,18 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 	if (state.path == "/uploads")
 	{
 		std::cout << "------------ Handling /uploads POST request -----------" << std::endl;
+		// check if the content length is valid:
 		if (state.content_type != "multipart/form-data" || state.boundary.empty() || state.metadata.empty())
 		{
 			state.response = ErrorResponse::Error_BadRequest(a);
+			state.close = true;
+			state.cleanup = true;
+			state.send_data = true;
+			return state.response;
+		}
+		else if (state.content_length > ServerConfig::client_max_body_size)
+		{
+			state.response = ErrorResponse::Error_PayloadTooLarge(a);
 			state.close = true;
 			state.cleanup = true;
 			state.send_data = true;
