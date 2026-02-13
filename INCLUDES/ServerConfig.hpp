@@ -9,7 +9,7 @@ class ServerConfig
         Vector_str server_config;
         Vector_str server_data;
         std::vector<LocationConfig> Location_Config;
-        std::pair<std::string, int> ip_port;
+        std::vector<std::pair<std::string, int> > ip_port;
         Vector_str server_name;
         std::string path_server_root;
         std::string path_server_index;
@@ -22,7 +22,7 @@ class ServerConfig
         static bool CheckClientMaxBodySize(size_t num);
         LocationConfig get_Location_Config(std::string path);
         
-        std::pair<std::string, int> get_ip();
+        std::vector<std::pair<std::string, int> > get_ip();
         bool checkAdd_fallback();
         std::vector<std::map<int, std::string> > get_error_status();
         int    parse_config(Vector_str server_configg, int from, int to);

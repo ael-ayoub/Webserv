@@ -106,7 +106,7 @@ void syntax_server::check_body_size(Vector_str str)
 void syntax_server::check_listen(Vector_str str)
 {
     int num;
-    if (listen_check == true || str.size() > 2)
+    if (str.size() > 2)
         throw Config::ErrorSyntax();
     listen_check = true;
     str[1] = str[1].erase(str[1].size() - 1); // remove ;
