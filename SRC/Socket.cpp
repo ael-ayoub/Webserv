@@ -107,10 +107,10 @@ std::string generate_log_entry(ClientState &state)
 {
     std::string log_entry;
     // log_entry += "Timestamp: " + to_string(state.timestamp) + " | ";
-    log_entry += format_timestamp(state.timestamp) + " | ";
-    log_entry += "Method: " + state.method + " | ";
-    log_entry += "Path: " + state.path + " | ";
-    log_entry += "Response: " + (state.response.empty() ? "No response generated" : state.response.substr(0, 50) + "...") + " | ";
+    log_entry += format_timestamp(state.timestamp);
+    log_entry += " " + state.method;
+    log_entry += " " + state.path;
+    log_entry += " " + (state.response.empty() ? "No response generated" : state.response.substr(0, 16) + "...");
     return log_entry;
 }
 
@@ -152,8 +152,8 @@ void Socket::Monitor(Config &a)
                     close(fd);
 
                     std::map<int, ClientState>::iterator to_erase = it;
-                    ++it;                   // ✅ advance FIRST
-                    status.erase(to_erase); // ✅ then erase
+                    ++it;           
+                    status.erase(to_erase); 
                 }
                 else
                 {
@@ -255,8 +255,7 @@ void Socket::Monitor(Config &a)
                     }
                     else
                     {
-
-                        std::cout << "Keeping connection alive for fd: " << fd_client << std::endl;
+                        // std::cout << "Keeping connection alive for fd: " << fd_client << std::endl;
                         event_client.data.fd = fd_client;
                         event_client.events = EPOLLIN;
                         if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
