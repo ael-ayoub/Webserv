@@ -95,6 +95,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     else if (state.method == "POST")
     {
+        // std::cout << "client body size is : " << ServerConfig::client_max_body_size << std::endl;
         state.timestamp = get_current_timestamp();
         if (!state.complete_metadata)
         {

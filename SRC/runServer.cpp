@@ -19,8 +19,10 @@ void run_server(std::string av)
 		// std::cout << "HEEEERE\n";
 
 		std::vector<ServerConfig> tmp_a = a.get_allserver_config();
-		for (size_t i = 0; i < tmp_a.size(); i++)
-			ports.push_back(tmp_a[i].get_ip());
+
+		ports = tmp_a[0].get_ip();
+		// std::cout << ports[0].second << std::endl;
+		// std::cout << ports[1].second << std::endl;
 
 		Socket socket(ports);
 		socket.run(a);
