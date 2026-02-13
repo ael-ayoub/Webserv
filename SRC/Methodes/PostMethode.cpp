@@ -127,12 +127,9 @@ void Upload_files(ClientState &state, const int &fd_client, Config &a)
 		if (state.readstring.find(state.end_boundary) != std::string::npos)
 		{
 			size_t end = state.readstring.find(state.end_boundary);
-			// size_t size_to_write =
 			std::string to_write = state.readstring.substr(0, end);
 			if (write(state.fd_upload, to_write.c_str(), to_write.size()) == -1)
 			{
-				// genertae error
-				// remove file
 				std::cerr << "Error: Failed to write to file '" << state.filename_upload << "': "
 						  << strerror(errno) << std::endl;
 				close(state.fd_upload);
@@ -221,7 +218,15 @@ void Upload_files(ClientState &state, const int &fd_client, Config &a)
 			}
 			else
 			{
-				state.readstring.append(buffer, n);
+				try
+				{
+					state.readstring.append(buffer, n);
+				}
+				catch(const std::exception& e)
+				{
+					std::cerr << e.what() << '\n';
+				}
+				
 				state.waiting = false;
 			}
 		}
