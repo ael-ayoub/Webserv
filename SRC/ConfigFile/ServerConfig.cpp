@@ -10,7 +10,7 @@ std::vector<std::map<int, std::string> > ServerConfig::get_error_status()
     return errorStatus_pathError;
 }
 
-std::pair<std::string, int> ServerConfig::get_ip()
+std::vector<std::pair<std::string, int> > ServerConfig::get_ip()
 {
     return ip_port;
 }
@@ -160,15 +160,15 @@ void    ServerConfig::store_server_info()
                 int port_tmp;
                 std::istringstream(tmp.second) >> port_tmp;
                 if (tmp.first == "localhost")
-                    ip_port = std::make_pair("127.0.0.1", port_tmp);
+                    ip_port.push_back(std::make_pair("127.0.0.1", port_tmp));
                 else
-                    ip_port = std::make_pair(tmp.first, port_tmp);
+                    ip_port.push_back(std::make_pair(tmp.first, port_tmp));
             }
             else
             {
                 int port_tmp;
                 std::istringstream(a.second) >> port_tmp;
-                ip_port = std::make_pair("", port_tmp);
+                ip_port.push_back(std::make_pair("", port_tmp));
             }
         }
         else if (a.first == "server_name")
@@ -212,8 +212,8 @@ void ServerConfig::print_info_server()
 {
     size_t i = 0;
     std::cout << "--------------------------------------\n";
-    std::cout << "ip :" << ip_port.first << "." << std::endl;
-    std::cout << "port_num :" << ip_port.second << "." << std::endl;
+    // std::cout << "ip :" << ip_port.first << "." << std::endl;
+    // std::cout << "port_num :" << ip_port.second << "." << std::endl;
     while (i < server_name.size())
     {
         std::cout << "server name :" << server_name[i] << "." << std::endl;

@@ -81,6 +81,8 @@ void Config::print_confiFile()
 
 int    Config::stores_config()
 {
+    bool check = false;
+
     while (first_last.first != -1 && first_last.second != -1)
     {
         ServerConfig tmp;
@@ -93,8 +95,15 @@ int    Config::stores_config()
         {
             break;
         }
-        tmp.parse_config(file_lines, first_last.first, first_last.second);
-        Servers_Config.push_back(tmp);
+        if (check == false)
+        {
+            tmp.parse_config(file_lines, first_last.first, first_last.second);
+            Servers_Config.push_back(tmp);
+            check = true;
+        }
+        else
+            throw Config::ErrorSyntax();
+
         first_last.first = first_last.second + 1;
     }
     //check if a fallback is set

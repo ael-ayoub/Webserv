@@ -398,7 +398,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 {
 
     std::vector<ServerConfig> servers = a.get_allserver_config();
-    std::pair<std::string, int> ip_port;
+    // std::vector<std::pair<std::string, int> > ip_ports;
     Request test_request;
     std::string response;
 
@@ -426,7 +426,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         else
         {
             char buffer[1000];
-            size_t b = read(fd_client, buffer, 1000);
+            ssize_t b = read(fd_client, buffer, 1000);
             if (b < 0)
                 return;
             buffer[b] = '\0';
@@ -453,21 +453,23 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         }
         else 
         {
-            size_t i = 0;
+            // size_t i = 0;
             response = test_request.parse_request((char *)state.header.c_str(), a);
-            while (i < servers.size())
-            {
-                ip_port = servers[i].get_ip();
-                if (ip_port.first == test_request.get_Hostname() && ip_port.second == test_request.get_port())
-                break;
-                i++;
-            }
+            // while (i < servers.size())
+            // {
+            //     ip_ports = servers[i].get_ip();
+            //     // if (ip_ports.first == test_request.get_Hostname() && ip_ports.second == test_request.get_port())
+            //     //     break;
+            //     i++;
+            // }
+            // servers[0].get_ip
             if (response == "NONE")
-            response = m.GetMethod(a, test_request, servers[i]);
+                response = m.GetMethod(a, test_request, servers[0]);
         }
     }
     else if (state.method == "POST")
     {
+        // std::cout << "client body size is : " << ServerConfig::client_max_body_size << std::endl;
         if (state.path == "/uploads" && !state.complete_upload)
         {
             if (_uploadFile(fd_client, state) == false)

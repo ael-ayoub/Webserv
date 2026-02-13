@@ -18,8 +18,8 @@ void run_server()
 		a.store_file(path);
 
 		std::vector<ServerConfig> tmp_a = a.get_allserver_config();
-		for (size_t i = 0; i < tmp_a.size(); i++)
-			ports.push_back(tmp_a[i].get_ip());
+		// for (size_t i = 0; i < tmp_a.size(); i++)
+			ports = tmp_a[0].get_ip();
 		Socket socket(ports);
 		socket.run(a);
 	}
