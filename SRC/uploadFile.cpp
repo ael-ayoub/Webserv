@@ -53,7 +53,6 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 	char buffer[4096];
 	std::vector<char> &tail = state.tail;
 	bool found = false;
-
 	while (!found)
 	{
 		ssize_t byte_read = read(fd_client, buffer, sizeof(buffer));
@@ -73,7 +72,6 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 				state.fd_upload = -1;
 				return false;
 			}
-
 		}
 
 		std::vector<char> check;
@@ -96,7 +94,6 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 		}
 		else
 		{
-
 			size_t write_size = check.size();
 
 			if (write_size >= end_boundary.size())
