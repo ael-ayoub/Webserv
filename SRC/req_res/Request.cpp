@@ -1,5 +1,53 @@
 #include "../../INCLUDES/Request.hpp"
 
+int hex_value(char c)
+{
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    if (c >= 'a' && c <= 'f')
+        return 10 + (c - 'a');
+    if (c >= 'A' && c <= 'F')
+        return 10 + (c - 'A');
+    return -1;
+}
+
+bool url_decode_path(const std::string &in, std::string &out)
+{
+    out.clear();
+    out.reserve(in.size());
+    for (size_t i = 0; i < in.size(); i++)
+    {
+        if (in[i] != '%')
+        {
+            out += in[i];
+            continue;
+        }
+        if (i + 2 >= in.size())
+            return false;
+        int j = hex_value(in[i + 1]);
+        int k = hex_value(in[i + 2]);
+        if (j < 0 || k < 0)
+            return false;
+        unsigned char decoded = (unsigned char)((j << 4) | k);
+        if (decoded == '?')
+        {
+            out += '%';
+            out += in[i + 1];
+            out += in[i + 2];
+        }
+        else if (decoded == '\0')
+        {
+            return false;
+        }
+        else
+        {
+            out += (char)decoded;
+        }
+        i += 2;
+    }
+    return true;
+}
+
 int Request::get_port()
 {
     return port;
@@ -44,7 +92,12 @@ std::string Request::check_requestline(std::string request_line, Config a)
     if (args[2] != "HTTP/1.1\r\n" && args[2] != "HTTP/1.0\r\n")
         return ErrorResponse::Error_BadRequest(a);
     method = args[0];
-    path = args[1];
+
+    std::string decoded;
+    if (!url_decode_path(args[1], decoded))
+        return ErrorResponse::Error_BadRequest(a);
+    path = decoded;
+
     HTTP = args[2];
     return "NONE";
 }
