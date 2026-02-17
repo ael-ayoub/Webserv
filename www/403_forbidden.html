@@ -1,11 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>403 Forbidden</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 FORBIDDEN - WEBSERV</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
-    <h1>403 Forbidden</h1>
-    <p>You don’t have permission to access this resource.</p>
+    <header>
+        <div class="title-block">
+            <h1 class="brutalist-title">ERROR 403</h1>
+        </div>
+        <nav>
+            <a href="/index.html">HOME</a>
+            <a href="/about.html">ABOUT</a>
+            <a href="/upload.html">UPLOAD</a>
+            <a href="/uploads_manager.html">UPLOADS</a>
+            <a href="/session.html">SESSION</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="content-split">
+                <div class="hero-text">
+                    <h2>ACCESS_DENIED</h2>
+                    <p class="description">YOU DO NOT HAVE PERMISSION TO ACCESS THIS RESOURCE.</p>
+
+                    <div class="brutalist-box" style="margin-top: 2rem; border-color: #ff4444;">
+                        <span class="box-number" style="background: #ff4444;">!</span>
+                        <h3>TECHNICAL DETAIL</h3>
+                        <p>The server understood the request but is refusing to fulfill it. This is typically due to insufficient file permissions (chmod) or disabled directory indexing.</p>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <a href="/index.html" class="brutalist-box"
+                            style="display: inline-block; text-decoration: none; background: var(--text-primary); color: var(--bg-primary); padding: 1rem 2rem;">
+                            RETURN TO HOME
+                        </a>
+                    </div>
+                </div>
+
+                <div class="hero-image"
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div
+                        style="width: 100%; max-width: 400px; border: 4px solid black; background: white; box-shadow: 10px 10px 0px black;">
+
+                        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"
+                            style="display: block; width: 100%; height: auto;">
+                            <rect width="100%" height="100%" fill="white" />
+
+                            <text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle"
+                                font-family="sans-serif" font-size="60" font-weight="900" fill="black">
+                                403
+                            </text>
+
+                            <rect x="0" y="65%" width="100%" height="40" fill="black" />
+                            <text x="50%" y="78%" dominant-baseline="middle" text-anchor="middle"
+                                font-family="monospace" font-size="14" font-weight="bold" fill="white">
+                                FORBIDDEN
+                            </text>
+
+                            <text x="10" y="190" font-family="monospace" font-size="8" fill="black" opacity="0.5">
+                                STATUS: 403_PERMISSION_STRICT
+                            </text>
+                        </svg>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 WEBSERV PROJECT | ERROR_HANDLER_MODULE</p>
+    </footer>
 </body>
+
 </html>

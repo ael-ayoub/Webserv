@@ -161,7 +161,7 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
                         return cgi.response;
 					if (cgi.TimedOut())
 						return ErrorResponse::Error_GatewayTimeout(a);
-					return ErrorResponse::default_response_error("500");
+					return ErrorResponse::Error_Internal_Server(a);
                 }
             }
             return Response::Display_file(last_path, a);

@@ -29,6 +29,7 @@ void run_server(std::string av);
 #include "socketConfig.hpp"
 #include <sys/time.h>
 
+std::string get_current_path();
 bool _parse_header(ClientState &state, int fd_client, Request &request, Config &a);
 bool _process_get_delete_request(int fd_client, ClientState &state, Request &request, Config &a, std::vector<ServerConfig> &servers, Methodes &m);
 bool _parse_metadata(ClientState &state, int fd_client, Config &a);
