@@ -17,6 +17,9 @@ std::vector<std::pair<std::string, int> > ServerConfig::get_ip()
 
 bool ServerConfig::CheckClientMaxBodySize(size_t num)
 {
+    // Treat 0 as "unlimited".
+    if (client_max_body_size == 0)
+        return false;
     if (num > client_max_body_size)
         return true;
     return false;

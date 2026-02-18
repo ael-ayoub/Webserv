@@ -107,9 +107,12 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
             }
             else
             {
-                // std::cout << "im hare "
-                // std::cout << "############ [..] handle normal metadata for fd: " << fd_client << std::endl;
-                state.metadata = state.readstring;
+                // For non-multipart POST, keep body in `readstring` for streaming endpoints (uploads/CGI).
+                // Only mirror into `metadata` for small form-style endpoints.
+                if (state.path == "/login" || state.path == "/check_user")
+                    state.metadata = state.readstring;
+                else
+                    state.metadata.clear();
                 state.complete_metadata = true;
                 state.waiting = false;
             }

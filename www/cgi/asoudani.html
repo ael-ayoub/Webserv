@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayoub Soudani | CV</title>
+    <style>
+        :root {
+            --accent: #e5e7eb;
+            --bg-dark: #000000;
+            --glass: rgba(255, 255, 255, 0.06);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.65);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top left, #1a1a1a, #000000);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .cv-wrapper {
+            max-width: 900px;
+            width: 100%;
+            margin: 40px 20px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Profile Header Section */
+        .banner {
+            height: 160px;
+            background: linear-gradient(135deg, #1f1f1f 0%, #000000 100%);
+            /* Replace with: background: url('banner.jpg') center/cover; */
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-section {
+            padding: 0 40px 20px 40px;
+            margin-top: 0;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.12);
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.06);
+            display: block;
+            margin-top: -70px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .header-text h1 { margin: 15px 0 5px 0; font-size: 2.2rem; }
+        .header-text .headline { color: var(--accent); font-weight: 500; font-size: 1.1rem; }
+        .contact-links { margin-top: 10px; font-size: 0.85rem; color: var(--text-muted); }
+
+        /* Content Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            padding: 30px 40px;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .profile-section { text-align: center; }
+        }
+
+        section { margin-bottom: 30px; }
+        h2 { 
+            font-size: 1rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            color: var(--accent); 
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        h2::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); margin-left: 15px; }
+
+        .entry { margin-bottom: 20px; }
+        .entry-top { display: flex; justify-content: space-between; font-weight: 600; }
+        .org-name { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; }
+        .date-label { color: var(--accent); font-family: monospace; font-size: 0.8rem; }
+        
+        ul { padding-left: 18px; color: var(--text-muted); font-size: 0.95rem; }
+        li { margin-bottom: 8px; }
+
+        /* Skill Tags */
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--accent);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .sidebar-box {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="cv-wrapper">
+    <div class="banner"></div>
+    
+    <div class="profile-section">
+        <img src="../images/profile.jpg" alt="Ayoub Soudani" class="profile-img">
+        <div class="header-text">
+            <h1>AYOUB SOUDANI</h1>
+            <div class="headline">DevOps & Backend Infrastructure Student</div>
+            <div class="contact-links">
+                📍 Ben Guerir, Morocco • 🔗 linkedin.com/in/ayoubsoudani
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="main-col">
+            <section>
+                <h2>Experience</h2>
+                <div class="entry">
+                    <div class="entry-top">
+                        <span>Event Manager</span>
+                        <span class="date-label">2024 — PRESENT</span>
+                    </div>
+                    <div class="org-name">LeetsEvents (1337 Coding School)</div>
+                    <ul>
+                        <li>Led <b>Integration Week 2025</b>, coordinating technical talks and community events.</li>
+                        <li>Managed large-scale event logistics for the 1337-UM6P community.</li>
+                    </ul>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-top">
+                        <span>Organizing Team Member</span>
+                        <span class="date-label">OCT 2025</span>
+                    </div>
+                    <div class="org-name">NullHat Morocco (HackerOne & Epic Games)</div>
+                    <ul>
+                        <li>Supported the execution of Morocco's first Live Hacking Event ($12,500 bounties).</li>
+                        <li>Collaborated with global security leaders to facilitate talent-rewarding competitions.</li>
+                    </ul>
+                </div>
+                <div class="entry">
+                    <div class="entry-top">
+                        <span>Organizing Team Member</span>
+                        <span class="date-label">Jan 2026</span>
+                    </div>
+                    <div class="org-name">AMDL Africa 2026 (1337 & AMDL Africa)</div>
+                    <ul>
+                        <li>Collaborated the AMLD Africa AI Hackathon at 1337, challenging participants to engineer AI-driven solutions tailored to enhancing the "Student Life" experience.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>Technical Projects</h2>
+                <div class="entry">
+                    <div class="entry-top"><span>Inception</span></div>
+                    <ul>
+                        <li>Virtualization of a multi-service infrastructure using Docker Compose, Nginx, and MariaDB.</li>
+                    </ul>
+                </div>
+                <div class="entry">
+                    <div class="entry-top"><span>Minishell</span></div>
+                    <ul>
+                        <li>Built a custom Unix shell in C, implementing pipes and signal management.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>Hackathons</h2>
+                <div class="entry">
+                    <div class="entry-top"><span>NASA Space Apps</span><span class="date-label">2025</span></div>
+                    <p style="color:var(--text-muted); font-size: 0.9rem;">Trained ML models on Kepler data to hunt for exoplanets.</p>
+                </div>
+                <div class="entry">
+                    <div class="entry-top"><span>AI x Collective Intelligence</span><span class="date-label">2026</span></div>
+                    <p style="color:var(--text-muted); font-size: 0.9rem;">Explored AI Agent workflows to accelerate technical innovation.</p>
+                </div>
+            </section>
+        </div>
+
+        <div class="side-col">
+            <section>
+                <h2>Technical Stack</h2>
+                <div class="sidebar-box">
+                    <div class="tag-cloud">
+                        <span class="tag">Docker</span> <span class="tag">Linux</span>
+                        <span class="tag">Git</span> <span class="tag">C/C++</span>
+                        <span class="tag">Python</span> <span class="tag">Bash</span>
+                        <span class="tag">Nginx</span> <span class="tag">VirtualBox</span>
+                        <span class="tag">Figma</span> <span class="tag">Notion</span>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Education</h2>
+                <div class="sidebar-box">
+                    <strong>1337 Coding School</strong><br>
+                    <span style="color:var(--text-muted); font-size:0.85rem;">UM6P - 42 Network</span><br>
+                    <span class="date-label">In Progress</span>
+                </div>
+            </section>
+
+            <section>
+                <h2>Soft Skills</h2>
+                <div class="tag-cloud">
+                    <span class="tag">Leadership</span>
+                    <span class="tag">Public Relations</span>
+                    <span class="tag">Logistics</span>
+                    <span class="tag">Communication</span>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
