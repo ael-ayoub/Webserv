@@ -119,22 +119,28 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
     std::string error_status;
     std::stringstream ss;
 
+    bool BreakLoop = false;
     while (i < error.size())
     {
         std::map<int, std::string>::iterator it;
         for (it = error[i].begin(); it != error[i].end(); ++it) 
         {
+            std::cout << "status code is : " << status_code << ", we found is : " << it->first << std::endl;
             err_tmp[it->first] = it->second;
             if (it->first == status_code)
             {
                 ss << it->first;
                 error_status = ss.str();
-                path = it->second;
+                path = get_current_path() + it->second;
+                BreakLoop = true;
                 break;
             }
         }
+        if (BreakLoop == true)
+            break;
         i++;
     }
+    
     // int key = err_tmp.begin();
     // ss << err_tmp.begin();
     // error_status = ss.str();
@@ -198,6 +204,15 @@ std::string ErrorResponse::Error_MethodeNotAllowed(Config a)
     return header;
 }
 
+// std::string get_current_path()
+// {
+//     char buffer[PATH_MAX];
+//     if (getcwd(buffer, sizeof(buffer)) != NULL)
+//         return std::string(buffer);
+//     return "";
+// }
+
+
 std::string ErrorResponse::Responde(Config &a, std::string path, std::string &head, std::string status)
 {
     std::string body, header, s, line;
@@ -237,9 +252,28 @@ std::string ErrorResponse::Error_NotFound(Config &a)
     std::string header = check_errorstatus(error, 404, path);
 
     if (header.empty() == true)
+    {
         return default_response_error("404");
+    }
         
     header += Responde(a, path, header, "404");
+    return header;
+}
+
+std::string ErrorResponse::Error_Internal_Server(Config &a)
+{
+    std::string path, line, body, s;
+
+    ServerConfig tmp = a.get_server_config();
+
+    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
+
+    std::string header = check_errorstatus(error, 500, path);
+
+    if (header.empty() == true)
+        return default_response_error("500");
+        
+    header += Responde(a, path, header, "500");
     return header;
 }
 
