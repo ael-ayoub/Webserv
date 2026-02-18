@@ -5,15 +5,32 @@ CGI::CGI(const char *RequestType,
 		const char *FilePath,
 		const char *Language,
 		const char *CgiBinary,
-		const char **Env) : requestType(RequestType),
+        const char **Env) : requestType(RequestType),
 		Filepath(FilePath), language(Language),
-        cgiBinary(CgiBinary), env(Env), timed_out(false)
+        cgiBinary(CgiBinary), env(Env), stdin_path(""), timed_out(false)
 {
 	execArg = new char*[3];
 	execArg[0] = const_cast<char *>(cgiBinary);
 	execArg[1] = const_cast<char *>(Filepath);
 	execArg[2] = NULL;
 	file.open("./SRC/temp/temp.txt", std::ios::out);
+}
+
+CGI::CGI(const char *RequestType,
+        const char *FilePath,
+        const char *Language,
+        const char *CgiBinary,
+        const char **Env,
+        const char *StdinFile) : requestType(RequestType),
+        Filepath(FilePath), language(Language),
+        cgiBinary(CgiBinary), env(Env), timed_out(false)
+{
+    stdin_path = (StdinFile ? StdinFile : "");
+    execArg = new char*[3];
+    execArg[0] = const_cast<char *>(cgiBinary);
+    execArg[1] = const_cast<char *>(Filepath);
+    execArg[2] = NULL;
+    file.open("./SRC/temp/temp.txt", std::ios::out);
 }
 
 bool CGI::CGIProccess()
@@ -51,6 +68,17 @@ int CGI::CGIOutput()
     if (id == 0)
     {
         close(piped[0]);
+        // for Post method, we need to send the body to the CGI script via stdin
+        if (!stdin_path.empty())
+        {
+            int in = open(stdin_path.c_str(), O_RDONLY);
+            if (in != -1)
+            {
+                dup2(in, 0);
+                close(in);
+            }
+        }
+
         dup2(piped[1], 1);
         close(piped[1]);
         execve(cgiBinary, execArg, (char **)env);
@@ -113,7 +141,7 @@ int CGI::responseWrapper()
     std::string lines = output.str();
 	file.close();
 
-    // Normalize CGI output to CRLF so HTTP clients parse headers reliably.
+    // make CGI output CRLF so HTTP clients parse headers.
     std::string normalized;
     normalized.reserve(lines.size() + 16);
     for (size_t i = 0; i < lines.size(); i++)
@@ -136,7 +164,7 @@ int CGI::responseWrapper()
         size_t sep = normalized.find("\r\n\r\n");
         if (sep == std::string::npos)
         {
-            // If CGI didn't produce a valid header/body separator, treat as body.
+            // if CGI didn't produce a valid header/body separator, treat as body.
             std::ostringstream contentLengthStream;
             contentLengthStream << normalized.length();
             response = statusLine +

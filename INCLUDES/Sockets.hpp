@@ -24,6 +24,7 @@ public:
 	std::string header;
 	std::string readstring;
 	std::string metadata;
+	std::string raw_content_type;
 	std::string filename;
 	std::string boundary;
 	std::string end_boundary;
@@ -31,6 +32,7 @@ public:
 	std::string path;
 	std::string filename_upload;
 	size_t byte_uploaded;
+	size_t body_received;
 
 	bool close;
 	bool cleanup;
@@ -45,6 +47,8 @@ public:
 
 	std::pair<std::string, std::string> session;
 	int fd_upload;
+	int fd_body;
+	std::string body_tmp_path;
 	bool complete_metadata;
 	int expected_content_length;
 	bool complete_header;
@@ -62,8 +66,10 @@ public:
 		waiting = false;
 		send_data = false;
 		fd_upload = -1;
+		fd_body = -1;
 		timestamp = 0;
 		byte_uploaded = 0;
+		body_received = 0;
 	}
 };
 

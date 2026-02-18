@@ -20,23 +20,67 @@
 // 	return "";
 // }
 
-size_t content_length(const std::string &header)
+static std::string _lower(const std::string &s)
 {
-    size_t pos = header.find("Content-Length:");
-    if (pos != std::string::npos)
-    {
-        size_t end = header.find("\r\n", pos);
-        if (end != std::string::npos)
-        {
-            std::string len_str = header.substr(pos + 15, end - pos - 15);
-            // return static_cast<size_t>(std::stoul(len_str));
-            std::stringstream ss(len_str);
-            size_t length;
-            ss >> length;
-            return length;
-        }
-    }
-    return 0;
+    std::string out = s;
+    for (size_t i = 0; i < out.size(); i++)
+        out[i] = (char)std::tolower(out[i]);
+    return out;
+}
+
+static size_t content_length(const std::string &header)
+{
+    std::string h = _lower(header);
+    const std::string key = "content-length:";
+    size_t pos = h.find(key);
+    if (pos == std::string::npos)
+        return 0;
+    pos += key.size();
+    while (pos < h.size() && (h[pos] == ' ' || h[pos] == '\t'))
+        pos++;
+    size_t end = h.find("\r\n", pos);
+    if (end == std::string::npos)
+        end = h.size();
+    std::string len_str = header.substr(pos, end - pos);
+    std::stringstream ss(len_str);
+    size_t length = 0;
+    ss >> length;
+    return length;
+}
+
+static std::string _header_value(const std::string &header, const std::string &key)
+{
+    std::string h = _lower(header);
+    std::string needle = _lower(key) + ":";
+    size_t pos = h.find(needle);
+    if (pos == std::string::npos)
+        return "";
+    pos += needle.size();
+    while (pos < header.size() && (header[pos] == ' ' || header[pos] == '\t'))
+        pos++;
+    size_t end = header.find("\r\n", pos);
+    if (end == std::string::npos)
+        end = header.size();
+    return header.substr(pos, end - pos);
+}
+
+static std::string _boundary_from_content_type(const std::string &content_type)
+{
+    std::string ct = _lower(content_type);
+    size_t b = ct.find("boundary=");
+    if (b == std::string::npos)
+        return "";
+    b += 9;
+    size_t end = content_type.find(';', b);
+    if (end == std::string::npos)
+        end = content_type.find(' ', b);
+    if (end == std::string::npos)
+        end = content_type.size();
+    std::string val = content_type.substr(b, end - b);
+    // strip quotes
+    if (val.size() >= 2 && val[0] == '"' && val[val.size() - 1] == '"')
+        val = val.substr(1, val.size() - 2);
+    return val;
 }
 
 bool _parse_header(ClientState &state, int fd_client, Request &request, Config &a)
@@ -92,7 +136,8 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
             }
             state.timestamp = get_current_timestamp();
             std::cout << "Complete header received from fd: " << fd_client << std::endl;
-            state.header = state.readstring.substr(0, pos);
+            state.header = state.readstring.substr(0, pos + 2);  // Include the final \r\n
+            std::cout << "DEBUG: Full header received:\n[" << state.header << "]" << std::endl;
             if (state.header.size() > HEADER_SIZE)
             {
                 state.response = ErrorResponse::Error_BadRequest(a);
@@ -103,7 +148,16 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
             }
             state.complete_header = true;
             state.readstring.erase(0, pos + 4);
-            request.parse_request(state.header, a);
+            std::string parse_res = request.parse_request(state.header, a);
+            if (parse_res != "NONE")
+            {
+                state.response = parse_res;
+                state.close = true;
+                state.cleanup = true;
+                state.send_data = true;
+                state.waiting = false;
+                return false;
+            }
             int len =  request.get_content_length();
             std::cout << "content_length: " << len << std::endl;
             state.method = request.get_method();
@@ -111,14 +165,15 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
             state.content_length = content_length(state.header);
             // std::cout << "Content-Length: " << state.content_length << std::endl;
             state.timestamp = get_current_timestamp();
-            if (state.header.find("Content-Type: multipart/form-data") != std::string::npos)
+
+            state.raw_content_type = _header_value(state.header, "Content-Type");
+            if (_lower(state.raw_content_type).find("multipart/form-data") != std::string::npos)
             {
-                size_t boundary_pos = state.header.find("boundary=");
-                if (boundary_pos != std::string::npos)
-                {
-                    state.boundary = "--" + state.header.substr(boundary_pos + 9, state.header.find("\r\n", boundary_pos) - (boundary_pos + 9));
+                std::string b = _boundary_from_content_type(state.raw_content_type);
+                if (!b.empty())
+                    state.boundary = "--" + b;
+                if (!state.boundary.empty())
                     state.end_boundary = state.boundary + "--";
-                }
                 state.content_type = "multipart/form-data";
             }
             else 
@@ -285,14 +340,22 @@ bool _process_post_request(int fd_client, ClientState &state, Config &a, Methode
         }
         state.timestamp = get_current_timestamp();
 
-        m.PostMethod(a,fd_client, state);
-        state.send_data = true;
-        state.cleanup = true;
+        m.PostMethod(a, fd_client, state);
+        if (state.waiting)
+            return true;
+
+        if (!state.send_data)
+        {
+            state.response = ErrorResponse::Error_BadRequest(a);
+            state.send_data = true;
+            state.cleanup = true;
+            state.close = true;
+        }
+
         if (state.header.find("Connection: close") != std::string::npos)
         {
             std::cout << "the client send Connection: close header, so we close the connection after response.\n";
             state.close = true;
         }
-    // }
     return true;
 }
