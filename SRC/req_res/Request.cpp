@@ -242,10 +242,10 @@ std::string Request::check_request(std::string str, Config a)
         {
             tmp += '\n';
             args.push_back(tmp);
-            std::cout << "DEBUG parse line " << args.size() << ": [" << tmp << "]";
-            if (tmp.size() >= 2)
-                std::cout << " (last 2 chars: '" << (int)(unsigned char)tmp[tmp.size()-2] << "' '" << (int)(unsigned char)tmp[tmp.size()-1] << "')";
-            std::cout << std::endl;
+            // std::cout << "DEBUG parse line " << args.size() << ": [" << tmp << "]";
+            // if (tmp.size() >= 2)
+            //     std::cout << " (last 2 chars: '" << (int)(unsigned char)tmp[tmp.size()-2] << "' '" << (int)(unsigned char)tmp[tmp.size()-1] << "')";
+            // std::cout << std::endl;
             // std::cout << "str is : " << tmp << std::endl;
             // std::cout << "b is : " << b << ", size total is : " << str.size() << std::endl;
             // if (str.size() - 1 == b)

@@ -384,12 +384,70 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 	state.fd_upload = -1;
 	std::cout << "File upload completed: " << state.filename_upload << std::endl;
 	state.complete_upload = true;
-	const std::string body = "File uploaded successfully.";
+	
+	// Extract filename from path
+	std::string filename = state.filename_upload;
+	size_t last_slash = filename.find_last_of('/');
+	if (last_slash != std::string::npos)
+		filename = filename.substr(last_slash + 1);
+	
+	std::string body = 
+		"<!DOCTYPE html>\n"
+		"<html lang=\"en\">\n"
+		"<head>\n"
+		"    <meta charset=\"UTF-8\">\n"
+		"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+		"    <title>UPLOAD SUCCESS - WEBSERV</title>\n"
+		"    <link rel=\"stylesheet\" href=\"/style.css\">\n"
+		"</head>\n"
+		"<body>\n"
+		"    <header>\n"
+		"        <div class=\"title-block\">\n"
+		"            <h1 class=\"brutalist-title\">UPLOAD SUCCESS</h1>\n"
+		"        </div>\n"
+		"        <nav>\n"
+		"            <a href=\"/index.html\">HOME</a>\n"
+		"            <a href=\"/about.html\">ABOUT</a>\n"
+		"            <a href=\"/upload.html\">UPLOAD</a>\n"
+		"            <a href=\"/uploads_manager.html\">UPLOADS</a>\n"
+		"            <a href=\"/session.html\">SESSION</a>\n"
+		"            <a href=\"/cgi_test.html\">CGI TEST</a>\n"
+		"        </nav>\n"
+		"    </header>\n"
+		"\n"
+		"    <main>\n"
+		"        <section class=\"page-header\">\n"
+		"            <h1>FILE UPLOADED</h1>\n"
+		"            <p style=\"margin-top: 1rem; color: var(--text-secondary);\">POST REQUEST COMPLETED SUCCESSFULLY</p>\n"
+		"        </section>\n"
+		"\n"
+		"        <section class=\"content-section\">\n"
+		"            <div class=\"brutalist-box\" style=\"background: #d4edda; border-color: #28a745;\">\n"
+		"                <span class=\"box-number\" style=\"background: #28a745; color: white;\">✓</span>\n"
+		"                <h2>UPLOAD COMPLETED</h2>\n"
+		"                <p style=\"margin-top: 1rem; font-size: 1.1rem;\">The following file has been successfully uploaded:</p>\n"
+		"                <div style=\"margin-top: 1.5rem; padding: 1rem; background: white; border: 2px solid #000;\">\n"
+		"                    <code style=\"font-size: 1.2rem; font-weight: bold;\">" + filename + "</code>\n"
+		"                </div>\n"
+		"                <div style=\"margin-top: 2rem;\">\n"
+		"                    <a href=\"/uploads_manager.html\" class=\"brutalist-link\">VIEW ALL UPLOADS →</a>\n"
+		"                    <a href=\"/upload.html\" class=\"brutalist-link\" style=\"margin-left: 1rem;\">UPLOAD ANOTHER FILE →</a>\n"
+		"                </div>\n"
+		"            </div>\n"
+		"        </section>\n"
+		"    </main>\n"
+		"\n"
+		"    <footer>\n"
+		"        <p>© 2026 WEBSERV PROJECT | C++98 COMPLIANT</p>\n"
+		"    </footer>\n"
+		"</body>\n"
+		"</html>\n";
+	
 	std::ostringstream oss;
 	oss << body.size();
 	state.response =
 		"HTTP/1.1 200 OK\r\n"
-		"Content-Type: text/plain\r\n"
+		"Content-Type: text/html\r\n"
 		"Content-Length: " + oss.str() + "\r\n";
 	if (state.header.find("Connection: close") != std::string::npos)
 		state.response += "Connection: close\r\n";

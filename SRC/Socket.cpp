@@ -245,7 +245,9 @@ void Socket::Monitor(Config &a)
                             it->second.cleanup = true;
                         }
                     }
-                    if (it->second.header.find("Connection: close") != std::string::npos || it->second.close)
+                    if (it->second.header.find("Connection: close") != std::string::npos || 
+                        it->second.response.find("Connection: close") != std::string::npos || 
+                        it->second.close)
                     {
                         std::cout << "Closing connection for fd: " << fd_client << std::endl;
                         if (it->second.cleanup)

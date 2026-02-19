@@ -177,25 +177,30 @@ std::string Response::Get_delete(std::string path, LocationConfig info_location,
     (void)info_location, (void)test_request, (void)a;
 
     struct stat path_stat;
-    stat(path.c_str(), &path_stat);
+    if (stat(path.c_str(), &path_stat) != 0)
+    {
+        if (errno == ENOENT)
+            return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+        return "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n";
+    }
     if (S_ISDIR(path_stat.st_mode))
-        return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
+        return "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
 
     if (access(path.c_str(), W_OK) != 0)
     {
         if (errno == EACCES)
-            return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
+            return "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
         else if (errno == ENOENT)
-            return "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+            return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
     }
 
     int status = remove(path.c_str());
     if (status != 0)
     {
         if (errno == ENOTEMPTY || errno == EACCES)
-            return "HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n";
+            return "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
         else if (errno == ENOENT)
-            return "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n";
+            return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
     }
-    return "HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n";
+    return "HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n\r\n";
 }

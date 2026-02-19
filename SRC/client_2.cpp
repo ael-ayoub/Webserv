@@ -137,7 +137,7 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
             state.timestamp = get_current_timestamp();
             std::cout << "Complete header received from fd: " << fd_client << std::endl;
             state.header = state.readstring.substr(0, pos + 2);  // Include the final \r\n
-            std::cout << "DEBUG: Full header received:\n[" << state.header << "]" << std::endl;
+            // std::cout << "DEBUG: Full header received:\n[" << state.header << "]" << std::endl;
             if (state.header.size() > HEADER_SIZE)
             {
                 state.response = ErrorResponse::Error_BadRequest(a);
