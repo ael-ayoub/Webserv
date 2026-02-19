@@ -18,6 +18,7 @@ class ErrorResponse
         static std::string Responde(Config &a, std::string path, std::string &head, std::string status);
         static std::string Error_InternalServerError();
         static std::string default_response_error(std::string status_code);
+        static std::string generate_error_page(std::string status_code);
         static std::string Error_Internal_Server(Config &a);
         // static std::string response_error(Config a, std::string last);
 };

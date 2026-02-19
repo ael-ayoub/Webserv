@@ -78,6 +78,134 @@ std::string ErrorResponse::default_response_error(std::string status_code)
     return response;
 }
 
+std::string ErrorResponse::generate_error_page(std::string status_code)
+{
+    std::string code = status_code.substr(0, 3);
+    std::string message;
+    std::string description;
+    
+    if (code == "400")
+    {
+        message = "Bad Request";
+        description = "Your browser sent a request that this server could not understand.";
+    }
+    else if (code == "403")
+    {
+        message = "Forbidden";
+        description = "You don't have permission to access this resource.";
+    }
+    else if (code == "404")
+    {
+        message = "Not Found";
+        description = "The requested resource could not be found on this server.";
+    }
+    else if (code == "405")
+    {
+        message = "Method Not Allowed";
+        description = "The requested method is not supported for this resource.";
+    }
+    else if (code == "413")
+    {
+        message = "Payload Too Large";
+        description = "The size of the request entity exceeds the maximum allowed limit.";
+    }
+    else if (code == "500")
+    {
+        message = "Internal Server Error";
+        description = "The server encountered an internal error.";
+    }
+    else if (code == "504")
+    {
+        message = "Gateway Timeout";
+        description = "The upstream CGI script did not respond in time.";
+    }
+    else
+    {
+        message = "Error";
+        description = "An error occurred while processing your request.";
+    }
+    
+    std::string body = 
+        "<!DOCTYPE html>\n"
+        "<html lang=\"en\">\n"
+        "<head>\n"
+        "    <meta charset=\"UTF-8\">\n"
+        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+        "    <title>ERROR " + code + " - WEBSERV</title>\n"
+        "    <link rel=\"stylesheet\" href=\"/style.css\">\n"
+        "</head>\n"
+        "<body>\n"
+        "    <header>\n"
+        "        <div class=\"title-block\">\n"
+        "            <h1 class=\"brutalist-title\">ERROR</h1>\n"
+        "        </div>\n"
+        "        <nav>\n"
+        "            <a href=\"/index.html\">HOME</a>\n"
+        "            <a href=\"/about.html\">ABOUT</a>\n"
+        "            <a href=\"/upload.html\">UPLOAD</a>\n"
+        "            <a href=\"/uploads_manager.html\">UPLOADS</a>\n"
+        "            <a href=\"/session.html\">SESSION</a>\n"
+        "            <a href=\"/cgi_test.html\">CGI TEST</a>\n"
+        "        </nav>\n"
+        "    </header>\n"
+        "\n"
+        "    <main>\n"
+        "        <section class=\"page-header\">\n"
+        "            <h1>" + code + " - " + message + "</h1>\n"
+        "            <p style=\"margin-top: 1rem; color: var(--text-secondary);\">AN ERROR OCCURRED</p>\n"
+        "        </section>\n"
+        "\n"
+        "        <section class=\"content-section\">\n"
+        "            <div class=\"brutalist-box\" style=\"background: #f8d7da; border-color: #dc3545;\">\n"
+        "                <span class=\"box-number\" style=\"background: #dc3545; color: white;\">✕</span>\n"
+        "                <h2>" + message + "</h2>\n"
+        "                <p style=\"margin-top: 1rem; font-size: 1.1rem;\">" + description + "</p>\n"
+        "                <div style=\"margin-top: 2rem;\">\n"
+        "                    <a href=\"/index.html\" class=\"brutalist-link\">BACK TO HOME →</a>\n"
+        "                </div>\n"
+        "            </div>\n"
+        "        </section>\n"
+        "    </main>\n"
+        "\n"
+        "    <footer>\n"
+        "        <p>© 2026 WEBSERV PROJECT | C++98 COMPLIANT</p>\n"
+        "    </footer>\n"
+        "</body>\n"
+        "</html>\n";
+    
+    std::stringstream ss;
+    ss << body.size();
+    std::string s = ss.str();
+    
+    std::string headers = "HTTP/1.1 ";
+    headers += status_code;
+    if (status_code == "200")
+        headers += " OK\r\n";
+    else if (status_code == "204")
+        headers += " No Content\r\n";
+    else if (status_code == "400")
+        headers += " Bad Request\r\n";
+    else if (status_code == "403")
+        headers += " Forbidden\r\n";
+    else if (status_code == "404")
+        headers += " Not Found\r\n";
+    else if (status_code == "405")
+        headers += " Method Not Allowed\r\n";
+    else if (status_code == "413")
+        headers += " Payload Too Large\r\n";
+    else if (status_code == "500")
+        headers += " Internal Server Error\r\n";
+    else if (status_code == "504")
+        headers += " Gateway Timeout\r\n";
+    
+    headers += "Content-Type: text/html\r\n";
+    headers += "Content-Length: " + s + "\r\n";
+    headers += "Connection: close\r\n";
+    headers += "\r\n";
+    
+    return headers + body;
+}
+
 // std::string ErrorResponse::response_error(Config a, std::string last)
 // {
 //     ServerConfig tmp = a.get_server_config();
@@ -174,34 +302,14 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
 
 std::string ErrorResponse::Error_GatewayTimeout(Config &a)
 {
-    std::string path;
-
-    ServerConfig tmp = a.get_server_config();
-    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-    std::string header = check_errorstatus(error, 504, path);
-
-    if (header.empty() == true)
-        return default_response_error("504");
-
-    header += Responde(a, path, header, "504");
-    return header;
+    (void)a;
+    return generate_error_page("504");
 }
 
 std::string ErrorResponse::Error_MethodeNotAllowed(Config a)
 {
-    std::string path, line, body, s;
-
-    ServerConfig tmp = a.get_server_config();
-
-    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-
-    std::string header = check_errorstatus(error, 405, path);
-
-    if (header.empty() == true)
-        return default_response_error("405");
-        
-    header += Responde(a, path, header, "405");
-    return header;
+    (void)a;
+    return generate_error_page("405");
 }
 
 // std::string get_current_path()
@@ -243,89 +351,32 @@ std::string ErrorResponse::Responde(Config &a, std::string path, std::string &he
 
 std::string ErrorResponse::Error_NotFound(Config &a)
 {
-    std::string path, line, body, s;
-
-    ServerConfig tmp = a.get_server_config();
-
-    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-
-    std::string header = check_errorstatus(error, 404, path);
-
-    if (header.empty() == true)
-    {
-        return default_response_error("404");
-    }
-        
-    header += Responde(a, path, header, "404");
-    return header;
+    (void)a;
+    return generate_error_page("404");
 }
 
 std::string ErrorResponse::Error_Internal_Server(Config &a)
 {
-    std::string path, line, body, s;
-
-    ServerConfig tmp = a.get_server_config();
-
-    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-
-    std::string header = check_errorstatus(error, 500, path);
-
-    if (header.empty() == true)
-        return default_response_error("500");
-        
-    header += Responde(a, path, header, "500");
-    return header;
+    (void)a;
+    return generate_error_page("500");
 }
 
 std::string ErrorResponse::Error_BadRequest(Config &a)
 {
-    std::string path, line, body, s;
-
-    ServerConfig tmp = a.get_server_config();
-
-    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-
-    std::string header = check_errorstatus(error, 400, path);
-
-    if (header.empty() == true)
-        return default_response_error("400");
-        
-    header += Responde(a, path, header, "400");
-    return header;
+    (void)a;
+    return generate_error_page("400");
 }
 
 std::string ErrorResponse::Error_PayloadTooLarge(Config &a)
 {
-    std::string path, line, body, s;
-
-    ServerConfig tmp = a.get_server_config();
-
-    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-
-    std::string header = check_errorstatus(error, 400, path);
-
-    if (header.empty() == true)
-        return default_response_error("413");
-        
-    header += Responde(a, path, header, "413");
-    return header;
+    (void)a;
+    return generate_error_page("413");
 }
 
 std::string ErrorResponse::Error_Forbidden(Config &a)
 {
-    std::string path, line, body, s;
-
-    ServerConfig tmp = a.get_server_config();
-
-    std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-
-    std::string header = check_errorstatus(error, 403, path);
-
-    if (header.empty() == true)
-        return default_response_error("403");
-        
-    header += Responde(a, path, header, "403");
-    return header;
+    (void)a;
+    return generate_error_page("403");
 }
 
 std::string ErrorResponse::Error_InternalServerError()
