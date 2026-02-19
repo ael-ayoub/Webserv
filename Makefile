@@ -12,7 +12,7 @@ OBJ = $(SRCS:.cpp=.o)
 
 CC = c++
 
-FLAGS = -Wall # -Wextra -Werror -std=c++98 -g
+FLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
 all: $(NAME)
 
@@ -26,6 +26,6 @@ fclean: clean
 	rm -f $(NAME)
 
 clean:
-	rm -f $(OBJ) ./SRC/temp/*
+	rm -f $(OBJ) ./SRC/temp/* temp.txt
 
 re: fclean all
