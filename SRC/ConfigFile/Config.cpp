@@ -40,6 +40,12 @@ std::string Config::get_mine(std::string path)
         return "image/webp";
     else if (tmp == "pdf")
         return "application/pdf";
+    else if (tmp == "sh")
+    {
+
+        
+        return "application/x-sh";
+    }
     return "application/octet-stream";
 }
 
