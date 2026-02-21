@@ -150,26 +150,30 @@ void Socket::Monitor(Config &a)
 
                     if (!it->second.send_data)
                     {
-                        std::cerr << "\033[1;31m[ERROR]\033[0m Request timeout on fd: " << fd;
-                        if (it->second.content_length > 0)
+                        if (it->second.complete_header || !it->second.readstring.empty())
                         {
-                            size_t received = it->second.byte_uploaded > 0 ? it->second.byte_uploaded : it->second.body_received;
-                            received += it->second.readstring.size();
-                            std::cerr << " - Content-Length declared: " << it->second.content_length
-                                      << " bytes, but only received: " << received << " bytes"
-                                      << " (incomplete body, possible Content-Length mismatch)";
+                            std::cerr << "\033[1;31m[ERROR]\033[0m Request timeout on fd: " << fd;
+                            if (it->second.content_length > 0)
+                            {
+                                size_t received = it->second.byte_uploaded > 0 ? it->second.byte_uploaded : it->second.body_received;
+                                received += it->second.readstring.size();
+                                std::cerr << " - Content-Length declared: " << it->second.content_length
+                                          << " bytes, but only received: " << received << " bytes"
+                                          << " (incomplete body, possible Content-Length mismatch)";
+                            }
+                            std::cerr << std::endl;
+                            it->second.response = ErrorResponse::Error_RequestTimeout(a);
+                            it->second.send_data = true;
+                            it->second.close = true;
+                            it->second.cleanup = true;
+                            it->second.waiting = false;
+                            event_client.data.fd = fd;
+                            event_client.events = EPOLLOUT;
+                            epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd, &event_client);
+                            ++it;
+                            continue;
                         }
-                        std::cerr << std::endl;
-                        it->second.response = ErrorResponse::Error_RequestTimeout(a);
-                        it->second.send_data = true;
-                        it->second.close = true;
-                        it->second.cleanup = true;
-                        it->second.waiting = false;
-                        event_client.data.fd = fd;
-                        event_client.events = EPOLLOUT;
-                        epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd, &event_client);
-                        ++it;
-                        continue;
+                        std::cout << "Keep-alive idle timeout, closing fd: " << fd << std::endl;
                     }
 
                     epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd, NULL);
@@ -325,6 +329,7 @@ void Socket::Monitor(Config &a)
                         it->second.method.clear();
                         it->second.path.clear();
                         it->second = ClientState();
+                        it->second.timestamp = get_current_timestamp();
                     }
                 }
             }
@@ -346,3 +351,5 @@ void Socket::run(Config &a)
         std::cout << e.what() << std::endl;
     }
 }
+
+

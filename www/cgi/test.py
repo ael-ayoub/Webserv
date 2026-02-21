@@ -1,399 +1,155 @@
 #!/usr/bin/env python3
-import time
-import json
-import os
-import psutil
-from datetime import datetime, timedelta
+import random
+from datetime import datetime
 
-# Get real system stats
-current_time = datetime.now()
+# A collection of quotes to cycle through
+quotes = [
+    {"text": "The only way to do great work is to love what you do.", "author": "Steve Jobs"},
+    {"text": "Simplicity is the ultimate sophistication.", "author": "Leonardo da Vinci"},
+    {"text": "Move fast and break things. Unless you are breaking things, you are not moving fast enough.", "author": "Mark Zuckerberg"},
+    {"text": "Code is like humor. When you have to explain it, it’s bad.", "author": "Cory House"},
+    {"text": "Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away.", "author": "Antoine de Saint-Exupéry"},
+    {"text": "Stay hungry, stay foolish.", "author": "Whole Earth Catalog"},
+    {"text": "Design is not just what it looks like and feels like. Design is how it works.", "author": "Steve Jobs"}
+]
 
-# CPU and Memory usage (real)
-cpu_percent = psutil.cpu_percent(interval=0.1)
-memory = psutil.virtual_memory()
-memory_percent = memory.percent
-
-# Disk usage (real)
-disk = psutil.disk_usage('/')
-disk_percent = disk.percent
-
-# Process count
-process_count = len(psutil.pids())
-
-# Uptime calculation
-uptime_seconds = time.time() - psutil.boot_time()
-uptime_days = int(uptime_seconds // 86400)
-uptime_hours = int((uptime_seconds % 86400) // 3600)
-uptime_minutes = int((uptime_seconds % 3600) // 60)
-
-# Formatted time for display
-current_hour = current_time.hour
-current_minute = current_time.minute
-current_second = current_time.second
-formatted_date = current_time.strftime("%A, %B %d, %Y")
+# Select a random quote
+selected_quote = random.choice(quotes)
+current_time = datetime.now().strftime("%A, %B %d")
 
 print("Content-Type: text/html; charset=utf-8\r\n\r\n", end="")
-print("""<!DOCTYPE html>
+print(f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device Monitor - System Status</title>
+    <title>Ayu Zen - Daily Inspiration</title>
     <style>
-        * {
+        :root {{
+            --bg: #0d1017;
+            --card-bg: #11141d;
+            --accent: #ffcc66; /* Ayu Mirage Orange */
+            --fg: #cccac2;
+            --dim: #5c6773;
+            --sky: #5ccfe6;
+        }}
+
+        * {{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
+        }}
         
-        body {
-            font-family: 'Monaco', 'Courier New', monospace;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        body {{
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--fg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            padding: 40px 20px;
-            color: #e0e0e0;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-        
-        .header h1 {
+            overflow: hidden;
+        }}
+
+        /* Subtle background glow */
+        body::before {{
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            filter: blur(150px);
+            opacity: 0.05;
+            top: 10%;
+            left: 10%;
+            z-index: -1;
+        }}
+
+        .quote-container {{
+            max-width: 800px;
+            padding: 60px;
+            text-align: left;
+            position: relative;
+        }}
+
+        .date-label {{
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--sky);
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            display: block;
+        }}
+
+        .quote-text {{
             font-size: 48px;
             font-weight: 700;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #00d4ff, #0099ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: none;
-        }
-        
-        .header p {
-            font-size: 14px;
-            opacity: 0.8;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        
-        .main-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
+            line-height: 1.2;
+            color: var(--fg);
             margin-bottom: 30px;
-        }
-        
-        .clock-container {
-            background: rgba(0, 20, 40, 0.8);
-            border: 2px solid #00d4ff;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
-        }
-        
-        .digital-clock {
-            font-size: 96px;
-            font-weight: bold;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 8px;
-            text-shadow: 0 0 20px rgba(0, 255, 0, 0.8), 0 0 40px rgba(0, 212, 255, 0.4);
-            margin: 20px 0;
-            line-height: 1;
-        }
-        
-        .clock-date {
+            position: relative;
+        }}
+
+        /* The decorative quote mark */
+        .quote-text::before {{
+            content: '“';
+            position: absolute;
+            left: -50px;
+            top: -10px;
+            font-size: 100px;
+            color: var(--accent);
+            opacity: 0.3;
+            font-family: serif;
+        }}
+
+        .quote-author {{
             font-size: 18px;
-            color: #00d4ff;
-            margin-top: 20px;
-            letter-spacing: 1px;
-        }
-        
-        .stats-vertical {
-            display: grid;
-            grid-template-rows: repeat(4, 1fr);
-            gap: 20px;
-        }
-        
-        .stat-item {
-            background: rgba(0, 20, 40, 0.8);
-            border: 2px solid #00d4ff;
-            border-radius: 12px;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
-        }
-        
-        .stat-item::before {
+            color: var(--dim);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+        }}
+
+        .quote-author::before {{
             content: '';
+            width: 40px;
+            height: 1px;
+            background: var(--accent);
+            display: inline-block;
+            margin-right: 15px;
+        }}
+
+        .refresh-hint {{
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.1), transparent);
-            animation: shimmer 3s infinite;
-        }
-        
-        .stat-content {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .stat-label {
+            bottom: 40px;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #00d4ff;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #00ff00;
-            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
-            margin-bottom: 5px;
-        }
-        
-        .stat-subtext {
-            font-size: 11px;
-            color: #888;
-            letter-spacing: 0.5px;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 3px;
-            margin-top: 10px;
-            overflow: hidden;
-            border: 1px solid #00d4ff;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff00, #00d4ff);
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
-            transition: width 0.3s ease;
-        }
-        
-        .full-width-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-        }
-        
-        .large-stat {
-            background: rgba(0, 20, 40, 0.8);
-            border: 2px solid #00d4ff;
-            border-radius: 12px;
-            padding: 30px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
-        }
-        
-        .large-stat::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.1), transparent);
-            animation: shimmer 3s infinite;
-        }
-        
-        .large-stat-content {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .large-stat-label {
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #00d4ff;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        
-        .large-stat-value {
-            font-size: 48px;
-            font-weight: bold;
-            color: #00ff00;
-            text-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
-            margin-bottom: 10px;
-        }
-        
-        .large-stat-subtext {
-            font-size: 13px;
-            color: #888;
-            letter-spacing: 0.5px;
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            padding: 20px;
-            border-top: 1px solid rgba(0, 212, 255, 0.3);
-            color: #888;
-            font-size: 12px;
+            color: var(--dim);
+            text-transform: lowercase;
             letter-spacing: 1px;
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            50% { transform: translateX(100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .digital-clock {
-                font-size: 64px;
-                letter-spacing: 4px;
-            }
-            
-            .full-width-stats {
-                grid-template-columns: 1fr;
-            }
-        }
+        }}
+
+        @media (max-width: 768px) {{
+            .quote-text {{ font-size: 32px; }}
+            .quote-container {{ padding: 30px; }}
+            .quote-text::before {{ display: none; }}
+        }}
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>⚙️ DEVICE MONITOR</h1>
-            <p>Real-Time System Status</p>
+    <div class="quote-container">
+        <span class="date-label">{current_time}</span>
+        <div class="quote-text">
+            {selected_quote['text']}
         </div>
-        
-        <div class="main-grid">
-            <div class="clock-container">
-                <div class="digital-clock" id="digitalClock">""")
-print(f"{current_hour:02d}:{current_minute:02d}:{current_second:02d}")
-print("""</div>
-                <div class="clock-date" id="dateDisplay">""")
-print(formatted_date)
-print("""</div>
-            </div>
-            
-            <div class="stats-vertical">
-                <div class="stat-item">
-                    <div class="stat-content">
-                        <div class="stat-label">⏱️ Uptime</div>
-                        <div class="stat-value">""")
-print(f"{uptime_days}d {uptime_hours}h {uptime_minutes}m")
-print("""</div>
-                        <div class="stat-subtext">System running time</div>
-                    </div>
-                </div>
-                
-                <div class="stat-item">
-                    <div class="stat-content">
-                        <div class="stat-label">🔧 Processes</div>
-                        <div class="stat-value">""")
-print(str(process_count))
-print("""</div>
-                        <div class="stat-subtext">Running processes</div>
-                    </div>
-                </div>
-                
-                <div class="stat-item">
-                    <div class="stat-content">
-                        <div class="stat-label">💾 RAM Usage</div>
-                        <div class="stat-value">""")
-print(f"{int(memory_percent)}%")
-print("""</div>
-                        <div class="stat-subtext">""")
-print(f"{round(memory.used / (1024**3), 2)} / {round(memory.total / (1024**3), 2)} GB")
-print("""</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: """)
-print(f"{memory_percent}%")
-print(""";"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="stat-item">
-                    <div class="stat-content">
-                        <div class="stat-label">⚡ CPU Load</div>
-                        <div class="stat-value">""")
-print(f"{int(cpu_percent)}%")
-print("""</div>
-                        <div class="stat-subtext">Processor usage</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: """)
-print(f"{cpu_percent}%")
-print(""";"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="full-width-stats">
-            <div class="large-stat">
-                <div class="large-stat-content">
-                    <div class="large-stat-label">📦 Storage</div>
-                    <div class="large-stat-value">""")
-print(f"{int(disk_percent)}%")
-print("""</div>
-                    <div class="large-stat-subtext">""")
-print(f"{round(disk.used / (1024**3), 2)} / {round(disk.total / (1024**3), 2)} GB used")
-print("""</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: """)
-print(f"{disk_percent}%")
-print("""; background: linear-gradient(90deg, #ff6b00, #ff9500);"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="large-stat">
-                <div class="large-stat-content">
-                    <div class="large-stat-label">✅ System Status</div>
-                    <div class="large-stat-value">ONLINE</div>
-                    <div class="large-stat-subtext">All systems operational • Ready</div>
-                    <div style="margin-top: 15px; padding: 10px; background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; border-radius: 6px; color: #00ff00; font-size: 11px;">
-                        ✓ CPU OK  |  ✓ Memory OK  |  ✓ Disk OK
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>🐍 Python CGI System Monitor • Live Device Statistics</p>
-            <p style="margin-top: 10px; opacity: 0.5;">Generated in real-time from system metrics</p>
+        <div class="quote-author">
+            {selected_quote['author']}
         </div>
     </div>
-    
-    <script>
-        function updateClock() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('digitalClock').textContent = hours + ':' + minutes + ':' + seconds;
-        }
-        
-        setInterval(updateClock, 1000);
-    </script>
+
+    <div class="refresh-hint">
+        [ F5 to generate new wisdom ]
+    </div>
 </body>
 </html>""")
-

@@ -1,7 +1,5 @@
 #include "../../INCLUDES/Webserv.hpp"
-
 #include "../../INCLUDES/CGI.hpp"
-
 #include <sstream>
 
 std::string generat_random_id();
@@ -78,7 +76,6 @@ static std::string _cwd()
 
 static std::string _get_filename_from_headers_or_query(const ClientState &state)
 {
-	// 1) Query string: /uploads?filename=...
 	std::string path = state.path;
 	size_t qpos = path.find('?');
 	if (qpos == std::string::npos)
@@ -99,12 +96,16 @@ static std::string _get_filename_from_headers_or_query(const ClientState &state)
 		}
 	}
 
-	// 2) Custom header: X-Filename: name.ext
 	std::string xfn = _header_value(state.header, "X-Filename");
 	if (!xfn.empty())
 		return xfn;
+	xfn = _header_value(state.header, "File-Name");
+	if (!xfn.empty())
+		return xfn;
+	xfn = _header_value(state.header, "X-File-Name");
+	if (!xfn.empty())
+		return xfn;
 
-	// 3) Content-Disposition: ... filename="..."
 	std::string cd = _header_value(state.header, "Content-Disposition");
 	if (!cd.empty())
 	{
@@ -124,7 +125,6 @@ static std::string _get_filename_from_headers_or_query(const ClientState &state)
 
 static bool _is_uploads_path(const std::string &path)
 {
-	// Accept: /uploads, /uploads?..., /uploads%3f...
 	std::string p = path;
 	while (!p.empty() && (unsigned char)p[0] <= 32)
 		p.erase(0, 1);
@@ -713,7 +713,7 @@ void _handle_post_login(ClientState &state, Config &a)
 	std::cout << "User '" << username << "' logged in with session ID: " << state.cookies << std::endl;
 }
 
-std::string _get_filename(const std::string &metadata)
+std::string _get_filename(const std::string &metadata, const ClientState &state)
 {
 	std::string filename_key = "filename=\"";
 	size_t pos = metadata.find(filename_key);
@@ -723,15 +723,22 @@ std::string _get_filename(const std::string &metadata)
 		size_t end_quote = metadata.find("\"", pos);
 		if (end_quote != std::string::npos)
 		{
-			return metadata.substr(pos, end_quote - pos);
+			std::string filename = metadata.substr(pos, end_quote - pos);
+			if (!filename.empty())
+				return filename;
 		}
 	}
+	
+	std::string fallback = _get_filename_from_headers_or_query(state);
+
+	if (fallback.find("default_upload_") != 0)
+		return fallback;
+	
 	return "default_upload_" + generat_random_id();
 }
 
 std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &state)
 {
-	// CGI for POST (e.g. /upload/script.py)
 	{
 		std::string req_path = state.path;
 		std::string query_string;
@@ -907,7 +914,6 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		}
 	}
 
-	// Upload endpoint supports multipart/form-data and raw bodies
 	if (_is_uploads_path(state.path))
 	{
 		std::cout << "------------ Handling /uploads POST request -----------" << std::endl;
@@ -933,7 +939,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 					state.waiting = false;
 					return state.response;
 				}
-				state.filename = _get_filename(state.metadata);
+				state.filename = _get_filename(state.metadata, state);
 				try
 				{
 					bool done = Upload_files(state, fd_client, a);
