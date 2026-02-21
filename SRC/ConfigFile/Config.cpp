@@ -36,6 +36,10 @@ std::string Config::get_mine(std::string path)
         return "image/png";
     else if (tmp == "jpg" || tmp == "jpeg")
         return "image/jpeg";
+    else if (tmp == "webp")
+        return "image/webp";
+    else if (tmp == "pdf")
+        return "application/pdf";
     return "application/octet-stream";
 }
 

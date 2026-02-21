@@ -12,7 +12,7 @@ std::string clean_string(std::string str)
             re += str[i];
         i++;
     }
-    // std::cout << "after test_req:   "<< re << std::endl;
+    
     return re;
 }
 
@@ -32,26 +32,15 @@ static std::string strip_query(const std::string &path)
     return path.substr(0, q);
 }
 
-// std::string Methodes::GetMethod(Config a, Request test_request, ServerConfig Servers_Config)
 std::string Methodes::GetMethod(Config& a, Request& test_request, ServerConfig& Servers_Config)
 {
     (void)a;
     std::string s;
     std::string body, line, last_path;
-    // Request test_request;
-    // std::string respon = test_request.parse_request(buffer, a);
-    // if (respon != "NONE")
-    //     return respon;
-    // if (test_request.get_path() == "/favicon.ico")
-    //     return std::string(); /// check heree the favicon.co why he display everytime
-    
     const std::string request_path = strip_query(test_request.get_path());
     LocationConfig info_location = Servers_Config.get_conf(request_path);
     
-    // std::cout << "choose: " << info_location.get_path() << std::endl;
-    // std::cout << "choose test_req: " << test_request.get_path() << std::endl;
     std::string path = gcwd() + info_location.get_root() + request_path;
-    // std::cout << "path: " << path<< std::endl;
     struct stat statbuf;
     if (stat((path).c_str(), &statbuf) == 0)
     {
@@ -65,10 +54,6 @@ std::string Methodes::GetMethod(Config& a, Request& test_request, ServerConfig& 
         }
     }
     info_location = Servers_Config.get_conf(clean_string(request_path));
-    // std::cout << "we have now configure : " << clean_string(test_request.get_path()) << std::endl;
-    // std::cout << "location working with is : " << info_location.get_path() << std::endl;
-    // std::cout << "path is : " << info_location.GetLocationPath() << "\n";
-    // std::cout << "bool is : " << info_location.GetRedirectionBool() << "\n";
     
     if (test_request.get_method() == "GET" && info_location.get_method("GET") == true)
     {
@@ -80,7 +65,9 @@ std::string Methodes::GetMethod(Config& a, Request& test_request, ServerConfig& 
     }
     else
     {
+
         return ErrorResponse::Error_MethodeNotAllowed(a);
     }
+
 	return "";
 }
