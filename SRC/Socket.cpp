@@ -148,12 +148,36 @@ void Socket::Monitor(Config &a)
                 {
                     int fd = it->first;
 
+                    if (!it->second.send_data)
+                    {
+                        std::cerr << "\033[1;31m[ERROR]\033[0m Request timeout on fd: " << fd;
+                        if (it->second.content_length > 0)
+                        {
+                            size_t received = it->second.byte_uploaded > 0 ? it->second.byte_uploaded : it->second.body_received;
+                            received += it->second.readstring.size();
+                            std::cerr << " - Content-Length declared: " << it->second.content_length
+                                      << " bytes, but only received: " << received << " bytes"
+                                      << " (incomplete body, possible Content-Length mismatch)";
+                        }
+                        std::cerr << std::endl;
+                        it->second.response = ErrorResponse::Error_RequestTimeout(a);
+                        it->second.send_data = true;
+                        it->second.close = true;
+                        it->second.cleanup = true;
+                        it->second.waiting = false;
+                        event_client.data.fd = fd;
+                        event_client.events = EPOLLOUT;
+                        epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd, &event_client);
+                        ++it;
+                        continue;
+                    }
+
                     epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd, NULL);
                     close(fd);
 
                     std::map<int, ClientState>::iterator to_erase = it;
-                    ++it;           
-                    status.erase(to_erase); 
+                    ++it;
+                    status.erase(to_erase);
                 }
                 else
                 {
@@ -202,6 +226,33 @@ void Socket::Monitor(Config &a)
                         if (!check_timeout(it->second.timestamp, TIMEOUT))
                         {
                             std::cout << "Connection timed out for fd: " << fd_client << std::endl;
+                            if (!it->second.send_data)
+                            {
+                                std::cerr << "\033[1;31m[ERROR]\033[0m Request timeout on fd: " << fd_client;
+                                if (it->second.content_length > 0)
+                                {
+                                    size_t received = it->second.byte_uploaded > 0 ? it->second.byte_uploaded : it->second.body_received;
+                                    received += it->second.readstring.size();
+                                    std::cerr << " - Content-Length declared: " << it->second.content_length
+                                              << " bytes, but only received: " << received << " bytes"
+                                              << " (incomplete body, possible Content-Length mismatch)";
+                                }
+                                std::cerr << std::endl;
+                                it->second.response = ErrorResponse::Error_RequestTimeout(a);
+                                it->second.send_data = true;
+                                it->second.close = true;
+                                it->second.cleanup = true;
+                                it->second.waiting = false;
+                                event_client.data.fd = fd_client;
+                                event_client.events = EPOLLOUT;
+                                if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
+                                {
+                                    close(fd_client);
+                                    perror("epoll_ctl MOD failed");
+                                    throw(std::runtime_error("cannot modify client to epoll instance !"));
+                                }
+                                continue;
+                            }
                             cloce_connection(it->second);
                             // continue;
                         }

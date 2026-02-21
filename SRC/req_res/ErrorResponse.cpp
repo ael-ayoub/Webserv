@@ -22,6 +22,8 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         headers += " Payload Too Large\r\n";
     else if (status_code == "500")
         headers += " Internal Server Error\r\n";
+    else if (status_code == "408")
+        headers += " Request Timeout\r\n";
     else if (status_code == "504")
         headers += " Gateway Timeout\r\n";
     body = "<!DOCTYPE html>\n";
@@ -42,6 +44,8 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         body += "  <h1>403 Forbidden</h1>\n";
     if (status_code == "413")
         body += "  <h1>413 Payload Too Large</h1>\n";
+    if (status_code == "408")
+        body += "  <h1>408 Request Timeout</h1>\n";
     if (status_code == "500")
         body += "  <h1>500 Internal Server Error</h1>\n";
     if (status_code == "504")
@@ -57,6 +61,8 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         body += "  <p>You don’t have permission to access this resource.</p>\n";
     if (status_code == "413")
         body += "  <p>The size of the request entity exceeds the maximum allowed limit.</p>\n";
+    if (status_code == "408")
+        body += "  <p>The server timed out waiting for the request body. Content-Length may exceed the actual data sent.</p>\n";
     if (status_code == "500")
         body += "  <p>The server encountered an internal error.</p>\n";
     if (status_code == "504")
@@ -103,6 +109,11 @@ std::string ErrorResponse::generate_error_page(std::string status_code)
     {
         message = "Method Not Allowed";
         description = "The requested method is not supported for this resource.";
+    }
+    else if (code == "408")
+    {
+        message = "Request Timeout";
+        description = "The server timed out waiting for the complete request body. The Content-Length header may not match the actual data sent.";
     }
     else if (code == "413")
     {
@@ -191,6 +202,8 @@ std::string ErrorResponse::generate_error_page(std::string status_code)
         headers += " Not Found\r\n";
     else if (status_code == "405")
         headers += " Method Not Allowed\r\n";
+    else if (status_code == "408")
+        headers += " Request Timeout\r\n";
     else if (status_code == "413")
         headers += " Payload Too Large\r\n";
     else if (status_code == "500")
@@ -290,6 +303,8 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
         header += " Not Found\r\n";
     else if (error_status == "405")
         header += " Method Not Allowed\r\n";
+    else if (error_status == "408")
+        header += " Request Timeout\r\n";
     else if (error_status == "413")
         header += " Payload Too Large\r\n";
     else if (error_status == "500")
@@ -377,6 +392,12 @@ std::string ErrorResponse::Error_Forbidden(Config &a)
 {
     (void)a;
     return generate_error_page("403");
+}
+
+std::string ErrorResponse::Error_RequestTimeout(Config &a)
+{
+    (void)a;
+    return generate_error_page("408");
 }
 
 std::string ErrorResponse::Error_InternalServerError()

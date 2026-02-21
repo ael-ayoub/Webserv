@@ -79,6 +79,13 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     Request request;
 
     ClientState &state = status[fd_client];
+
+    // If a response was already prepared (the timeout handler),
+    // don't re-process let the Monitor loop send it.
+    // std::cout << "DEBUG: waaaaaaaaaaaaaaaaaa" << std::endl;
+    if (state.send_data)
+        return;
+
     state.timestamp = get_current_timestamp();
     if (!state.complete_header)
     {

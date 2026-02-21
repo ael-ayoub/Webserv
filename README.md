@@ -37,3 +37,4 @@ location /upload/ {
 
 - Upload form: `http://localhost:1033/upload.html`
 - Uploads manager (open/delete): `http://localhost:1033/uploads_manager.html`
+

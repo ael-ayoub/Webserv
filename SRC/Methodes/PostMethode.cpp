@@ -266,9 +266,13 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 	{
 		if(!check_timeout(state.timestamp, TIMEOUT))
 		{
-			std::cout << "Connection timed out for fd: " << fd_client << std::endl;
-			state.response = ErrorResponse::Error_BadRequest(a);
+			std::cerr << "\033[1;31m[ERROR]\033[0m Upload timeout for fd: " << fd_client
+					  << " - Content-Length declared: " << state.content_length
+					  << " bytes, uploaded so far: " << state.byte_uploaded
+					  << " bytes (incomplete body, possible Content-Length mismatch)" << std::endl;
+			state.response = ErrorResponse::Error_RequestTimeout(a);
 			cloce_connection(state);
+			state.send_data = true;
 			return true;
 		}
 		state.timestamp = get_current_timestamp();
