@@ -102,11 +102,9 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     else if (state.method == "POST")
     {
-        // std::cout << "client body size is : " << ServerConfig::client_max_body_size << std::endl;
         state.timestamp = get_current_timestamp();
         if (!state.complete_metadata)
         {
-            // std::cout << "############ [..] reading metadata for fd: " << fd_client << std::endl;
             if (state.content_type == "multipart/form-data")
             {
                 if (!_parse_metadata(state, fd_client, a))
@@ -114,9 +112,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
             }
             else
             {
-                // For non-multipart POST, keep body in `readstring` for streaming endpoints (uploads/CGI).
-                // Only mirror into `metadata` for small form-style endpoints.
-                if (state.path == "/login" || state.path == "/check_user")
+                if (state.path == "/login" || state.path == "/check_user" || state.path == "/logout")
                     state.metadata = state.readstring;
                 else
                     state.metadata.clear();

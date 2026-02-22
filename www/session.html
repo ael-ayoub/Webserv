@@ -1,20 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-        <header>
-        <div class="title-block">
-            <h1 class="brutalist-title">SESSION</h1>
-        </div>
-        <nav>
-            <a href="/index.html">HOME</a>
-            <a href="/about.html">ABOUT</a>
-            <a href="/upload.html">UPLOAD</a>
-            <a href="/uploads_manager.html">UPLOADS</a>
-            <a href="/session.html">SESSION</a>
-            <a href="/cgi_test.html">CGI TEST</a>
-        </nav>
-    </header>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SESSION - WEBSERV</title>
     <link rel="stylesheet" href="/style.css">
     <style>
         .login-container {
@@ -44,6 +33,15 @@
             background: transparent;
             color: #000;
         }
+        .logoff-btn {
+            background: #cc0000;
+            border-color: #cc0000;
+        }
+        .logoff-btn:hover {
+            background: transparent;
+            color: #cc0000;
+            border-color: #cc0000;
+        }
         .status-box {
             margin-top: 1rem;
             padding: 1rem;
@@ -54,45 +52,108 @@
     </style>
 </head>
 <body>
-
-<main>
-
-<section>
-    <div class="login-container">
-
-        <h3>CREATE SESSION</h3>
-
-        <!-- POST: save username -->
-        <form action="/login" method="POST">
-            <input type="text" name="username" class="login-input" placeholder="ENTER USERNAME" required>
-            <button class="action-btn" type="submit">CREATE SESSION</button>
-        </form>
-
-        <hr>
-
-        <h3>CHECK USER</h3>
-
-        <!-- GET: check username -->
-        <form action="/check_user" method="POST">
-            <input type="text" name="username" class="login-input" placeholder="ENTER NAME TO CHECK" required>
-            <button class="action-btn" type="submit">CHECK USER</button>
-        </form>
-
-        <!-- SERVER INJECTS RESULT HERE -->
-        <!--
-        <div class="status-box">
-            RESULT: USER EXISTS
+    <header>
+        <div class="title-block">
+            <h1 class="brutalist-title">SESSION</h1>
         </div>
-        -->
+        <nav>
+            <a href="/index.html">HOME</a>
+            <a href="/about.html">ABOUT</a>
+            <a href="/upload.html">UPLOAD</a>
+            <a href="/uploads_manager.html">UPLOADS</a>
+            <a href="/session.html">SESSION</a>
+            <a href="/cgi_test.html">CGI TEST</a>
+        </nav>
+    </header>
 
-    </div>
-</section>
+    <main>
 
-</main>
+    <!-- Flash message zone: populated by JS after login/logout redirects -->
+    <div id="flash-zone" style="max-width:600px;margin:1rem auto;"></div>
 
-<footer>
-    <p>© WEBSERV C++98</p>
-</footer>
+    <section>
+        <div class="login-container">
 
+            <h3>CREATE SESSION</h3>
+
+            <!-- POST: save username -->
+            <form action="/login" method="POST">
+                <input type="text" name="username" class="login-input" placeholder="ENTER USERNAME" required>
+                <button class="action-btn" type="submit">CREATE SESSION</button>
+            </form>
+
+            <hr>
+
+            <h3>CHECK USER</h3>
+
+            <!-- GET: check username -->
+            <form action="/check_user" method="POST">
+                <input type="text" name="username" class="login-input" placeholder="ENTER NAME TO CHECK" required>
+                <button class="action-btn" type="submit">CHECK USER</button>
+            </form>
+
+            <!-- SERVER INJECTS RESULT HERE -->
+            <!--
+            <div class="status-box">
+                RESULT: USER EXISTS
+            </div>
+            -->
+
+            <hr>
+
+            <h3>LOGOFF</h3>
+
+            <!-- POST: destroy session -->
+            <form action="/logout" method="POST">
+                <button class="action-btn logoff-btn" type="submit">LOGOFF ✕</button>
+            </form>
+
+        </div>
+    </section>
+
+    <section>
+        <div id="user-area" style="max-width:600px; margin: 1rem auto; text-align: left;"></div>
+    </section>
+
+    </main>
+
+    <footer>
+        <p>© WEBSERV C++98</p>
+    </footer>
+
+    <script src="/theme.js"></script>
+    <script>
+    (function () {
+        function readCookie(name) {
+            var v = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+            return v ? decodeURIComponent(v[1]) : null;
+        }
+        function clearCookie(name) {
+            document.cookie = name + '=; Path=/; Max-Age=0';
+        }
+        var flash = readCookie('flash_msg');
+        if (flash) {
+            clearCookie('flash_msg');
+            var msg = '';
+            if (flash === 'NEW_USER')
+                msg = 'SESSION CREATED SUCCESSFULLY.';
+            else if (flash === 'SIGNED_IN')
+                msg = 'USER ALREADY IN DATA. SIGNING IN...';
+            else if (flash.indexOf('SIGNED_OFF_') === 0) {
+                var user = decodeURIComponent(flash.slice(11)).toUpperCase();
+                msg = user + ' SIGNED OFF.';
+            }
+            if (msg) {
+                var zone = document.getElementById('flash-zone');
+                if (zone) {
+                    zone.style.cssText =
+                        'padding:1rem;border:2px dashed #000;background:#fff;' +
+                        'font-family:monospace;font-weight:700;letter-spacing:0.05em;';
+                    zone.textContent = '▶ ' + msg;
+                }
+            }
+        }
+    })();
+    </script>
 </body>
 </html>

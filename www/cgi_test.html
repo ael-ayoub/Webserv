@@ -192,6 +192,17 @@
                         <button class="btn" onclick="window.open('/cgi/asoudani.html', '_blank')">OPEN FILE →</button>
                     </div>
                 </div>
+
+                <!-- Echo Script -->
+                <div class="cgi-file-item">
+                    <div class="cgi-file-info">
+                        <div class="cgi-file-name">echo.py</div>
+                        <div class="cgi-file-path">/cgi/echo.py — POST BODY + QUERY ECHO</div>
+                    </div>
+                    <div class="cgi-actions">
+                        <button class="btn btn-test" onclick="window.open('/cgi/echo.py?demo=1', 'echo')">OPEN FILE  →</button>
+                    </div>
+                </div>
             </div>
 
             <div id="loading" class="loading">
@@ -204,27 +215,84 @@
             </div>
         </section>
 
+        <!-- CUSTOM CGI REQUEST -->
         <section class="content-section">
             <h2 class="section-title">CUSTOM CGI REQUEST</h2>
-            
+
             <div class="brutalist-box">
                 <span class="box-number">CUSTOM</span>
                 <form onsubmit="customCGI(event)">
                     <div class="form-group">
                         <label for="cgi-path">CGI SCRIPT PATH:</label>
-                        <input type="text" id="cgi-path" name="cgi-path" placeholder="/cgi/test.py" required>
+                        <input type="text" id="cgi-path" name="cgi-path" placeholder="/cgi/testquery.rb" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cgi-method">METHOD:</label>
+                        <select id="cgi-method" name="cgi-method" onchange="toggleBody(this.value)"
+                            style="width:100%; padding:.6rem; background:var(--bg-primary); color:var(--text-primary); border:var(--border-thin);">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="query-string">QUERY STRING (OPTIONAL):</label>
-                        <input type="text" id="query-string" name="query-string" placeholder="name=value&key=data">
+                        <input type="text" id="query-string" name="query-string" placeholder="name=seraph&key=919">
+                    </div>
+                    <div class="form-group" id="body-group" style="display:none;">
+                        <label for="request-body">REQUEST BODY:</label>
+                        <textarea id="request-body" name="request-body"
+                            placeholder="key1=value1&key2=value2"
+                            style="width:100%; min-height:80px; font-family:monospace; padding:.6rem;
+                                   background:var(--bg-primary); color:var(--text-primary);
+                                   border:var(--border-thin); resize:vertical;"></textarea>
                     </div>
                     <button type="submit">EXECUTE CUSTOM CGI →</button>
                 </form>
             </div>
 
-            <div id="custom-result" class="cgi-result" style="display: none;">
-                <h3>CUSTOM RESULT:</h3>
-                <pre id="custom-result-content"></pre>
+            <!-- Result rendered in iframe so HTML output is actually visualized -->
+            <div id="custom-result" style="display:none; margin-top:1.5rem;">
+                <h3 style="font-size:1.1rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:.8rem;">RESPONSE:</h3>
+                <iframe id="custom-result-frame"
+                    style="width:100%; min-height:340px; border:var(--border-thick); background:#fff;"
+                    sandbox="allow-scripts allow-same-origin"
+                    title="CGI Response"></iframe>
+            </div>
+        </section>
+
+        <!-- POST BODY + QUERY STRING ECHO TEST -->
+        <section class="content-section">
+            <h2 class="section-title">POST BODY + QUERY STRING ECHO TEST</h2>
+            <p style="margin-bottom:1.5rem; color:var(--text-secondary);">
+                USES <code style="background:var(--bg-secondary); padding:.1rem .4rem;">/cgi/echo.py</code>
+                — SENDS YOUR BODY &amp; QUERY STRING VIA POST AND ECHOES THEM BACK
+            </p>
+
+            <div class="brutalist-box">
+                <span class="box-number">ECHO</span>
+                <form onsubmit="echoCGI(event)">
+                    <div class="form-group">
+                        <label for="echo-query">QUERY STRING (OPTIONAL):</label>
+                        <input type="text" id="echo-query" placeholder="user=seraph&lang=cpp">
+                    </div>
+                    <div class="form-group">
+                        <label for="echo-body">REQUEST BODY (POST DATA):</label>
+                        <textarea id="echo-body"
+                            placeholder="message=hello+world&foo=bar"
+                            style="width:100%; min-height:100px; font-family:monospace; padding:.6rem;
+                                   background:var(--bg-primary); color:var(--text-primary);
+                                   border:var(--border-thin); resize:vertical;">message=hello+world&project=webserv</textarea>
+                    </div>
+                    <button type="submit">SEND POST REQUEST →</button>
+                </form>
+            </div>
+
+            <div id="echo-result" style="display:none; margin-top:1.5rem;">
+                <h3 style="font-size:1.1rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:.8rem;">ECHO RESPONSE:</h3>
+                <iframe id="echo-result-frame"
+                    style="width:100%; min-height:340px; border:var(--border-thick); background:#fff;"
+                    sandbox="allow-scripts allow-same-origin"
+                    title="Echo Response"></iframe>
             </div>
         </section>
     </main>
@@ -233,69 +301,109 @@
         <p>© 2026 WEBSERV PROJECT | C++98 COMPLIANT</p>
     </footer>
 
+    <script src="/theme.js"></script>
     <script>
-        function testCGI(path, type) {
-            const resultDiv = document.getElementById('result');
-            const resultContent = document.getElementById('result-content');
-            const loading = document.getElementById('loading');
-            
+        function fetchAndShow(path, resultId, contentId) {
+            var resultDiv = document.getElementById(resultId);
+            var resultContent = document.getElementById(contentId);
+            var loading = document.getElementById('loading');
             loading.classList.add('active');
             resultDiv.style.display = 'none';
-            
             fetch(path)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('HTTP ' + response.status + ' ' + response.statusText);
-                    }
+                .then(function(response){
+                    if(!response.ok) throw new Error('HTTP ' + response.status + ' ' + response.statusText);
                     return response.text();
                 })
-                .then(data => {
+                .then(function(data){
                     loading.classList.remove('active');
                     resultContent.textContent = data;
                     resultDiv.style.display = 'block';
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 })
-                .catch(error => {
+                .catch(function(err){
                     loading.classList.remove('active');
-                    resultContent.textContent = 'ERROR: ' + error.message;
+                    resultContent.textContent = 'ERROR: ' + err.message;
                     resultDiv.style.display = 'block';
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 });
         }
 
+        /* Show / hide body textarea based on method */
+        function toggleBody(method) {
+            document.getElementById('body-group').style.display =
+                method === 'POST' ? 'block' : 'none';
+        }
+
+        /* Render arbitrary HTML into an iframe via srcdoc */
+        function renderInFrame(frameId, html) {
+            document.getElementById(frameId).srcdoc = html;
+        }
+
+        /* Custom CGI — supports GET and POST, renders response as real HTML */
         function customCGI(event) {
             event.preventDefault();
-            
-            const path = document.getElementById('cgi-path').value;
-            const queryString = document.getElementById('query-string').value;
-            const resultDiv = document.getElementById('custom-result');
-            const resultContent = document.getElementById('custom-result-content');
-            const loading = document.getElementById('loading');
-            
-            let url = path;
-            if (queryString) {
-                url += '?' + queryString;
-            }
-            
+            var path        = document.getElementById('cgi-path').value.trim();
+            var method      = document.getElementById('cgi-method').value;
+            var queryString = document.getElementById('query-string').value.trim();
+            var body        = document.getElementById('request-body').value;
+            var url         = path + (queryString ? ('?' + queryString) : '');
+            var resultDiv   = document.getElementById('custom-result');
+            var loading     = document.getElementById('loading');
+
             loading.classList.add('active');
             resultDiv.style.display = 'none';
-            
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('HTTP ' + response.status + ' ' + response.statusText);
-                    }
-                    return response.text();
-                })
-                .then(data => {
+
+            var opts = { method: method };
+            if (method === 'POST' && body) {
+                opts.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+                opts.body    = body;
+            }
+
+            fetch(url, opts)
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
                     loading.classList.remove('active');
-                    resultContent.textContent = data;
+                    renderInFrame('custom-result-frame', html);
                     resultDiv.style.display = 'block';
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 })
-                .catch(error => {
+                .catch(function(err) {
                     loading.classList.remove('active');
-                    resultContent.textContent = 'ERROR: ' + error.message;
+                    renderInFrame('custom-result-frame',
+                        '<pre style="color:red;padding:1rem;font-family:monospace">ERROR: ' + err.message + '</pre>');
+                    resultDiv.style.display = 'block';
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                });
+        }
+
+        /* Echo CGI — always POST to /cgi/echo.py with body + optional query */
+        function echoCGI(event) {
+            event.preventDefault();
+            var query     = document.getElementById('echo-query').value.trim();
+            var body      = document.getElementById('echo-body').value;
+            var url       = '/cgi/echo.py' + (query ? ('?' + query) : '');
+            var resultDiv = document.getElementById('echo-result');
+            var loading   = document.getElementById('loading');
+
+            loading.classList.add('active');
+            resultDiv.style.display = 'none';
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body
+            })
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    loading.classList.remove('active');
+                    renderInFrame('echo-result-frame', html);
+                    resultDiv.style.display = 'block';
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                })
+                .catch(function(err) {
+                    loading.classList.remove('active');
+                    renderInFrame('echo-result-frame',
+                        '<pre style="color:red;padding:1rem;font-family:monospace">ERROR: ' + err.message + '</pre>');
                     resultDiv.style.display = 'block';
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 });

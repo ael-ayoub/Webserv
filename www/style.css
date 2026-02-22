@@ -79,6 +79,27 @@ nav a:hover {
     color: var(--bg-secondary);
 }
 
+.nav-logoff-btn {
+    padding: 1rem 2rem;
+    text-decoration: none;
+    color: #fff;
+    border: var(--border-thin);
+    border-color: #cc0000;
+    background: #cc0000;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.nav-logoff-btn:hover {
+    background: transparent;
+    color: #cc0000;
+}
+
 /* MAIN CONTENT */
 main {
     max-width: 1400px;
