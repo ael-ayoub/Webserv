@@ -7,47 +7,67 @@
     <link rel="stylesheet" href="/style.css">
     <style>
         .login-container {
-            border: 4px solid #000;
+            border: var(--border-thick);
+            border-radius: var(--radius);
             padding: 2rem;
-            background: #f0f0f0;
+            background: var(--bg-secondary);
             max-width: 600px;
             margin: 2rem auto;
+            box-shadow: var(--shadow);
+        }
+        .login-container h3 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin: 1.25rem 0 0.75rem;
+        }
+        .login-container h3:first-child {
+            margin-top: 0;
+        }
+        .login-container hr {
+            border: none;
+            border-top: var(--border-thin);
+            margin: 1.25rem 0;
         }
         .login-input {
             width: 100%;
-            border: 2px solid #000;
-            padding: 1rem;
+            border: var(--border-thin);
+            border-radius: var(--radius);
+            padding: 0.85rem 1rem;
             margin-bottom: 1rem;
-            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .login-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(242,174,73,.15);
         }
         .action-btn {
             width: 100%;
-            padding: 1rem;
-            background: #000;
-            color: #fff;
-            border: 2px solid #000;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .action-btn:hover {
-            background: transparent;
-            color: #000;
+            padding: 0.75rem 1rem;
         }
         .logoff-btn {
-            background: #cc0000;
-            border-color: #cc0000;
+            background: var(--accent-red) !important;
+            box-shadow: 0 2px 6px rgba(240,113,113,.25) !important;
         }
         .logoff-btn:hover {
-            background: transparent;
-            color: #cc0000;
-            border-color: #cc0000;
+            background: #d8504f !important;
         }
         .status-box {
             margin-top: 1rem;
-            padding: 1rem;
-            border: 2px dashed #000;
-            background: #fff;
-            font-family: monospace;
+            padding: 1rem 1.25rem;
+            border: var(--border-thin);
+            border-style: dashed;
+            border-radius: var(--radius);
+            background: var(--bg-primary);
+            font-size: 0.88rem;
+            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -147,9 +167,11 @@
                 var zone = document.getElementById('flash-zone');
                 if (zone) {
                     zone.style.cssText =
-                        'padding:1rem;border:2px dashed #000;background:#fff;' +
-                        'font-family:monospace;font-weight:700;letter-spacing:0.05em;';
-                    zone.textContent = '▶ ' + msg;
+                        'padding:1rem 1.25rem;border:1px dashed var(--border-color);' +
+                        'border-radius:var(--radius);background:var(--bg-secondary);' +
+                        'font-size:0.88rem;font-weight:600;letter-spacing:0.05em;' +
+                        'color:var(--accent);';
+                    zone.textContent = '▸ ' + msg;
                 }
             }
         }

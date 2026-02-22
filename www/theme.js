@@ -14,25 +14,38 @@
         document.cookie = name + '=; Path=/; Max-Age=0';
     }
 
-    /* ── Dark-mode style injection ──────────────────────────────── */
+    /* ── Ayu Dark style injection ───────────────────────────────── */
     function applyDarkStyle() {
         if (document.getElementById('dark-override')) return;
         var css =
+            /* Ayu Dark – override every CSS variable */
             ':root{' +
-            '--bg-primary:#0b0b0d;--bg-secondary:#111214;' +
-            '--text-primary:#e6e6e6;--text-secondary:#cfcfcf;}' +
-            'body,header,footer,.brutalist-box,.image-placeholder{' +
+            '--bg-primary:#0a0e14;--bg-secondary:#0d1017;--bg-panel:#13181f;' +
+            '--text-primary:#bfbdb6;--text-secondary:#8a9199;--text-muted:#626a73;' +
+            '--border-color:#1a2332;' +
+            '--border-thick:2px solid #1a2332;--border-thin:1px solid #1a2332;' +
+            '--accent:#e6b450;--accent-alt:#39bae6;' +
+            '--accent-green:#7fd962;--accent-red:#ff3333;' +
+            '--shadow:0 2px 12px rgba(0,0,0,.45);' +
+            '}' +
+            'body,header,footer,.hero-section,.image-gallery{' +
             'background:var(--bg-primary)!important;color:var(--text-primary)!important;}' +
-            'nav a{background:var(--bg-secondary)!important;color:var(--text-primary)!important;' +
-            'border-color:var(--text-primary)!important;}' +
-            '.login-container{background:var(--bg-secondary)!important;' +
-            'border-color:var(--text-primary)!important;color:var(--text-primary)!important;}' +
-            '.action-btn{background:var(--text-primary)!important;' +
-            'color:var(--bg-secondary)!important;border-color:var(--text-primary)!important;}' +
-            '.status-box{background:var(--bg-secondary)!important;' +
-            'color:var(--text-primary)!important;border-color:var(--text-primary)!important;}' +
-            '.cgi-result,.cgi-file-item{background:var(--bg-secondary)!important;' +
-            'color:var(--text-primary)!important;border-color:var(--text-primary)!important;}';
+            '.brutalist-box,.status-box,.cgi-result,.cgi-file-item,' +
+            '.login-container,.result,.page-header{' +
+            'background:var(--bg-secondary)!important;' +
+            'border-color:var(--border-color)!important;' +
+            'color:var(--text-primary)!important;}' +
+            '.form-group input,.form-group textarea,.form-group select{' +
+            'background:var(--bg-panel)!important;color:var(--text-primary)!important;' +
+            'border-color:var(--border-color)!important;}' +
+            '.endpoint-item{background:var(--bg-secondary)!important;' +
+            'color:var(--text-primary)!important;border-color:var(--border-color)!important;}' +
+            '.endpoint-item:hover{background:var(--bg-panel)!important;' +
+            'border-color:var(--accent)!important;}' +
+            'nav a{color:var(--text-secondary)!important;}' +
+            'nav a:hover{color:var(--accent)!important;background:var(--bg-panel)!important;}' +
+            '.endpoint-path{color:var(--accent-alt)!important;}' +
+            '.section-title{border-bottom-color:var(--accent)!important;}';
         var s = document.createElement('style');
         s.id = 'dark-override';
         s.appendChild(document.createTextNode(css));
@@ -76,8 +89,9 @@
         var userBadge = document.createElement('span');
         userBadge.id = 'nav-user-badge';
         userBadge.style.cssText =
-            'font-weight:700;margin-left:12px;padding:0 8px;' +
-            'border:2px solid currentColor;display:inline-flex;align-items:center;';
+            'font-weight:600;margin-left:10px;padding:0.3rem 0.8rem;' +
+            'border:1px solid;border-radius:4px;' +
+            'display:inline-flex;align-items:center;font-size:0.72rem;letter-spacing:1px;';
         userBadge.textContent = username.toUpperCase();
         nav.appendChild(userBadge);
 
@@ -85,8 +99,10 @@
         var toggle = document.createElement('button');
         toggle.id = 'theme-toggle';
         toggle.type = 'button';
-        toggle.style.cssText = 'margin-left:8px;cursor:pointer;font-size:1rem;' +
-            'background:transparent;border:none;padding:0 4px;';
+        toggle.style.cssText =
+            'margin-left:6px;cursor:pointer;font-size:0.95rem;' +
+            'background:transparent;border:none;padding:0.3rem 0.5rem;' +
+            'border-radius:4px;line-height:1;';
         toggle.textContent = (getUserTheme(username) === 'dark') ? '\u2600\ufe0f' : '\ud83c\udf19';
         nav.appendChild(toggle);
 
