@@ -69,7 +69,7 @@ void cloce_connection(ClientState &state)
     state.cleanup = true;
     state.send_data = false;
     state.waiting = false;
-    std::cout << "Marked connection for closure." << std::endl;
+    // std::cout << "Marked connection for closure." << std::endl;
 }
 
 void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
@@ -89,7 +89,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     state.timestamp = get_current_timestamp();
     if (!state.complete_header)
     {
-        std::cout << "Starting to read header from fd: " << fd_client << std::endl;
+        // std::cout << "Starting to read header from fd: " << fd_client << std::endl;
         if (!_parse_header(state, fd_client, request, a))
             return;
     }

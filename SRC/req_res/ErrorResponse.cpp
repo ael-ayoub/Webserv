@@ -266,7 +266,7 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
         std::map<int, std::string>::iterator it;
         for (it = error[i].begin(); it != error[i].end(); ++it) 
         {
-            std::cout << "status code is : " << status_code << ", we found is : " << it->first << std::endl;
+            // std::cout << "status code is : " << status_code << ", we found is : " << it->first << std::endl;
             err_tmp[it->first] = it->second;
             if (it->first == status_code)
             {

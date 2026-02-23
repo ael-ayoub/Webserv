@@ -242,7 +242,7 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 	state.filename_upload = "www/upload/" + state.filename;
 	if (state.fd_upload == -1)
 	{
-		std::cout << "Creating upload file: " << state.filename_upload << std::endl;
+		// std::cout << "Creating upload file: " << state.filename_upload << std::endl;
 		state.fd_upload = open(state.filename_upload.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	}
 
@@ -266,7 +266,7 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 	{
 		if(!check_timeout(state.timestamp, TIMEOUT))
 		{
-			std::cout << "Connection timed out for fd: " << fd_client << std::endl;
+			// std::cout << "Connection timed out for fd: " << fd_client << std::endl;
 			state.response = ErrorResponse::Error_BadRequest(a);
 			cloce_connection(state);
 			return true;
@@ -373,7 +373,7 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 				}
 				catch(const std::exception& e)
 				{
-					std::cerr << e.what() << '\n';
+					// std::cerr << e.what() << '\n';
 				}
 				
 				state.waiting = false;
@@ -384,7 +384,7 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 	}
 	close(state.fd_upload);
 	state.fd_upload = -1;
-	std::cout << "File upload completed: " << state.filename_upload << std::endl;
+	// std::cout << "File upload completed: " << state.filename_upload << std::endl;
 	state.complete_upload = true;
 	
 	// Extract filename from path
@@ -625,7 +625,7 @@ void _handle_post_check_user(ClientState &state, Config&a)
 	std::string username = get_username_from_metadata(state.metadata);
 	if (username.empty())
 	{
-		std::cout << "No username found in metadata" << std::endl;
+		// std::cout << "No username found in metadata" << std::endl;
 		state.response = ErrorResponse::Error_BadRequest(a);
 		state.close = true;
 		state.cleanup = true;
@@ -679,7 +679,7 @@ void _handle_post_login(ClientState &state, Config &a)
 	std::string username = get_username_from_metadata(state.metadata);
 	if (username.empty())
 	{
-		std::cout << "No username found in metadata" << std::endl;
+		// std::cout << "No username found in metadata" << std::endl;
 		state.response = ErrorResponse::Error_BadRequest(a);
 		state.close = true;
 		state.cleanup = true;
@@ -708,7 +708,7 @@ void _handle_post_login(ClientState &state, Config &a)
 	state.cleanup = true;
 	state.send_data = true;
 
-	std::cout << "User '" << username << "' logged in with session ID: " << state.cookies << std::endl;
+	// std::cout << "User '" << username << "' logged in with session ID: " << state.cookies << std::endl;
 }
 
 std::string _get_filename(const std::string &metadata)
@@ -908,7 +908,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 	// Upload endpoint supports multipart/form-data and raw bodies
 	if (_is_uploads_path(state.path))
 	{
-		std::cout << "------------ Handling /uploads POST request -----------" << std::endl;
+		// std::cout << "------------ Handling /uploads POST request -----------" << std::endl;
 		// Hard cap: 1 GB — prevents hang when client_max_body_size == 0 (unlimited)
 		const size_t _hard_cap = 1024ULL * 1024ULL * 1024ULL;
 		if (state.content_length > _hard_cap ||
@@ -974,7 +974,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 	}
 	else
 	{
-		std::cout << "this the correct path: " << state.path << std::endl;
+		// std::cout << "this the correct path: " << state.path << std::endl;
 		state.response = ErrorResponse::Error_NotFound(a);
 		state.close = true;
 		state.cleanup = true;

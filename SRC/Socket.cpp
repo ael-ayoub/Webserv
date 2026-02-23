@@ -110,7 +110,7 @@ std::string generate_log_entry(ClientState &state)
     log_entry += format_timestamp(state.timestamp);
     log_entry += " " + state.method;
     log_entry += " " + state.path;
-    log_entry += " " + (state.response.empty() ? "No response generated" : state.response.substr(0, 16) + "...");
+    log_entry += " " + (state.response.empty() ? "No response generated" : state.response.substr(0, 16));
     return log_entry;
 }
 
@@ -173,7 +173,7 @@ void Socket::Monitor(Config &a)
                             ++it;
                             continue;
                         }
-                        std::cout << "Keep-alive idle timeout, closing fd: " << fd << std::endl;
+                        // std::cout << "Keep-alive idle timeout, closing fd: " << fd << std::endl;
                     }
 
                     epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd, NULL);
@@ -192,14 +192,14 @@ void Socket::Monitor(Config &a)
             continue;
         }
 
-        std::cout << "Epoll returned " << max_fds << " events." << std::endl;
+        // std::cout << "Epoll returned " << max_fds << " events." << std::endl;
         for (int i = 0; i < max_fds; i++)
         {
             current_fd = events[i].data.fd;
             int index = checkEvent(current_fd);
             if (index != -1)
             {
-                std::cout << "Accepting new client on socket fd: " << current_fd << std::endl;
+                // std::cout << "Accepting new client on socket fd: " << current_fd << std::endl;
                 int &fd_socket = sockconf[index].fd_socket;
                 // addr_size = sizeof(addr_client);
                 fd_client = accept(fd_socket, NULL, NULL);
@@ -219,17 +219,17 @@ void Socket::Monitor(Config &a)
             else
             {
                 fd_client = events[i].data.fd;
-                std::cout << "Handling client on fd: " << fd_client << std::endl;
+                // std::cout << "Handling client on fd: " << fd_client << std::endl;
                 HandleClient(fd_client, a, status);
                 std::map<int, ClientState>::iterator it = status.find(fd_client);
                 if (it != status.end())
                 {
                     if (it->second.waiting)
                     {
-                        std::cout << "checking timeout for fd: " << fd_client << std::endl;
+                        // std::cout << "checking timeout for fd: " << fd_client << std::endl;
                         if (!check_timeout(it->second.timestamp, TIMEOUT))
                         {
-                            std::cout << "Connection timed out for fd: " << fd_client << std::endl;
+                            // std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                             if (!it->second.send_data)
                             {
                                 std::cerr << "\033[1;31m[ERROR]\033[0m Request timeout on fd: " << fd_client;
@@ -263,7 +263,7 @@ void Socket::Monitor(Config &a)
                         else
                         {
                             it->second.timestamp = get_current_timestamp();
-                            std::cout << "Waiting for more data from fd: " << fd_client << std::endl;
+                            // std::cout << "Waiting for more data from fd: " << fd_client << std::endl;
                             event_client.data.fd = fd_client;
                             event_client.events = EPOLLIN;
                             if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
@@ -277,7 +277,7 @@ void Socket::Monitor(Config &a)
                     }
                     if (it->second.send_data)
                     {
-                        std::cout << "Sending response to fd: " << fd_client << std::endl;
+                        // std::cout << "Sending response to fd: " << fd_client << std::endl;
                         event_client.data.fd = fd_client;
                         event_client.events = EPOLLOUT;
                         if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
@@ -294,7 +294,7 @@ void Socket::Monitor(Config &a)
                         }
                         catch (const std::exception &e)
                         {
-                            std::cout << "Error sending response to fd: " << fd_client << std::endl;
+                            // std::cout << "Error sending response to fd: " << fd_client << std::endl;
                             std::cerr << e.what() << '\n';
                             it->second.close = true;
                             it->second.cleanup = true;
@@ -304,7 +304,7 @@ void Socket::Monitor(Config &a)
                         it->second.response.find("Connection: close") != std::string::npos || 
                         it->second.close)
                     {
-                        std::cout << "Closing connection for fd: " << fd_client << std::endl;
+                        // std::cout << "Closing connection for fd: " << fd_client << std::endl;
                         if (it->second.cleanup)
                             status.erase(it);
                         epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
