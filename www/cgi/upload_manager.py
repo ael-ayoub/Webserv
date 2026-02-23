@@ -165,22 +165,22 @@ td a:hover { text-decoration: underline; }
             print("</tr>")
         print("</tbody></table>")
 
-    # print("</div></main>")
+    print("</div></main>")
 
     # print("<footer><p>&copy; WEBSERV C++98</p></footer>")
 
-    # print("<script src='/theme.js'></script>")
-    # print("<script>")
-    # print("function delFile(urlName, label){")
-    # print("  if(!confirm('DELETE ' + label + ' ?')) return;")
-    # print("  fetch('/upload/' + urlName, {method: 'DELETE'})")
-    # print("    .then(r => { if(!r.ok && r.status !== 204) throw new Error('HTTP ' + r.status); })")
-    # print("    .then(() => location.reload())")
-    # print("    .catch(e => alert('DELETE FAILED: ' + e));")
-    # print("}")
-    # print("</script>")
+    print("<script src='/theme.js'></script>")
+    print("<script>")
+    print("function delFile(urlName, label){")
+    print("  if(!confirm('DELETE ' + label + ' ?')) return;")
+    print("  fetch('/upload/' + urlName, {method: 'DELETE'})")
+    print("    .then(r => { if(!r.ok && r.status !== 204) throw new Error('HTTP ' + r.status); })")
+    print("    .then(() => location.reload())")
+    print("    .catch(e => alert('DELETE FAILED: ' + e));")
+    print("}")
+    print("</script>")
 
-    # print("</body></html>")
+    print("</body></html>")
 
 
 if __name__ == '__main__':

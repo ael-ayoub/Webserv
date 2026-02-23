@@ -1,10 +1,8 @@
 #include "../../INCLUDES/Webserv.hpp"
-#include "../../INCLUDES/CGI.hpp"
-#include <sstream>
 
-// Server-side user registry: persists for the lifetime of the server process.
-// Maps username -> theme preference ("light" or "dark").
-static std::map<std::string, std::string> g_user_map;
+#include "../../INCLUDES/CGI.hpp"
+
+#include <sstream>
 
 std::string generat_random_id();
 
@@ -70,27 +68,6 @@ static std::string _url_decode_simple(const std::string &in)
 	return out;
 }
 
-// URL-encodes a string for safe use in cookie values (encodes everything
-// except unreserved characters: alpha, digit, '-', '_', '.').
-static std::string _url_encode_simple(const std::string &in)
-{
-	std::string out;
-	out.reserve(in.size() * 3);
-	for (size_t i = 0; i < in.size(); i++)
-	{
-		unsigned char c = (unsigned char)in[i];
-		if (std::isalnum(c) || c == '-' || c == '_' || c == '.')
-			out += (char)c;
-		else
-		{
-			char buf[4];
-			snprintf(buf, sizeof(buf), "%%%02X", c);
-			out += buf;
-		}
-	}
-	return out;
-}
-
 static std::string _cwd()
 {
 	char buffer[PATH_MAX];
@@ -101,6 +78,7 @@ static std::string _cwd()
 
 static std::string _get_filename_from_headers_or_query(const ClientState &state)
 {
+	// 1) Query string: /uploads?filename=...
 	std::string path = state.path;
 	size_t qpos = path.find('?');
 	if (qpos == std::string::npos)
@@ -121,16 +99,12 @@ static std::string _get_filename_from_headers_or_query(const ClientState &state)
 		}
 	}
 
+	// 2) Custom header: X-Filename: name.ext
 	std::string xfn = _header_value(state.header, "X-Filename");
 	if (!xfn.empty())
 		return xfn;
-	xfn = _header_value(state.header, "File-Name");
-	if (!xfn.empty())
-		return xfn;
-	xfn = _header_value(state.header, "X-File-Name");
-	if (!xfn.empty())
-		return xfn;
 
+	// 3) Content-Disposition: ... filename="..."
 	std::string cd = _header_value(state.header, "Content-Disposition");
 	if (!cd.empty())
 	{
@@ -150,6 +124,7 @@ static std::string _get_filename_from_headers_or_query(const ClientState &state)
 
 static bool _is_uploads_path(const std::string &path)
 {
+	// Accept: /uploads, /uploads?..., /uploads%3f...
 	std::string p = path;
 	while (!p.empty() && (unsigned char)p[0] <= 32)
 		p.erase(0, 1);
@@ -291,13 +266,9 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 	{
 		if(!check_timeout(state.timestamp, TIMEOUT))
 		{
-			std::cerr << "\033[1;31m[ERROR]\033[0m Upload timeout for fd: " << fd_client
-					  << " - Content-Length declared: " << state.content_length
-					  << " bytes, uploaded so far: " << state.byte_uploaded
-					  << " bytes (incomplete body, possible Content-Length mismatch)" << std::endl;
-			state.response = ErrorResponse::Error_RequestTimeout(a);
+			std::cout << "Connection timed out for fd: " << fd_client << std::endl;
+			state.response = ErrorResponse::Error_BadRequest(a);
 			cloce_connection(state);
-			state.send_data = true;
 			return true;
 		}
 		state.timestamp = get_current_timestamp();
@@ -379,6 +350,7 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 				{
 					// should wait for more data
 					state.waiting = true;
+					state.send_data = false;
 					return false;
 				}
 				// error happen on the server close the connection
@@ -405,6 +377,7 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 				}
 				
 				state.waiting = false;
+				state.send_data = false;
 			}
 		}
 		state.timestamp = get_current_timestamp();
@@ -629,27 +602,30 @@ static bool Upload_raw(ClientState &state, const int &fd_client, Config &a)
 
 std::string get_username_from_metadata(const std::string &metadata)
 {
-	const std::string key = "username=";
-	size_t pos = metadata.find(key);
-	if (pos == std::string::npos)
-		return "";
-	pos += key.size();
-	size_t end_pos = metadata.size();
-	const char *delims = ";\r\n&";
-	for (int d = 0; delims[d]; d++)
+	std::string username_key = "username=";
+	size_t pos = metadata.find(username_key);
+	if (pos != std::string::npos)
 	{
-		size_t p = metadata.find(delims[d], pos);
-		if (p != std::string::npos && p < end_pos)
-			end_pos = p;
+		pos += username_key.length();
+		size_t end_pos = metadata.find("\r\n", pos);
+		if (end_pos != std::string::npos)
+		{
+			return metadata.substr(pos, end_pos - pos);
+		}
+		else
+		{
+			return metadata.substr(pos);
+		}
 	}
-	return metadata.substr(pos, end_pos - pos);
+	return "";
 }
 
-void _handle_post_check_user(ClientState &state, Config &a)
+void _handle_post_check_user(ClientState &state, Config&a)
 {
-	std::string username = _url_decode_simple(_trim(get_username_from_metadata(state.metadata)));
+	std::string username = get_username_from_metadata(state.metadata);
 	if (username.empty())
 	{
+		std::cout << "No username found in metadata" << std::endl;
 		state.response = ErrorResponse::Error_BadRequest(a);
 		state.close = true;
 		state.cleanup = true;
@@ -657,22 +633,40 @@ void _handle_post_check_user(ClientState &state, Config &a)
 		return;
 	}
 
-	bool exists = (g_user_map.find(username) != g_user_map.end());
-	std::string body = exists
-		? "USER '" + username + "' EXISTS IN SERVER DATA."
-		: "USER '" + username + "' NOT FOUND IN SERVER DATA.";
-	std::ostringstream oss;
-	oss << body.size();
-	std::string status = exists ? "HTTP/1.1 200 OK\r\n" : "HTTP/1.1 404 Not Found\r\n";
-	std::string response = status +
-		"Content-Type: text/plain\r\n"
-		"Content-Length: " + oss.str() + "\r\n";
-	if (state.header.find("Connection: close") != std::string::npos)
-		response += "Connection: close\r\n";
+	if (username == state.cookies)
+	{
+		std::string body = "User '" + username + "' is logged in.";
+		std::stringstream ss;
+		ss << body.size();
+		std::string response =
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: " +
+			ss.str() + "\r\n";
+		if (state.header.find("Connection: close") != std::string::npos)
+			response += "Connection: close\r\n";
+		else
+			response += "Connection: keep-alive\r\n";
+		response += "\r\n" + body;
+		state.response = response;
+	}
 	else
-		response += "Connection: keep-alive\r\n";
-	response += "\r\n" + body;
-	state.response = response;
+	{
+		std::string body = "User '" + username + "' is not logged in.";
+		std::stringstream ss;
+		ss << body.size();
+		std::string response =
+			"HTTP/1.1 401 Unauthorized\r\n"
+			"Content-Type: text/plain\r\n"
+			"Content-Length: " +
+			ss.str() + "\r\n";
+		if (state.header.find("Connection: close") != std::string::npos)
+			response += "Connection: close\r\n";
+		else
+			response += "Connection: keep-alive\r\n";
+		response += "\r\n" + body;
+		state.response = response;
+	}
 	state.close = true;
 	state.cleanup = true;
 	state.send_data = true;
@@ -681,9 +675,11 @@ void _handle_post_check_user(ClientState &state, Config &a)
 
 void _handle_post_login(ClientState &state, Config &a)
 {
-	std::string username = _url_decode_simple(_trim(get_username_from_metadata(state.metadata)));
+	// Extract username from metadata
+	std::string username = get_username_from_metadata(state.metadata);
 	if (username.empty())
 	{
+		std::cout << "No username found in metadata" << std::endl;
 		state.response = ErrorResponse::Error_BadRequest(a);
 		state.close = true;
 		state.cleanup = true;
@@ -691,55 +687,31 @@ void _handle_post_login(ClientState &state, Config &a)
 		return;
 	}
 
-	std::string flash_value;
-	if (g_user_map.find(username) != g_user_map.end())
-		flash_value = "SIGNED_IN"; // already in registry
+	std::string body = "username \'" + username + "\' logged in successfully.";
+	std::stringstream ss;
+	ss << body.size();
+	std::string response =
+		"HTTP/1.1 200 OK\r\n"
+		"Content-Type: text/plain\r\n"
+		"Content-Length: " +
+		ss.str() + "\r\n"
+				   "Set-Cookie: username=" +
+		username + "; HttpOnly\r\n";
+	if (state.header.find("Connection: close") != std::string::npos)
+		response += "Connection: close\r\n";
 	else
-	{
-		g_user_map[username] = "light"; // register with default light theme
-		flash_value = "NEW_USER";
-	}
+		response += "Connection: keep-alive\r\n";
+	response += "\r\n" + body;
 
-	std::string encoded_username = _url_encode_simple(username);
-	std::string response =
-		"HTTP/1.1 302 Found\r\n"
-		"Location: /session.html\r\n"
-		"Set-Cookie: username=" + encoded_username + "; Path=/; Max-Age=86400\r\n"
-		"Set-Cookie: flash_msg=" + flash_value + "; Path=/; Max-Age=30\r\n"
-		"Content-Length: 0\r\n"
-		"\r\n";
 	state.response = response;
 	state.close = true;
 	state.cleanup = true;
 	state.send_data = true;
-	std::cout << "[LOGIN] user='" << username << "' flash='" << flash_value << "'" << std::endl;
+
+	std::cout << "User '" << username << "' logged in with session ID: " << state.cookies << std::endl;
 }
 
-
-void _handle_post_logout(ClientState &state, Config &a)
-{
-	(void)a;
-	std::string username = _url_decode_simple(_trim(get_username_from_metadata(state.header)));
-	if (username.empty())
-		username = _trim(state.cookies);
-
-	std::string flash_value = "SIGNED_OFF_" + _url_encode_simple(username);
-
-	std::string response =
-		"HTTP/1.1 302 Found\r\n"
-		"Location: /session.html\r\n"
-		"Set-Cookie: username=; Path=/; Max-Age=0\r\n"
-		"Set-Cookie: flash_msg=" + flash_value + "; Path=/; Max-Age=30\r\n"
-		"Content-Length: 0\r\n"
-		"\r\n";
-	state.response = response;
-	state.close = true;
-	state.cleanup = true;
-	state.send_data = true;
-	std::cout << "[LOGOUT] user='" << username << "'" << std::endl;
-}
-
-std::string _get_filename(const std::string &metadata, const ClientState &state)
+std::string _get_filename(const std::string &metadata)
 {
 	std::string filename_key = "filename=\"";
 	size_t pos = metadata.find(filename_key);
@@ -749,22 +721,15 @@ std::string _get_filename(const std::string &metadata, const ClientState &state)
 		size_t end_quote = metadata.find("\"", pos);
 		if (end_quote != std::string::npos)
 		{
-			std::string filename = metadata.substr(pos, end_quote - pos);
-			if (!filename.empty())
-				return filename;
+			return metadata.substr(pos, end_quote - pos);
 		}
 	}
-	
-	std::string fallback = _get_filename_from_headers_or_query(state);
-
-	if (fallback.find("default_upload_") != 0)
-		return fallback;
-	
 	return "default_upload_" + generat_random_id();
 }
 
 std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &state)
 {
+	// CGI for POST (e.g. /upload/script.py)
 	{
 		std::string req_path = state.path;
 		std::string query_string;
@@ -806,7 +771,6 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 						return state.response;
 					}
 
-					mkdir("./SRC/temp", 0755); // ensure temp dir exists
 					if (state.body_tmp_path.empty())
 						state.body_tmp_path = "./SRC/temp/cgi_stdin_" + _itoa(fd_client) + ".tmp";
 					if (state.fd_body == -1)
@@ -941,10 +905,14 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		}
 	}
 
+	// Upload endpoint supports multipart/form-data and raw bodies
 	if (_is_uploads_path(state.path))
 	{
 		std::cout << "------------ Handling /uploads POST request -----------" << std::endl;
-		if (ServerConfig::client_max_body_size != 0 && state.content_length > ServerConfig::client_max_body_size)
+		// Hard cap: 1 GB — prevents hang when client_max_body_size == 0 (unlimited)
+		const size_t _hard_cap = 1024ULL * 1024ULL * 1024ULL;
+		if (state.content_length > _hard_cap ||
+			(ServerConfig::client_max_body_size != 0 && state.content_length > ServerConfig::client_max_body_size))
 		{
 			state.response = ErrorResponse::Error_PayloadTooLarge(a);
 			state.close = true;
@@ -966,7 +934,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 					state.waiting = false;
 					return state.response;
 				}
-				state.filename = _get_filename(state.metadata, state);
+				state.filename = _get_filename(state.metadata);
 				try
 				{
 					bool done = Upload_files(state, fd_client, a);
@@ -999,15 +967,10 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		_handle_post_login(state, a);
 		return state.response;
 	}
-	else if (state.path == "/logout")
-	{
-		_handle_post_logout(state, a);
-		return state.response;
-	}
 	else if (state.path == "/check_user")
 	{
-		_handle_post_check_user(state, a);
-		return state.response;
+		_handle_post_check_user(state,a);
+		 return state.response;
 	}
 	else
 	{

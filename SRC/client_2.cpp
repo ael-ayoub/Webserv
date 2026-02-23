@@ -88,11 +88,9 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
     // std::cout << "checking timeout for fd: " << fd_client << std::endl;
     if (!check_timeout(state.timestamp, TIMEOUT))
     {
-        std::cerr << "\033[1;31m[ERROR]\033[0m Header read timeout for fd: " << fd_client
-                  << " (client did not send complete request in time)" << std::endl;
-        state.response = ErrorResponse::Error_RequestTimeout(a);
+        std::cout << "Connection timed out for fd: " << fd_client << std::endl;
+        state.response = ErrorResponse::Error_BadRequest(a);
         cloce_connection(state);
-        state.send_data = true;
         return false;
     }
     state.timestamp = get_current_timestamp();
@@ -138,7 +136,8 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
             }
             state.timestamp = get_current_timestamp();
             std::cout << "Complete header received from fd: " << fd_client << std::endl;
-            state.header = state.readstring.substr(0, pos + 2);
+            state.header = state.readstring.substr(0, pos + 2);  // Include the final \r\n
+            // std::cout << "DEBUG: Full header received:\n[" << state.header << "]" << std::endl;
             if (state.header.size() > HEADER_SIZE)
             {
                 state.response = ErrorResponse::Error_BadRequest(a);
@@ -190,11 +189,10 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
             std::cout << "checking timeout for fd: " << fd_client << std::endl;
             if (!check_timeout(state.timestamp, TIMEOUT))
             {
-                std::cerr << "\033[1;31m[ERROR]\033[0m Incomplete header timeout for fd: " << fd_client << std::endl;
-                state.response = ErrorResponse::Error_RequestTimeout(a);
+                std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                 state.close = true;
                 state.cleanup = true;
-                state.send_data = true;
+                state.send_data = false;
                 state.waiting = false;
                 return false;
             }
@@ -245,12 +243,9 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
 {
     if (!check_timeout(state.timestamp, TIMEOUT))
     {
-        std::cerr << "\033[1;31m[ERROR]\033[0m Metadata read timeout for fd: " << fd_client
-                  << " - Content-Length declared: " << state.content_length
-                  << " bytes (incomplete body, possible Content-Length mismatch)" << std::endl;
-        state.response = ErrorResponse::Error_RequestTimeout(a);
+        std::cout << "Connection timed out for fd: " << fd_client << std::endl;
+        state.response = ErrorResponse::Error_BadRequest(a);
         cloce_connection(state);
-        state.send_data = true;
         return false;
     }
     state.timestamp = get_current_timestamp();
@@ -297,14 +292,13 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
     {
         std::cout << "Read " << n << " bytes from fd: " << fd_client << std::endl;
         state.readstring.append(buffer, n);
+        size_t pos = state.readstring.find("\r\n\r\n");
         if (pos != std::string::npos)
         {
             if (!check_timeout(state.timestamp, TIMEOUT))
             {
-                std::cerr << "\033[1;31m[ERROR]\033[0m Metadata processing timeout for fd: " << fd_client << std::endl;
-                state.response = ErrorResponse::Error_RequestTimeout(a);
+                std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                 cloce_connection(state);
-                state.send_data = true;
                 return false;
             }
             state.timestamp = get_current_timestamp();
@@ -319,13 +313,10 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
         {
             if (!check_timeout(state.timestamp, TIMEOUT))
             {
-                std::cerr << "\033[1;31m[ERROR]\033[0m Metadata read timeout for fd: " << fd_client
-                          << " - Content-Length declared: " << state.content_length
-                          << " bytes (incomplete metadata, possible Content-Length mismatch)" << std::endl;
-                state.response = ErrorResponse::Error_RequestTimeout(a);
+                std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                 state.close = true;
                 state.cleanup = true;
-                state.send_data = true;
+                state.send_data = false;
                 state.waiting = false;
                 return false;
             }
@@ -343,19 +334,8 @@ bool _process_post_request(int fd_client, ClientState &state, Config &a, Methode
 {
         if (!check_timeout(state.timestamp, TIMEOUT))
         {
-            std::cerr << "\033[1;31m[ERROR]\033[0m POST request timeout on fd: " << fd_client;
-            if (state.content_length > 0)
-            {
-                size_t received = state.byte_uploaded > 0 ? state.byte_uploaded : state.body_received;
-                received += state.readstring.size();
-                std::cerr << " - Content-Length declared: " << state.content_length
-                          << " bytes, but only received: " << received << " bytes"
-                          << " (incomplete body, possible Content-Length mismatch)";
-            }
-            std::cerr << std::endl;
-            state.response = ErrorResponse::Error_RequestTimeout(a);
+            std::cout << "Connection timed out for fd: " << fd_client << std::endl;
             cloce_connection(state);
-            state.send_data = true;
             return false;
         }
         state.timestamp = get_current_timestamp();

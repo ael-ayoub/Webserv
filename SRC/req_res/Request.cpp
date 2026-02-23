@@ -191,6 +191,9 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     return "NONE";
 }
 
+// 1 GB hard absolute cap — prevents infinite-wait loops when client_max_body_size=0
+#define MAX_BODY_SIZE_HARD_CAP (1024ULL * 1024ULL * 1024ULL)
+
 std::string CheckContentLenght(std::string str, Config a)
 {
     // ServerConfig x;
@@ -207,6 +210,9 @@ std::string CheckContentLenght(std::string str, Config a)
 
     std::stringstream s(str);
     s >> num;
+    // Always reject values beyond the hard cap regardless of client_max_body_size
+    if (num > MAX_BODY_SIZE_HARD_CAP)
+        return ErrorResponse::Error_PayloadTooLarge(a);
     if (ServerConfig::CheckClientMaxBodySize(num) == true)
         return ErrorResponse::Error_PayloadTooLarge(a);
     return "NONE";
