@@ -66,6 +66,14 @@
 
     /* ── Main init ──────────────────────────────────────────────── */
     function init() {
+        /* If a logout just happened, wipe the user's theme cookie before
+           anything else so the page always resets to light mode. */
+        var flash = readCookie('flash_msg');
+        if (flash && flash.indexOf('SIGNED_OFF_') === 0) {
+            var signedOffUser = decodeURIComponent(flash.slice(11));
+            if (signedOffUser) deleteCookie('theme_' + signedOffUser);
+        }
+
         var username = readCookie('username');
         var nav = document.querySelector('nav');
 

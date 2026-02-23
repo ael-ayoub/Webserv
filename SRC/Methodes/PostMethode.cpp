@@ -687,24 +687,23 @@ void _handle_post_login(ClientState &state, Config &a)
 		return;
 	}
 
-	std::string body = "username \'" + username + "\' logged in successfully.";
-	std::stringstream ss;
-	ss << body.size();
+	// Distinguish new session vs returning user (already has the same cookie)
+	std::string flash_value = (state.cookies == username) ? "SIGNED_IN" : "NEW_USER";
+
 	std::string response =
-		"HTTP/1.1 200 OK\r\n"
-		"Content-Type: text/plain\r\n"
-		"Content-Length: " +
-		ss.str() + "\r\n"
-				   "Set-Cookie: username=" +
-		username + "; HttpOnly\r\n";
+		"HTTP/1.1 302 Found\r\n"
+		"Location: /session.html\r\n"
+		"Set-Cookie: username=" + username + "; Path=/\r\n"
+		"Set-Cookie: flash_msg=" + flash_value + "; Path=/\r\n"
+		"Content-Length: 0\r\n";
 	if (state.header.find("Connection: close") != std::string::npos)
 		response += "Connection: close\r\n";
 	else
 		response += "Connection: keep-alive\r\n";
-	response += "\r\n" + body;
+	response += "\r\n";
 
 	state.response = response;
-	state.close = true;
+	state.close = false;
 	state.cleanup = true;
 	state.send_data = true;
 
@@ -971,6 +970,28 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 	{
 		_handle_post_check_user(state,a);
 		 return state.response;
+	}
+	else if (state.path == "/logout")
+	{
+		std::string username = state.cookies;
+		std::string flash_value = username.empty() ? "SIGNED_OFF_" : "SIGNED_OFF_" + username;
+		std::string response =
+			"HTTP/1.1 302 Found\r\n"
+			"Location: /session.html\r\n"
+			"Set-Cookie: username=; Path=/; Max-Age=0\r\n"
+			"Set-Cookie: flash_msg=" + flash_value + "; Path=/\r\n"
+			"Content-Length: 0\r\n";
+		if (state.header.find("Connection: close") != std::string::npos)
+			response += "Connection: close\r\n";
+		else
+			response += "Connection: keep-alive\r\n";
+		response += "\r\n";
+		state.response = response;
+		state.cookies = "";
+		state.close = false;
+		state.cleanup = true;
+		state.send_data = true;
+		return state.response;
 	}
 	else
 	{
