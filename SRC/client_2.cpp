@@ -110,7 +110,7 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
     else
     {
         state.readstring.append(buffer, n);
-        std::cout << "state.readstring >> " <<  state.readstring << std::endl;
+        // std::cout << "state.readstring >> " <<  state.readstring << std::endl;
 
         size_t pos = state.readstring.find("\r\n\r\n");
         if (pos != std::string::npos)

@@ -78,7 +78,7 @@ void Config::DefaultConfigFile()
     file_lines.push_back("    }");
     file_lines.push_back("    location / {");
     file_lines.push_back("        root /www;");
-    file_lines.push_back("        methods GET;");
+    file_lines.push_back("        methods GET POST;");
     file_lines.push_back("        index index.html;");
     file_lines.push_back("        autoindex on;");
     file_lines.push_back("    }");
