@@ -1,4 +1,4 @@
-#include "../INCLUDES/CGI.hpp"
+#include "../includes/CGI.hpp"
 #include <sstream>
 
 CGI::CGI(const char *RequestType,

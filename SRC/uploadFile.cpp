@@ -1,4 +1,4 @@
-#include "../INCLUDES/Webserv.hpp"
+#include "../includes/Webserv.hpp"
 
 bool _uploadFile(const int &fd_client, ClientState &state)
 {
@@ -44,7 +44,7 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 		if (state.fd_upload < 0)
 		{
 
-			std::string error_msg = "Error: Failed to open/create file '" + u_path + "': " + strerror(errno);
+			std::string error_msg = "Error: Failed to open/create file '" + u_path + "'";
 			throw std::runtime_error(error_msg);
 		}
 	}
@@ -63,15 +63,7 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 		}
 		if (byte_read < 0)
 		{
-			if (errno == EWOULDBLOCK)
-				return false;
-			else
-			{
-				// std::cout << "read function failed" << std::endl;
-				close(state.fd_upload);
-				state.fd_upload = -1;
-				return false;
-			}
+			return false;
 		}
 
 		std::vector<char> check;
@@ -85,8 +77,7 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 		{
 			if (write(state.fd_upload, check.data(), pos) == -1)
 			{
-				std::cerr << "Error: Failed to write to file '" << u_path << "': "
-						  << strerror(errno) << std::endl;
+				std::cerr << "Error: Failed to write to file '" << u_path << "'" << std::endl;
 				return false;
 			}
 			state.complete_upload = true;
@@ -108,8 +99,7 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 			}
 			if (write(state.fd_upload, check.data(), write_size) == -1)
 			{
-				std::cerr << "Error: Failed to write to file '" << u_path << "': "
-						  << strerror(errno) << std::endl;
+				std::cerr << "Error: Failed to write to file '" << u_path << "'" << std::endl;
 				return false;
 			}
 		}

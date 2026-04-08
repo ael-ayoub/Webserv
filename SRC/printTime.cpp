@@ -1,4 +1,4 @@
-#include "../INCLUDES/includes.hpp"
+#include "../includes/includes.hpp"
 
 void printCurrentTime()
 {

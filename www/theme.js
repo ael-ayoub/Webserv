@@ -51,9 +51,9 @@
         s.appendChild(document.createTextNode(css));
         document.head.appendChild(s);
     }
-    function removeDarkStyle() {
+    function std::removeDarkStyle() {
         var s = document.getElementById('dark-override');
-        if (s) s.parentNode.removeChild(s);
+        if (s) s.parentNode.std::removeChild(s);
     }
 
     /* ── Per-user theme persistence ─────────────────────────────── */
@@ -79,7 +79,7 @@
 
         /* Default: light mode always on every page load.
            If the user is logged in we override below. */
-        removeDarkStyle();
+        std::removeDarkStyle();
 
         if (!username || !nav) {
             /* No logged-in user → stay in light mode, no toggle shown. */
@@ -117,7 +117,7 @@
         toggle.addEventListener('click', function () {
             var isDark = !!document.getElementById('dark-override');
             if (isDark) {
-                removeDarkStyle();
+                std::removeDarkStyle();
                 saveUserTheme(username, 'light');
                 toggle.textContent = '\ud83c\udf19';
             } else {

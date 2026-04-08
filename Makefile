@@ -1,6 +1,6 @@
 NAME = Webserv
 
-SRCS = main.cpp SRC/CGI.cpp SRC/ConfigFile/Config.cpp SRC/ConfigFile/ServerConfig.cpp \
+SRCS = main.cpp includes/helper_functions/ft_strol.cpp SRC/CGI.cpp SRC/ConfigFile/Config.cpp SRC/ConfigFile/ServerConfig.cpp \
 	SRC/ConfigFile/LocationConfig.cpp SRC/ConfigFile/Syntax_server.cpp \
 	SRC/ConfigFile/Syntax_location.cpp SRC/Socket.cpp\
 	SRC/Methodes/GetMethode.cpp SRC/req_res/Request.cpp\
@@ -12,7 +12,7 @@ OBJ = $(SRCS:.cpp=.o)
 
 CC = c++
 
-FLAGS = -Wall #-Wextra -Werror -std=c++98 -g
+FLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
 all: $(NAME)
 

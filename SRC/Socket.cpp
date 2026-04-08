@@ -1,4 +1,4 @@
-#include "../INCLUDES/Webserv.hpp"
+#include "../includes/Webserv.hpp"
 
 SockConf::SockConf(std::string ip, int p)
 {
@@ -252,7 +252,7 @@ void Socket::Monitor(Config &a)
                                 if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
                                 {
                                     close(fd_client);
-                                    perror("epoll_ctl MOD failed");
+                                    std::cerr << "epoll_ctl MOD failed" << std::endl;
                                     throw(std::runtime_error("cannot modify client to epoll instance !"));
                                 }
                                 continue;
@@ -269,7 +269,7 @@ void Socket::Monitor(Config &a)
                             if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
                             {
                                 close(fd_client);
-                                perror("epoll_ctl MOD failed");
+                                std::cerr << "epoll_ctl MOD failed" << std::endl;
                                 throw(std::runtime_error("cannot modify client to epoll instance !"));
                             }
                             continue; // Wait for more data
@@ -283,7 +283,7 @@ void Socket::Monitor(Config &a)
                         if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
                         {
                             close(fd_client);
-                            perror("epoll_ctl MOD failed");
+                            std::cerr << "epoll_ctl MOD failed" << std::endl;
                             throw(std::runtime_error("cannot modify client to epoll instance !"));
                         }
                         try
@@ -318,7 +318,7 @@ void Socket::Monitor(Config &a)
                         if (epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd_client, &event_client) == -1)
                         {
                             close(fd_client);
-                            perror("epoll_ctl MOD failed");
+                            std::cerr << "epoll_ctl MOD failed" << std::endl;
                             throw(std::runtime_error("cannot modify client to epoll instance !"));
                         }
                         it->second.header.clear();

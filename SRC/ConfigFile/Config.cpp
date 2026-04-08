@@ -1,4 +1,4 @@
-#include "../../INCLUDES/Config.hpp"
+#include "../../includes/Config.hpp"
 
 ServerConfig Config::get_server_config()
 {

@@ -145,7 +145,7 @@ td a:hover { text-decoration: underline; }
     # print("<main><div class='upload-wrap'>")
     # print("<h2 class='section-title'>UPLOAD MANAGER</h2>")
     # print("<p style='color:var(--text-secondary);font-size:0.88rem;margin-bottom:1.5rem;'>")
-    # print("Open files or remove them via DELETE.</p>")
+    # print("Open files or std::remove them via DELETE.</p>")
 
     if not files:
         print("<p class='empty-note'>&#9656; NO UPLOADED FILES FOUND.</p>")
