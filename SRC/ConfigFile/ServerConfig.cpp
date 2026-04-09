@@ -93,15 +93,17 @@ int    ServerConfig::parse_config(Vector_str server_configg, int from, int to)
 {
     while (from < to)
     {
-
         server_config.push_back(server_configg[from]);
         from++;
     }
+    // unsigned int i = 0;
+    // while (server_config[i].size() > i)
+    // {
+    //     std::cout << "found : " << server_config[i] << std::endl;
+    //     i++;
+    // }
     this->check_configFile();
     this->store_server_info();
-    // std::cout << "------------------------------------\n";
-    // this->print_info_server();
-    // std::cout << "------------------------------------\n";
     return 0;
 }
 
@@ -213,8 +215,8 @@ void    ServerConfig::store_server_info()
         i++;
         // std::cout << "i = " << i << "server size is " << server_config.size() << std::endl;
     }
-    if (checkAdd_fallback() == false)
-        std::cout << "the fallback not found\n";
+    // if (checkAdd_fallback() == false)
+    //     std::cout << "the fallback not found\n";
 }
 
 void ServerConfig::print_info_server()

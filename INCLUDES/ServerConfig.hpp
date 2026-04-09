@@ -13,7 +13,6 @@ class ServerConfig
         Vector_str server_name;
         std::string path_server_root;
         std::string path_server_index;
-        // std::vector<std::pair<int, std::string> > errorStatus_pathError;
         std::vector<std::map<int, std::string> > errorStatus_pathError;
         
     public:
