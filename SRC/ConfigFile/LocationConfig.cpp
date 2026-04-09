@@ -1,4 +1,4 @@
-#include "../../INCLUDES/LocationConfig.hpp"
+#include "../../includes/LocationConfig.hpp"
 
 LocationConfig::LocationConfig()
     : path_index("None"), autoindex(false), GET_methode(false),

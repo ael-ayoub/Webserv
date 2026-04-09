@@ -1,4 +1,4 @@
-#include "../../INCLUDES/Syntax_server.hpp"
+#include "../../includes/Syntax_server.hpp"
 
 syntax_server::syntax_server()
     : listen_check(false), client_max_body_size_check(false), error_page_check(false)
@@ -95,7 +95,7 @@ void syntax_server::check_body_size(Vector_str str)
     if (client_max_body_size_check == true || str.size() > 2)
         throw Config::ErrorSyntax();
     client_max_body_size_check = true;
-    str[1] = str[1].erase(str[1].size() - 1); // remove ;
+    str[1] = str[1].erase(str[1].size() - 1); // std::remove ;
     check_number(str[1]);
     size_t size;
     std::istringstream(str[1]) >> size;
@@ -109,7 +109,7 @@ void syntax_server::check_listen(Vector_str str)
     if (str.size() > 2)
         throw Config::ErrorSyntax();
     listen_check = true;
-    str[1] = str[1].erase(str[1].size() - 1); // remove ;
+    str[1] = str[1].erase(str[1].size() - 1); // std::remove ;
     if (str[1].find(':') != std::string::npos)
     {
         Vector_str info = ServerConfig::ft_splitv2(str[1], ':');

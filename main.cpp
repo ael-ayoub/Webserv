@@ -1,20 +1,5 @@
-#include "INCLUDES/Webserv.hpp"
+#include "includes/Webserv.hpp"
 
-// std::string DefaultConfigFile(Config &a)
-// {
-//     std::string path = "/tmp/default.conf";
-//     std::ofstream File(path.c_str());
-
-//     if (!File.is_open())
-//     {
-//         std::cerr << "Error when creating default config file!\n";
-//         return "";
-//     }
-
-    
-//     File.close();
-//     return path;
-// }
 
 int main(int ac, char **av)
 {

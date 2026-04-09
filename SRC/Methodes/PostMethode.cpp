@@ -1,6 +1,6 @@
-#include "../../INCLUDES/Webserv.hpp"
+#include "../../includes/Webserv.hpp"
 
-#include "../../INCLUDES/CGI.hpp"
+#include "../../includes/CGI.hpp"
 
 #include <sstream>
 
@@ -52,7 +52,7 @@ static std::string _url_decode_simple(const std::string &in)
 			hex[1] = in[i + 2];
 			hex[2] = 0;
 			char *end = NULL;
-			long v = strtol(hex, &end, 16);
+			long v = ft_strtol(hex, &end, 16);
 			if (end && *end == 0)
 			{
 				out += static_cast<char>(v);
@@ -99,12 +99,10 @@ static std::string _get_filename_from_headers_or_query(const ClientState &state)
 		}
 	}
 
-	// 2) Custom header: X-Filename: name.ext
 	std::string xfn = _header_value(state.header, "X-Filename");
 	if (!xfn.empty())
 		return xfn;
 
-	// 3) Content-Disposition: ... filename="..."
 	std::string cd = _header_value(state.header, "Content-Disposition");
 	if (!cd.empty())
 	{
@@ -163,98 +161,56 @@ std::string generat_random_id()
 	}
 	return random;
 }
-//@hello
-// static std::string ft_getline(int fd)
-// {
-// 	if (fd < 0)
-// 		return "";
 
-// 	char ch;
-// 	int byte_read;
-// 	std::string line;
-// 	while ((byte_read = read(fd, &ch, 1)) > 0)
-// 	{
-// 		if (byte_read < 0)
-// 		{
-// 			std::cerr << "Error in read: " << strerror(errno) << std::endl;
-// 			return "";
-// 		}
-// 		if (ch == '\n')
-// 			break;
-// 		line += ch;
-// 	}
-// 	return line;
-// }
+static void close_connection(ClientState &state, const std::string &response, const std::string &error_msg)
+{
+	if (!error_msg.empty())
+		std::cerr << error_msg << std::endl;
+	if (!response.empty())
+		state.response = response;
+	state.close = true;
+	state.cleanup = true;
+	state.send_data = true;
+	state.waiting = false;
+}
 
 static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 {
 	if (fd_client < 0)
 	{
-		std::cerr << "Error: Invalid client file descriptor" << std::endl;
-		state.response = ErrorResponse::Error_InternalServerError();
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_InternalServerError(), "Error: Invalid client file descriptor");
 		throw(std::runtime_error("Invalid client file descriptor"));
 	}
 	if (state.filename.empty())
 	{
-		std::cerr << "Error: No filename specified in upload" << std::endl;
-		state.response = ErrorResponse::Error_Forbidden(a);
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_Forbidden(a), "Error: No filename specified in upload");
 		return true;
 	}
 	if (state.boundary.empty())
 	{
-		std::cerr << "Error: No boundary specified in upload" << std::endl;
-		state.response = ErrorResponse::Error_Forbidden(a);
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_Forbidden(a), "Error: No boundary specified in upload");
 		return true;
 	}
 	if (state.content_length <= 0)
 	{
-		std::cerr << "Error: Content-Length is zero in upload" << std::endl;
-		state.response = ErrorResponse::Error_Forbidden(a);
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_Forbidden(a), "Error: Content-Length is zero in upload");
 		return true;
 	}
 	if (state.filename.find("..") != std::string::npos || state.filename.find('/') != std::string::npos)
 	{
-		state.response = ErrorResponse::Error_Forbidden(a);
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_Forbidden(a), "Error: Invalid upload filename");
 		return true;
 	}
-	mkdir("www", 0755);
-	mkdir("www/upload", 0755);
+
 	state.filename_upload = "www/upload/" + state.filename;
 	if (state.fd_upload == -1)
 	{
-		// std::cout << "Creating upload file: " << state.filename_upload << std::endl;
 		state.fd_upload = open(state.filename_upload.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	}
 
 	if (state.fd_upload < 0)
 	{
-		std::cerr << "Error: Unable to create or open file '" << state.filename_upload << "': "
-				  << strerror(errno) << std::endl;
-		state.response = ErrorResponse::Error_InternalServerError();
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_InternalServerError(), "Error: Unable to create or open upload file");
 		throw(std::runtime_error("Unable to create or open upload file"));
 	}
 
@@ -266,7 +222,6 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 	{
 		if(!check_timeout(state.timestamp, TIMEOUT))
 		{
-			// std::cout << "Connection timed out for fd: " << fd_client << std::endl;
 			state.response = ErrorResponse::Error_BadRequest(a);
 			cloce_connection(state);
 			return true;
@@ -278,15 +233,14 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 			std::string to_write = state.readstring.substr(0, end);
 			if (write(state.fd_upload, to_write.c_str(), to_write.size()) == -1)
 			{
-				std::cerr << "Error: Failed to write to file '" << state.filename_upload << "': "
-						  << strerror(errno) << std::endl;
+				std::cerr << "Error: Failed to write to file '" << state.filename_upload << "'" << std::endl;
 				close(state.fd_upload);
 				state.response = ErrorResponse::Error_InternalServerError();
 				state.close = true;
 				state.cleanup = true;
 				state.send_data = true;
 				state.waiting = false;
-				remove(state.filename_upload.c_str());
+				std::remove(state.filename_upload.c_str());
 				return true;
 			}
 			break;
@@ -305,15 +259,14 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 			if (write(state.fd_upload, to_write.c_str(), to_write.size()) == -1)
 			{
 
-				std::cerr << "Error: Failed to write to file '" << state.filename_upload << "': "
-						  << strerror(errno) << std::endl;
+				std::cerr << "Error: Failed to write to file '" << state.filename_upload << "'" << std::endl;
 				close(state.fd_upload);
 				state.response = ErrorResponse::Error_InternalServerError();
 				state.close = true;
 				state.cleanup = true;
 				state.send_data = true;
 				state.waiting = false;
-				remove(state.filename_upload.c_str());
+				std::remove(state.filename_upload.c_str());
 				return true;
 			}
 			state.byte_uploaded += to_write.size();
@@ -341,29 +294,14 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 				state.cleanup = true;
 				state.send_data = true;
 				state.waiting = false;
-				remove(state.filename_upload.c_str());
+				std::remove(state.filename_upload.c_str());
 				return true;
 			}
 			else if (n < 0)
 			{
-				if (errno == EAGAIN || errno == EWOULDBLOCK)
-				{
-					// should wait for more data
-					state.waiting = true;
-					state.send_data = false;
-					return false;
-				}
-				// error happen on the server close the connection
-				std::cerr << "Error: Failed to read from client during file upload: "
-						  << strerror(errno) << std::endl;
-				close(state.fd_upload);
-				state.response = ErrorResponse::Error_InternalServerError();
-				state.close = true;
-				state.cleanup = true;
-				state.send_data = true;
-				state.waiting = false;
-				remove(state.filename_upload.c_str());
-				return true;
+				state.waiting = true;
+				state.send_data = false;
+				return false;
 			}
 			else
 			{
@@ -384,10 +322,8 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 	}
 	close(state.fd_upload);
 	state.fd_upload = -1;
-	// std::cout << "File upload completed: " << state.filename_upload << std::endl;
 	state.complete_upload = true;
 	
-	// Extract filename from path
 	std::string filename = state.filename_upload;
 	size_t last_slash = filename.find_last_of('/');
 	if (last_slash != std::string::npos)
@@ -466,45 +402,26 @@ static bool Upload_raw(ClientState &state, const int &fd_client, Config &a)
 {
 	if (state.filename.empty())
 	{
-		state.response = ErrorResponse::Error_BadRequest(a);
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_BadRequest(a), "");
 		return true;
 	}
 	if (state.content_length == 0)
 	{
-		state.response = ErrorResponse::Error_BadRequest(a);
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_BadRequest(a), "");
 		return true;
 	}
 	if (state.filename.find("..") != std::string::npos || state.filename.find('/') != std::string::npos)
 	{
-		state.response = ErrorResponse::Error_Forbidden(a);
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_Forbidden(a), "");
 		return true;
 	}
-
-	mkdir("www", 0755);
-	mkdir("www/upload", 0755);
 	if (state.filename_upload.empty())
 		state.filename_upload = "www/upload/" + state.filename;
 	if (state.fd_upload == -1)
 		state.fd_upload = open(state.filename_upload.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (state.fd_upload < 0)
 	{
-		state.response = ErrorResponse::Error_InternalServerError();
-		state.close = true;
-		state.cleanup = true;
-		state.send_data = true;
-		state.waiting = false;
+		close_connection(state, ErrorResponse::Error_InternalServerError(), "");
 		return true;
 	}
 
@@ -515,12 +432,8 @@ static bool Upload_raw(ClientState &state, const int &fd_client, Config &a)
 		{
 			close(state.fd_upload);
 			state.fd_upload = -1;
-			remove(state.filename_upload.c_str());
-			state.response = ErrorResponse::Error_InternalServerError();
-			state.close = true;
-			state.cleanup = true;
-			state.send_data = true;
-			state.waiting = false;
+			std::remove(state.filename_upload.c_str());
+			close_connection(state, ErrorResponse::Error_InternalServerError(), "");
 			return true;
 		}
 		state.byte_uploaded += (size_t)w;
@@ -535,30 +448,14 @@ static bool Upload_raw(ClientState &state, const int &fd_client, Config &a)
 		{
 			close(state.fd_upload);
 			state.fd_upload = -1;
-			remove(state.filename_upload.c_str());
-			state.response = ErrorResponse::Error_BadRequest(a);
-			state.close = true;
-			state.cleanup = true;
-			state.send_data = true;
-			state.waiting = false;
+			std::remove(state.filename_upload.c_str());
+			close_connection(state, ErrorResponse::Error_BadRequest(a), "");
 			return true;
 		}
 		if (n < 0)
 		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-			{
-				state.waiting = true;
-				return false;
-			}
-			close(state.fd_upload);
-			state.fd_upload = -1;
-			remove(state.filename_upload.c_str());
-			state.response = ErrorResponse::Error_InternalServerError();
-			state.close = true;
-			state.cleanup = true;
-			state.send_data = true;
-			state.waiting = false;
-			return true;
+			state.waiting = true;
+			return false;
 		}
 
 		size_t remaining = state.content_length - state.byte_uploaded;
@@ -568,12 +465,8 @@ static bool Upload_raw(ClientState &state, const int &fd_client, Config &a)
 		{
 			close(state.fd_upload);
 			state.fd_upload = -1;
-			remove(state.filename_upload.c_str());
-			state.response = ErrorResponse::Error_InternalServerError();
-			state.close = true;
-			state.cleanup = true;
-			state.send_data = true;
-			state.waiting = false;
+			std::remove(state.filename_upload.c_str());
+			close_connection(state, ErrorResponse::Error_InternalServerError(), "");
 			return true;
 		}
 		state.byte_uploaded += (size_t)w;
@@ -728,17 +621,17 @@ std::string _get_filename(const std::string &metadata)
 
 std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &state)
 {
-	// CGI for POST (e.g. /upload/script.py)
+	std::string req_path = state.path;
+	std::string query_string;
+	size_t qpos = req_path.find('?');
+	if (qpos != std::string::npos)
 	{
-		std::string req_path = state.path;
-		std::string query_string;
-		size_t qpos = req_path.find('?');
-		if (qpos != std::string::npos)
-		{
-			query_string = req_path.substr(qpos + 1);
-			req_path = req_path.substr(0, qpos);
-		}
-		LocationConfig info_location = a.get_info_location(req_path);
+		query_string = req_path.substr(qpos + 1);
+		req_path = req_path.substr(0, qpos);
+	}
+	LocationConfig info_location = a.get_info_location(req_path);
+
+	{
 		if (info_location.get_path() != "None")
 		{
 			const size_t dot = req_path.rfind('.');
@@ -750,11 +643,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 				{
 					if (!info_location.get_method("POST"))
 					{
-						state.response = ErrorResponse::Error_MethodeNotAllowed(a);
-						state.close = true;
-						state.cleanup = true;
-						state.send_data = true;
-						state.waiting = false;
+						close_connection(state, ErrorResponse::Error_MethodeNotAllowed(a), "");
 						return state.response;
 					}
 
@@ -762,11 +651,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 					struct stat st;
 					if (stat(script_fs.c_str(), &st) != 0)
 					{
-						state.response = ErrorResponse::Error_NotFound(a);
-						state.close = true;
-						state.cleanup = true;
-						state.send_data = true;
-						state.waiting = false;
+						close_connection(state, ErrorResponse::Error_NotFound(a), "");
 						return state.response;
 					}
 
@@ -776,15 +661,10 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 						state.fd_body = open(state.body_tmp_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
 					if (state.fd_body < 0)
 					{
-						state.response = ErrorResponse::Error_InternalServerError();
-						state.close = true;
-						state.cleanup = true;
-						state.send_data = true;
-						state.waiting = false;
+						close_connection(state, ErrorResponse::Error_InternalServerError(), "");
 						return state.response;
 					}
 
-					// write any buffered body bytes first
 					if (!state.readstring.empty())
 					{
 						ssize_t w = write(state.fd_body, state.readstring.c_str(), state.readstring.size());
@@ -792,14 +672,10 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 						{
 							close(state.fd_body);
 							state.fd_body = -1;
-							remove(state.body_tmp_path.c_str());
+							std::remove(state.body_tmp_path.c_str());
 							state.body_tmp_path.clear();
 							state.body_received = 0;
-							state.response = ErrorResponse::Error_InternalServerError();
-							state.close = true;
-							state.cleanup = true;
-							state.send_data = true;
-							state.waiting = false;
+							close_connection(state, ErrorResponse::Error_InternalServerError(), "");
 							return state.response;
 						}
 						state.body_received += (size_t)w;
@@ -807,42 +683,25 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 					}
 
 					char buf[4096];
-					while (state.body_received < state.content_length)
+					while (state.body_received < state.content_length) //! I HAVE TO REMOVE THIS CAUSE IT CAUSES HANGING WHEN THE CLIENT CLOSES THE CONNECTION BEFORE SENDING ALL THE BODY, I NEED TO CHECK IF THE CLIENT CLOSED THE CONNECTION INSIDE THE LOOP
 					{
 						ssize_t n = read(fd_client, buf, sizeof(buf));
 						if (n == 0)
 						{
 							close(state.fd_body);
 							state.fd_body = -1;
-							remove(state.body_tmp_path.c_str());
+							std::remove(state.body_tmp_path.c_str());
 							state.body_tmp_path.clear();
 							state.body_received = 0;
-							state.response = ErrorResponse::Error_BadRequest(a);
-							state.close = true;
-							state.cleanup = true;
-							state.send_data = true;
-							state.waiting = false;
+							close_connection(state, ErrorResponse::Error_BadRequest(a), "");
 							return state.response;
 						}
 						if (n < 0)
 						{
-							if (errno == EAGAIN || errno == EWOULDBLOCK)
-							{
-								state.waiting = true;
-								return state.response;
-							}
-							close(state.fd_body);
-							state.fd_body = -1;
-							remove(state.body_tmp_path.c_str());
-							state.body_tmp_path.clear();
-							state.body_received = 0;
-							state.response = ErrorResponse::Error_InternalServerError();
-							state.close = true;
-							state.cleanup = true;
-							state.send_data = true;
-							state.waiting = false;
+							state.waiting = true;
 							return state.response;
 						}
+
 						size_t remaining = state.content_length - state.body_received;
 						size_t to_write = (remaining < (size_t)n) ? remaining : (size_t)n;
 						ssize_t w = write(state.fd_body, buf, to_write);
@@ -850,14 +709,10 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 						{
 							close(state.fd_body);
 							state.fd_body = -1;
-							remove(state.body_tmp_path.c_str());
+							std::remove(state.body_tmp_path.c_str());
 							state.body_tmp_path.clear();
 							state.body_received = 0;
-							state.response = ErrorResponse::Error_InternalServerError();
-							state.close = true;
-							state.cleanup = true;
-							state.send_data = true;
-							state.waiting = false;
+							close_connection(state, ErrorResponse::Error_InternalServerError(), "");
 							return state.response;
 						}
 						state.body_received += (size_t)w;
@@ -892,7 +747,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 					else
 						state.response = ErrorResponse::default_response_error("500");
 
-					remove(state.body_tmp_path.c_str());
+					std::remove(state.body_tmp_path.c_str());
 					state.body_tmp_path.clear();
 					state.body_received = 0;
 					state.send_data = true;
@@ -904,19 +759,18 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		}
 	}
 
-	// Upload endpoint supports multipart/form-data and raw bodies
-	if (_is_uploads_path(state.path))
+	const bool is_special_post_path =
+		(req_path == "/login" || req_path == "/check_user" || req_path == "/logout");
+	const bool is_config_post_upload_path =
+		(info_location.get_path() != "None" && info_location.get_method("POST"));
+
+	if (!is_special_post_path && (_is_uploads_path(state.path) || is_config_post_upload_path))
 	{
-		// std::cout << "------------ Handling /uploads POST request -----------" << std::endl;
-		// Hard cap: 1 GB — prevents hang when client_max_body_size == 0 (unlimited)
 		const size_t _hard_cap = 1024ULL * 1024ULL * 1024ULL;
 		if (state.content_length > _hard_cap ||
 			(ServerConfig::client_max_body_size != 0 && state.content_length > ServerConfig::client_max_body_size))
 		{
-			state.response = ErrorResponse::Error_PayloadTooLarge(a);
-			state.close = true;
-			state.cleanup = true;
-			state.send_data = true;
+			close_connection(state, ErrorResponse::Error_PayloadTooLarge(a), "");
 			return state.response;
 		}
 		if (!state.complete_upload)
@@ -926,11 +780,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 			{
 				if (state.boundary.empty() || state.metadata.empty())
 				{
-					state.response = ErrorResponse::Error_BadRequest(a);
-					state.close = true;
-					state.cleanup = true;
-					state.send_data = true;
-					state.waiting = false;
+					close_connection(state, ErrorResponse::Error_BadRequest(a), "");
 					return state.response;
 				}
 				state.filename = _get_filename(state.metadata);
@@ -943,11 +793,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 				catch (const std::exception &e)
 				{
 					std::cerr << e.what() << '\n';
-					state.response = ErrorResponse::Error_InternalServerError();
-					state.close = true;
-					state.cleanup = true;
-					state.send_data = true;
-					state.waiting = false;
+					close_connection(state, ErrorResponse::Error_InternalServerError(), "");
 					return state.response;
 				}
 			}
@@ -961,20 +807,21 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		}
 		return state.response;
 	}
-	else if (state.path == "/login")
+	else if (req_path == "/login")
 	{
 		_handle_post_login(state, a);
 		return state.response;
 	}
-	else if (state.path == "/check_user")
+	else if (req_path == "/check_user")
 	{
 		_handle_post_check_user(state,a);
 		 return state.response;
 	}
-	else if (state.path == "/logout")
+	else if (req_path == "/logout")
 	{
 		std::string username = state.cookies;
-		std::string flash_value = username.empty() ? "SIGNED_OFF_" : "SIGNED_OFF_" + username;
+		std::string flash_value = "SIGNED_OFF_";
+		if (!username.empty()) flash_value += username;
 		std::string response =
 			"HTTP/1.1 302 Found\r\n"
 			"Location: /session.html\r\n"
@@ -995,7 +842,6 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 	}
 	else
 	{
-		// std::cout << "this the correct path: " << state.path << std::endl;
 		state.response = ErrorResponse::Error_NotFound(a);
 		state.close = true;
 		state.cleanup = true;

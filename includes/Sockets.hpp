@@ -7,7 +7,6 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <errno.h>
 #include <cstring>
 #include <iostream>
 #include "Webserv.hpp"

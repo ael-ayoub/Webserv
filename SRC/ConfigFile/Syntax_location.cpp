@@ -1,4 +1,4 @@
-#include "../../INCLUDES/Syntax_location.hpp"
+#include "../../includes/Syntax_location.hpp"
 
 syntax_location::syntax_location()
     : methods(false), upload_enable(false), upload_store(false), cgi(false),
