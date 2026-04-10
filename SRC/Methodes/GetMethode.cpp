@@ -1,4 +1,4 @@
-#include "../../INCLUDES/Webserv.hpp"
+#include "../../includes/Webserv.hpp"
 
 std::string clean_string(std::string str)
 {

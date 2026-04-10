@@ -1,5 +1,5 @@
-#include "../../INCLUDES/Response.hpp"
-#include "../../INCLUDES/CGI.hpp"
+#include "../../includes/Response.hpp"
+#include "../../includes/CGI.hpp"
 
 std::string gcwdd()
 {
@@ -60,10 +60,11 @@ std::string Response::Display_file(std::string last_path, Config a)
     std::ifstream file((last_path).c_str(), std::ios::in);
     if (!file.is_open())
     {
-        if (errno == EACCES)
-            return ErrorResponse::Error_Forbidden(a);
-        else if (errno == ENONET)
+        if (access(last_path.c_str(), F_OK) != 0)
             return ErrorResponse::Error_NotFound(a);
+        if (access(last_path.c_str(), R_OK) != 0)
+            return ErrorResponse::Error_Forbidden(a);
+        return ErrorResponse::Error_Internal_Server(a);
     }
     while (getline(file, line))
         body += line + "\n";
@@ -213,7 +214,7 @@ std::string Response::Get_delete(std::string path, LocationConfig info_location,
     struct stat path_stat;
     if (stat(path.c_str(), &path_stat) != 0)
     {
-        if (errno == ENOENT)
+        if (access(path.c_str(), F_OK) != 0)
             return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
         return "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n";
     }
@@ -222,19 +223,17 @@ std::string Response::Get_delete(std::string path, LocationConfig info_location,
 
     if (access(path.c_str(), W_OK) != 0)
     {
-        if (errno == EACCES)
-            return "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
-        else if (errno == ENOENT)
+        if (access(path.c_str(), F_OK) != 0)
             return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+        return "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
     }
 
-    int status = remove(path.c_str());
+    int status = std::remove(path.c_str());
     if (status != 0)
     {
-        if (errno == ENOTEMPTY || errno == EACCES)
-            return "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
-        else if (errno == ENOENT)
+        if (access(path.c_str(), F_OK) != 0)
             return "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+        return "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n";
     }
     return "HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n\r\n";
 }

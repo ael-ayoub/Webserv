@@ -1,4 +1,4 @@
-#include "../INCLUDES/Webserv.hpp"
+#include "../includes/Webserv.hpp"
 
 
 void _sendReaponse(const std::string &response, int fd_client)
@@ -80,16 +80,12 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     ClientState &state = status[fd_client];
 
-    // If a response was already prepared (the timeout handler),
-    // don't re-process let the Monitor loop send it.
-    // std::cout << "DEBUG: waaaaaaaaaaaaaaaaaa" << std::endl;
     if (state.send_data)
         return;
 
     state.timestamp = get_current_timestamp();
     if (!state.complete_header)
     {
-        // std::cout << "Starting to read header from fd: " << fd_client << std::endl;
         if (!_parse_header(state, fd_client, request, a))
             return;
     }

@@ -1,4 +1,4 @@
-#include "../../INCLUDES/ErrorResponse.hpp"
+#include "../../includes/ErrorResponse.hpp"
 
 std::string ErrorResponse::default_response_error(std::string status_code)
 {

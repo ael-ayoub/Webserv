@@ -16,6 +16,7 @@
 
 typedef std::vector<std::string> Vector_str;
 void run_server(std::string av);
+#include "helper_functions/helpers.hpp"
 #include "ServerConfig.hpp"
 #include "Config.hpp"
 #include "LocationConfig.hpp"
@@ -40,3 +41,4 @@ std::string get_username_from_metadata(const std::string &metadata);
 unsigned long long get_current_timestamp();
 bool check_timeout(unsigned long long timestamp, unsigned long long timeout);
 void cloce_connection(ClientState &state);
+

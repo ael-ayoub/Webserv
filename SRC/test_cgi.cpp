@@ -1,7 +1,7 @@
-#include "INCLUDES/Response.hpp"
-#include "INCLUDES/Config.hpp"
-#include "INCLUDES/LocationConfig.hpp"
-#include "INCLUDES/Request.hpp"
+#include "includes/Response.hpp"
+#include "includes/Config.hpp"
+#include "includes/LocationConfig.hpp"
+#include "includes/Request.hpp"
 
 int main()
 {
