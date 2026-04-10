@@ -214,6 +214,8 @@ void Socket::Monitor(Config &a)
                 event_client.data.fd = fd_client;
                 event_client.events = EPOLLIN;
                 status[fd_client] = ClientState();
+                status[fd_client].ip = inet_ntoa(sockconf[index].addr.sin_addr);
+                status[fd_client].port = ntohs(sockconf[index].addr.sin_port);
                 status[fd_client].timestamp = get_current_timestamp();
                 if (epoll_ctl(fd_epoll, EPOLL_CTL_ADD, fd_client, &event_client) == -1)
                 {

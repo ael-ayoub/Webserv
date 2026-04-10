@@ -20,6 +20,8 @@ class Config;
 class ClientState
 {
 public:
+	std::string ip; 
+	int port;
 	std::string header;
 	std::string readstring;
 	std::string metadata;

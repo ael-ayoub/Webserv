@@ -29,6 +29,8 @@ void run_server(std::string av)
 			i++;
 		}
 
+		// tmp_a.
+
 		Socket socket(ports); // change the prototype
 		socket.run(a);
 	}

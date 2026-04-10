@@ -75,6 +75,8 @@ void cloce_connection(ClientState &state)
 void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
 {
     std::vector<ServerConfig> servers = a.get_allserver_config();
+    // here you can get port and ip: 
+    std::cout << "port: " << status[fd_client].port << " ip: " << status[fd_client].ip << std::endl;
     std::pair<std::string, int> ip_port;
     Request request;
 
