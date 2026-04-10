@@ -21,6 +21,7 @@ class ServerConfig
         static bool CheckClientMaxBodySize(size_t num);
         LocationConfig get_Location_Config(std::string path);
         
+        Vector_str get_server_name();
         std::vector<std::pair<std::string, int> > get_ip();
         bool checkAdd_fallback();
         std::vector<std::map<int, std::string> > get_error_status();

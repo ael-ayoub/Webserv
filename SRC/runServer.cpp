@@ -34,5 +34,8 @@ void run_server(std::string av)
 		Socket socket(ports); // change the prototype
 		socket.run(a);
 	}
-	catch (...) {}
+	catch (std::exception &e) 
+	{
+		std::cout << e.what() << std::endl;
+	}
 }

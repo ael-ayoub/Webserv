@@ -82,6 +82,11 @@ LocationConfig ServerConfig::get_Location_Config(std::string path)
     // return tmp;
 }
 
+Vector_str ServerConfig::get_server_name()
+{
+    return server_name;
+}
+
 int    ServerConfig::check_configFile()
 {
     syntax_server tmp;
