@@ -82,7 +82,6 @@ std::string Request::check_requestline(std::string request_line, Config a)
     Vector_str args = ServerConfig::ft_splitv2(request_line, ' ');
     if (args.size() != 3)
         return ErrorResponse::Error_BadRequest(a);
-    // std::cout << "first arg is " << args[0] << std::endl;
     if (args[0] != "GET" && args[0] != "POST" && args[0] != "DELETE")
     {
         return ErrorResponse::Error_BadRequest(a); // 405
@@ -108,7 +107,6 @@ bool check_ip(std::string info)
     Vector_str ip_port = ServerConfig::ft_splitv2(info, '.');
     if (ip_port.size() != 4)
         return false;
-    // std::cout << "size is " << ip_port.size() << "\n";
     size_t j = 0;
     while (j < ip_port.size())
     {
@@ -126,7 +124,6 @@ bool CheckNumber(std::string str)
     int j = 0;
     while (str[j])
     {
-        // std::cout << "im in " << str[j] << "\n";
         if (!std::isdigit(str[j]))
             return true;
         j++;
@@ -141,7 +138,6 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     int car = 0;
     size_t i = 0;
 
-    // std::cout << "-------------str: " << header_line << std::endl;
     while (header_line[i])
     {
         if (header_line[i] == ' ')
@@ -154,7 +150,6 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     }
     if (spaces != 1 || newline != 1 || car != 1)
     {
-        // std::cout << "spa " << spaces << newline << car << "\n";
         return ErrorResponse::Error_BadRequest(a);
     }
     Vector_str args = ServerConfig::ft_splitv2(header_line, ' ');
@@ -168,14 +163,9 @@ std::string Request::check_headerline(std::string header_line, Config &a)
         return ErrorResponse::Error_BadRequest(a); // 400
     if (ip_port[0] != "localhost" && check_ip(ip_port[0]) == false)
     {
-        // std::cout << "Errorsadas\n";
         return ErrorResponse::Error_BadRequest(a); // 400
     }
-    // std::cout << "before\n";
     int start = ip_port[1].find('\r');
-    // if (ip_port[1][start + 1] != '\n')
-    //     return ErrorResponse::Error_BadRequest(a);
-    // std::cout << "after\n";
     std::string ip = ip_port[1].substr(0, start);
     if (CheckNumber(ip) == true)
         return ErrorResponse::Error_BadRequest(a);
@@ -191,7 +181,6 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     return "NONE";
 }
 
-// 1 GB hard absolute cap — prevents infinite-wait loops when client_max_body_size=0
 #define MAX_BODY_SIZE_HARD_CAP (1024ULL * 1024ULL * 1024ULL)
 
 std::string CheckContentLenght(std::string str, Config a)
@@ -203,14 +192,12 @@ std::string CheckContentLenght(std::string str, Config a)
     {
         if (!isdigit(str[i]))
         {
-            // std::cout << str[i] << ".\n";
             return ErrorResponse::Error_BadRequest(a);
         }
     }
 
     std::stringstream s(str);
     s >> num;
-    // Always reject values beyond the hard cap regardless of client_max_body_size
     if (num > MAX_BODY_SIZE_HARD_CAP)
         return ErrorResponse::Error_PayloadTooLarge(a);
     if (ServerConfig::CheckClientMaxBodySize(num) == true)
@@ -220,14 +207,17 @@ std::string CheckContentLenght(std::string str, Config a)
 
 bool CheckContentType(std::vector<std::string> &str)
 {
-    // std::cout << "first str is " << str[1] << ", the seconde is " << str[2] << std::endl;
     if (str[1] != "multipart/form-data;")
         return true;
     std::pair<std::string, std::string> tmp = ServerConfig::ft_splito(str[2], '=');
     if (tmp.first != "boundary")
         return true;
-        //save the data
     return false;
+}
+
+std::string Request::get_Host()
+{
+    return Host;
 }
 
 std::string Request::check_request(std::string str, Config a)
@@ -237,43 +227,18 @@ std::string Request::check_request(std::string str, Config a)
     std::string tmp;
     for (size_t b = 0; b < str.size(); b++)
     {
-        if (str[b] != '\n')
+        tmp += str[b];
+        if (str[b] == '\n')
         {
-            // if (str[b] == '\r')
-            //     std::cout << "YYYYYYYYYYEEEEEEs\n";
-            tmp += str[b];
-            // std::cout << "tmp is : " << tmp << ", and b is : " << b << std::endl;
-        }
-        else if (str[b] == '\n')
-        {
-            tmp += '\n';
             args.push_back(tmp);
-            // std::cout << "DEBUG parse line " << args.size() << ": [" << tmp << "]";
-            // if (tmp.size() >= 2)
-            //     std::cout << " (last 2 chars: '" << (int)(unsigned char)tmp[tmp.size()-2] << "' '" << (int)(unsigned char)tmp[tmp.size()-1] << "')";
-            // std::cout << std::endl;
-            // std::cout << "str is : " << tmp << std::endl;
-            // std::cout << "b is : " << b << ", size total is : " << str.size() << std::endl;
-            // if (str.size() - 1 == b)
-            // {
-            // }
             tmp.clear();
         }
     }
     if (!tmp.empty())
-    {
-        tmp += '\n';
         args.push_back(tmp);
-        tmp.clear();
-    }
     
-    // std::cout << "tmp: " << tmp <<std::endl;
-    // std::cout << "lenght first one is : " << args[0].size() << std::endl;
-    // std::cout << "lenght seconde one is : " << tmp.size() << std::endl;
-    // for (size_t b = 0; b < args.size(); b++)
-    // {
-    //     std::cout << b << ": " << args[b] << std::endl;
-    // }
+    if (args.empty())
+        return ErrorResponse::Error_BadRequest(a);
     std::string response;
     response = check_requestline(args[0], a);
     if (response != "NONE")
@@ -285,14 +250,18 @@ std::string Request::check_request(std::string str, Config a)
     bool host_found = false;
     for (size_t i = 1; i < args.size(); i++)
     {
-        if (args[i].find("Host:") == 0)
+        size_t n = args[i].find("Host:");
+        if (n != std::string::npos)
         {
-            response = check_headerline(args[i], a);
-            if (response != "NONE")
-            {
-                return response;
-            }
             host_found = true;
+            n += 6;
+
+            size_t last = args[i].find_first_of(":\r\n", n);
+
+            if (last == std::string::npos)
+                last = args[i].length();
+
+            Host = args[i].substr(n, last - n);
             break;
         }
     }
@@ -302,67 +271,36 @@ std::string Request::check_request(std::string str, Config a)
         return ErrorResponse::Error_BadRequest(a);
     }
     
-    // std::cout << "first has : " << args[0].size() << std::endl;
-    // std::cout << " sec: " << args[1].size() << std::endl;
-    // std::cout << "NONEEEEEEEE" << std::endl;
-    // std::cout << args[0] << std::endl;
-    // std::cout << "been here\n";
-    // bool lenght = false;
-    // bool type = false;
     std::string res;
     for (size_t b = 2; b < args.size() && get_method() == "POST"; b++)
     {
         std::vector<std::string> tmp = ServerConfig::ft_splitv2(args[b], ' ');
         if (tmp.empty() || tmp[tmp.size() - 1].size() < 2)
             continue;
-        // std::cout << tmp[0] << std::endl;
-        // (tmp[0] == "Content-Type:" && tmp.size() != 3) // check thsi after
+
         if ((tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 1] != '\n')
             || (tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 2] != '\r'))
         {
-            // std::cout << "dsadadasdadas\n\n";
             return ErrorResponse::Error_BadRequest(a);
         }
 
         if (tmp[0] == "Content-Length:")
         {
-            // lenght = true;
             if (tmp.size() < 2)
                 return ErrorResponse::Error_BadRequest(a);
             res = CheckContentLenght(tmp[1], a);
             content_length = tmp[1];
             if (res != "NONE")
             {
-                // std::cout << "He pass the test\n";
                 return res;
             }
         }
-        // if (tmp[0] == "Content-Type:")
-        // {
-        //     type = true;
-        //     if (CheckContentType(tmp) == true)
-        //     {
-        //         std::cout << "The seconde cause\n";
-        //         return ErrorResponse::Error_BadRequest(a);
-        //     }
-        //     // std::cout << "it is content type\n";
-        // }
     }
-
-    // if ((type == false || lenght == false) && get_method() == "POST")
-    // {
-    //     std::cout << "here\n";
-    //     return ErrorResponse::Error_BadRequest(a);
-    // }
-    // std::cout << "i have this : " << str  << std::endl;
-    // if (str.substr(str.length() - 1) != "\r\n")
-    //     return ErrorResponse::Error_BadRequest(a);
     return "NONE";
 }
 
 std::string Request::parse_request(std::string buffer, Config a)
 {
-    // std::string str(buffer);
     std::string response = check_request(buffer, a);
     if (response != "NONE")
         return response;

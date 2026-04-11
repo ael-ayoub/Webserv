@@ -69,31 +69,57 @@ void cloce_connection(ClientState &state)
     state.cleanup = true;
     state.send_data = false;
     state.waiting = false;
-    // std::cout << "Marked connection for closure." << std::endl;
 }
 
-void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
+ServerConfig checkRightServer(std::vector<ServerConfig> servers, std::map<int, 
+                            ClientState> &status, int fd_client, Request request)
 {
-    // here you can get port and ip: 
-    // std::cout << "port: " << status[fd_client].port << " ip: " << status[fd_client].ip << std::endl;
-    std::vector<ServerConfig> servers = a.get_allserver_config();
-    // std::cout << "size of servers is : " << servers.size() << std::endl;
-    size_t index = 0;
-    while (index < servers.size())
+    std::vector<ServerConfig> tmp;
+    size_t p = 0;
+    while (p < servers.size())
     {
-        std::vector<std::pair<std::string, int> > ip_port = servers[index].get_ip();
+        std::vector<std::pair<std::string, int> > ip_port = servers[p].get_ip();
         size_t o = 0;
         while (o < ip_port.size())
         {
             if (ip_port[o].second == status[fd_client].port)
-                servers[0] = servers[index];
+            {
+                tmp.push_back(servers[p]);
+                break;
+            }
             o++;
         }
-        index++;
+        p++;
     }
-    // Vector_str ss = servers[0].get_server_name();
-    // std::cout << "server name found is : " << ss[0] << std::endl;
 
+    p = 0;
+    while (p < tmp.size())
+    {
+        Vector_str tmp_serverNames = tmp[p].get_server_name();
+        size_t i = 0;
+        while (i < tmp_serverNames.size())
+        {
+            if (request.get_Host() == tmp_serverNames[i])
+            {
+                return tmp[p];
+            }
+            i++;
+        }
+        p++;
+    }
+
+    if (tmp.size() == 0)
+        return ServerConfig();
+    return tmp[0];
+}
+
+void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
+{
+    std::vector<ServerConfig> servers = a.get_allserver_config();
+    if (servers.empty())
+        return;
+
+    
     std::pair<std::string, int> ip_port;
     Request request;
 
@@ -109,6 +135,15 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
             return;
     }
     state.timestamp = get_current_timestamp();
+
+    servers[0] = checkRightServer(servers, status, fd_client, request);
+
+    Vector_str aa = servers[0].get_server_name();
+    // if (aa.empty())
+    //     std::cout << "empty!\n";
+    // else
+    //     std::cout << "server_name is : " << aa[0] << std::endl;
+
     if (state.method == "GET" || state.method == "DELETE")
     {
         if (!_process_get_delete_request(fd_client, state, request, a, servers, m))

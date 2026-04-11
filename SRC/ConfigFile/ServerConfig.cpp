@@ -1,7 +1,7 @@
 #include "../../includes/ServerConfig.hpp"
 
 size_t ServerConfig::client_max_body_size = 0;
-ServerConfig::ServerConfig()
+ServerConfig::ServerConfig() : server_name()
 {
 }
 

@@ -8,17 +8,16 @@ SockConf::SockConf(std::string ip, int p)
     fd_socket = -1;
 }
 
-Socket::Socket(std::vector<std::vector<std::pair<std::string, int> > > ports)
+Socket::Socket(std::vector<std::pair<std::string, int> > ports)
 {
-    for (size_t i = 0; i < ports.size(); i++)
+    // for (size_t i = 0; i < ports.size(); i++)
+    // {
+    for (size_t j = 0; j < ports.size(); j++)
     {
-        for (size_t j = 0; j < ports[i].size(); j++)
-        {
-
-            // sockconf.push_back(SockConf(ports[i].first, ports[i].second));
-            sockconf.push_back(SockConf(ports[i][j].first, ports[i][j].second));
-        }
+        sockconf.push_back(SockConf(ports[j].first, ports[j].second));
+        // sockconf.push_back(SockConf(ports[i][j].first, ports[i][j].second));
     }
+    // }
 }
 
 void Socket::set_nonblocking(int fd)

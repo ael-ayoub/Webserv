@@ -82,7 +82,7 @@ private:
 	int fd_epoll;
 
 public:
-	Socket(std::vector<std::vector<std::pair<std::string, int> > > ports);
+	Socket(std::vector<std::pair<std::string, int> > ports);
 	void run(Config &a);
 	void set_nonblocking(int fd);
 	void CreateSocket();
