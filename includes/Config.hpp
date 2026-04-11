@@ -37,8 +37,7 @@ class Config
         std::string get_mine(std::string path);
         LocationConfig get_info_location(std::string path);
 
-        void server_bounds(int index, Vector_str lines, int *from, 
-                            int *to, bool *bracket, bool *main_bracket);
+        void server_bounds(int index, Vector_str lines, int *from, int *to, bool *bracket, bool *main_bracket);
         
         void DefaultConfigFile();
         class ErrorSyntax : public std::exception

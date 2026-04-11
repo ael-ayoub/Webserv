@@ -1,5 +1,33 @@
 #include "../../includes/ErrorResponse.hpp"
 
+static std::string status_line_from_code(const std::string &status)
+{
+    std::string line = "HTTP/1.1 " + status;
+    if (status == "200")
+        line += " OK\r\n";
+    else if (status == "204")
+        line += " No Content\r\n";
+    else if (status == "400")
+        line += " Bad Request\r\n";
+    else if (status == "403")
+        line += " Forbidden\r\n";
+    else if (status == "404")
+        line += " Not Found\r\n";
+    else if (status == "405")
+        line += " Method Not Allowed\r\n";
+    else if (status == "408")
+        line += " Request Timeout\r\n";
+    else if (status == "413")
+        line += " Payload Too Large\r\n";
+    else if (status == "500")
+        line += " Internal Server Error\r\n";
+    else if (status == "504")
+        line += " Gateway Timeout\r\n";
+    else
+        line += " Error\r\n";
+    return line;
+}
+
 std::string ErrorResponse::default_response_error(std::string status_code)
 {
     std::string body, headers, response, s;
@@ -310,7 +338,7 @@ std::string ErrorResponse::Responde(Config &a, std::string path, std::string &he
 	if (!file.is_open())
     {
         head = "";
-        return default_response_error(status);
+        return generate_error_page(status);
     }
 
 	while (getline(file, line))
@@ -328,12 +356,18 @@ std::string ErrorResponse::Responde(Config &a, std::string path, std::string &he
 
 	response += header;
 	response += body;
-    return response;
+
+    if (head.empty())
+        return status_line_from_code(status) + response;
+    return head + response;
 }
 
 std::string ErrorResponse::Error_NotFound(Config &a)
 {
-    (void)a;
+    std::string path;
+    std::string status_head = check_errorstatus(a.get_server_config().get_error_status(), 404, path);
+    if (!status_head.empty())
+        return Responde(a, path, status_head, "404");
     return generate_error_page("404");
 }
 

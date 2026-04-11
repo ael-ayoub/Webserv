@@ -184,6 +184,8 @@ bool _process_get_delete_request(int fd_client, ClientState &state, Request &req
             state.waiting = true;
             return true;
         }
+
+        a.settte(servers[0]);
         
         state.response = m.GetMethod(a, request, servers[0]);
         state.send_data = true;
