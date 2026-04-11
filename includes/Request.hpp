@@ -11,7 +11,7 @@ class Request
         int port;
         std::string hostname;
         std::string content_length;
-    
+        std::string Host;
     
     public:
         Request() : content_length("NONE") {}
@@ -21,6 +21,7 @@ class Request
         std::string parse_request(std::string buffer, Config a);
         std::string get_path();
         std::string get_method();
+        std::string get_Host();
         size_t get_content_length();
     
     

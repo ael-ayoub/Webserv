@@ -8,44 +8,57 @@ std::string get_current_path()
     return "";
 }
 
-
-void process_ports(std::vector<std::vector<std::pair<std::string, int> > > &ports)
+std::vector<std::pair<std::string, int> > filterServerPorts(std::vector<ServerConfig> servers)
 {
-	for (size_t i = 0; i < ports.size(); i++)
+	std::vector<std::pair<std::string, int> > store_ports;
+	size_t o = 0;
+	while (o < servers.size())
 	{
-		for (size_t j = 0; j < ports[i].size(); j++)
+		std::vector<std::pair<std::string, int> > port_server = servers[o].get_ip();
+		size_t j = 0;
+		while (j < port_server.size())
 		{
-			std::cout << "Listening on " << ports[i][j].first << ":" << ports[i][j].second << std::endl;
+			store_ports.push_back(port_server[j]);
+			j++;
 		}
+		o++;
 	}
+	o = 0;
+	while (o < store_ports.size())
+	{
+		size_t j = o + 1;
+		while (j < store_ports.size())
+		{
+			if (store_ports[o].second == store_ports[j].second)
+				store_ports.erase(store_ports.begin() + j);
+			else
+				j++;
+		}
+		o++;
+	}
+
+	// size_t i = 0;
+	// while (i < store_ports.size())
+	// {
+	// 	std::cout << "port is : " << store_ports[i].second << std::endl;
+	// 	i++;
+	// }
+	return store_ports;
 }
-
-
 
 void run_server(std::string av)
 {
 	try
 	{
-		// std::vector<std::pair<std::string, int> > ports; //comment it 
-		std::vector<std::vector<std::pair<std::string, int> > > ports;
 		Config a;
 
 		a.store_file(av);
 
-		std::vector<ServerConfig> tmp_a = a.get_allserver_config();
-
-		size_t i = 0;
-		while (tmp_a.size() > i)
-		{
-			ports.push_back(tmp_a[i].get_ip());
-			// ports = tmp_a[0].get_ip(); //comment it
-			i++;
-		}
-		process_ports(ports);
-		// tmp_a.
-
-		Socket socket(ports); // change the prototype
+		Socket socket(filterServerPorts(a.get_allserver_config()));
 		socket.run(a);
 	}
-	catch (...) {}
+	catch (std::exception &e) 
+	{
+		std::cout << e.what() << std::endl;
+	}
 }

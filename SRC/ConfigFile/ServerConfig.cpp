@@ -1,7 +1,7 @@
 #include "../../includes/ServerConfig.hpp"
 
 size_t ServerConfig::client_max_body_size = 0;
-ServerConfig::ServerConfig()
+ServerConfig::ServerConfig() : server_name()
 {
 }
 
@@ -80,6 +80,11 @@ LocationConfig ServerConfig::get_Location_Config(std::string path)
     return Location_Config[store_id];
     // }
     // return tmp;
+}
+
+Vector_str ServerConfig::get_server_name()
+{
+    return server_name;
 }
 
 int    ServerConfig::check_configFile()

@@ -12,12 +12,12 @@ void syntax_server::check_server_syntax(Vector_str server)
         throw Config::ErrorSyntax();
     std::string tmp = Config::remove_whitespaces(server[i]);
     i++;
-    std::cout << "server side is " << server.size() << ", and i: " << i<<"\n";
+    // std::cout << "server side is " << server.size() << ", and i: " << i<<"\n";
     while (i < server.size())
     {
         Vector_str tmp = ServerConfig::parse_line(server[i]);
         // std::cout << "line is : " << tmp[0] << "\n";
-        if (tmp[0] == "location")
+        if (tmp[0] == "location" && tmp.size() == 3)
         {
             size_t k = 0;
             while (k < location_path.size())
