@@ -26,8 +26,8 @@
             <div class="content-split">
                 <div class="hero-text">
                     <h2>THE PROJECT</h2>
-                    <p class="description">A FULLY FUNCTIONAL HTTP/1.1 SERVER BUILT FROM SCRATCH IN C++98</p>
-                    <p style="margin-bottom: 2rem;">This project implements a complete web server following the HTTP/1.1 protocol specification. It handles multiple simultaneous connections, serves static files, and executes CGI scripts for dynamic content generation.</p>
+                    <p class="description">A FULLY FUNCTIONAL HTTP SERVER BUILT FROM SCRATCH IN C++98</p>
+                    <p style="margin-bottom: 2rem;">This project implements a complete web server following the HTTP protocol specification. It handles multiple simultaneous connections, serves static files, and executes CGI scripts for dynamic content generation.</p>
                 </div>
                 <div class="hero-image">
                     <div class="image-placeholder">
@@ -46,7 +46,7 @@
                     <h3>ARCHITECTURE</h3>
                     <ul>
                         <li>C++98 Standard Compliant</li>
-                        <li>Non-blocking I/O with poll()</li>
+                        <li>Non-blocking I/O with epoll()</li>
                         <li>Multi-port listening</li>
                         <li>Configurable via .conf file</li>
                     </ul>
@@ -89,7 +89,7 @@
             <div class="brutalist-box" style="margin-bottom: 2rem;">
                 <span class="box-number">01</span>
                 <h3>SOCKET MANAGEMENT</h3>
-                <p>The server creates listening sockets for each configured port and uses poll() to monitor multiple file descriptors simultaneously. This allows handling many concurrent connections without blocking.</p>
+                <p>The server creates listening sockets for each configured port and uses epoll() to monitor multiple file descriptors simultaneously. This allows handling many concurrent connections without blocking.</p>
             </div>
 
             <div class="brutalist-box" style="margin-bottom: 2rem;">

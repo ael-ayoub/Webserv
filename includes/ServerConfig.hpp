@@ -13,7 +13,6 @@ class ServerConfig
         Vector_str server_name;
         std::string path_server_root;
         std::string path_server_index;
-        // std::vector<std::pair<int, std::string> > errorStatus_pathError;
         std::vector<std::map<int, std::string> > errorStatus_pathError;
         
     public:
@@ -22,6 +21,7 @@ class ServerConfig
         static bool CheckClientMaxBodySize(size_t num);
         LocationConfig get_Location_Config(std::string path);
         
+        Vector_str get_server_name();
         std::vector<std::pair<std::string, int> > get_ip();
         bool checkAdd_fallback();
         std::vector<std::map<int, std::string> > get_error_status();

@@ -94,11 +94,20 @@ int Config::store_file(std::string path_of_Cfile)
         return 0;
     }
 
+    struct stat st;
+    
+    if (stat(path_of_Cfile.c_str(), &st) != 0 
+        || S_ISDIR(st.st_mode))
+    {
+        std::cerr << "Error: invalid config file path!" << std::endl;
+        throw std::exception();    
+    }
+
     std::ifstream file(path_of_Cfile.c_str());
     if (!file.is_open())
     {
-        std::cerr << "Error" << std::endl;
-        return 1;
+        std::cerr << "Error: invalid config file path!" << std::endl;
+        throw std::exception();
     }
 
     std::string line;
@@ -135,49 +144,6 @@ void Config::print_confiFile()
     //     i++;
     //     std::cout << "....\n";
     // }
-}
-
-int    Config::stores_config()
-{
-    bool check = false;
-    while (first_last.first != -1 && first_last.second != -1)
-    {
-        ServerConfig tmp;
-
-        first_last = this->get_firstlast();
-        // std::cout << "first :" << first_last.first << "seconde :" << first_last.second << "\n";
-        if (first_last.first == -2)
-            throw Config::ErrorSyntax();
-        if (first_last.first == -1 || first_last.second == -1)
-        {
-            break;
-        }
-        if (check == false)
-        {
-            tmp.parse_config(file_lines, first_last.first, first_last.second);
-            Servers_Config.push_back(tmp);
-            check = true;
-        }
-        else
-            throw Config::ErrorSyntax();
-        first_last.first = first_last.second + 1;
-    }
-    //check if a fallback is set
-    return 0;
-}
-
-std::string  Config::remove_whitespaces(std::string line)
-{
-    std::string tmp;
-    int i = 0;
-
-    while (line[i])
-    {
-        if (!std::isspace(line[i]))
-            tmp += line[i];
-        i++;
-    }
-    return tmp;
 }
 
 std::pair<int, int> Config::get_firstlast()
@@ -219,6 +185,99 @@ std::pair<int, int> Config::get_firstlast()
     if (brace_cout != 0)
         first = -2;
     return std::make_pair(first, last);
+}
+
+void    Config::server_bounds(int index, Vector_str lines, int *from, 
+                        int *to, bool *bracket, bool *main_bracket)
+{
+    if (lines[index].find('\n') != std::string::npos)
+        lines[index].substr(lines[index].size() - 1);
+
+    // if (lines[index].find('\n') != std::string::npos)
+    //     std::cout << lines[index] << "sdf"<< "\n";
+
+    if (index == 0 && lines[0] != "server {")
+        throw Config::ErrorSyntax();
+    else if (index == 0 && lines[0] == "server {")
+    {
+        *main_bracket = true;
+    }
+
+    if (index != 0 && lines[index] == "server {" && *main_bracket == false)
+    {
+        *from = index;
+    }
+
+    if (lines[index].find('{') != std::string::npos && lines[index] != "server {")
+        *bracket = true;
+    else if (lines[index].find('}') != std::string::npos)
+    {
+        if (*bracket == true)
+            *bracket = false;
+        else
+        {
+            ServerConfig tmp;
+            *to = index; 
+            *main_bracket = false;
+            tmp.parse_config(lines, *from, *to);
+            Servers_Config.push_back(tmp);
+        }
+    }
+}
+
+int    Config::stores_config()
+{
+    // bool check = false;
+    int from = 0, to = 0;
+    bool bracket = false;
+    bool main_bracket = false;
+
+    // while (1)
+    // {
+    //     ServerConfig tmp;
+
+        // std::cout << "---: " << file_lines.size() << "\n";
+        unsigned int i = 0;
+        while (i < file_lines.size())
+        {
+            // std::cout << "---: " << file_lines.size() << "\n";
+            server_bounds(i, file_lines, &from, &to, &bracket, &main_bracket);
+            i++;
+        }
+        // break;
+        // first_last = this->get_firstlast();
+        // if (first_last.first == -2)
+        //     throw Config::ErrorSyntax();
+        // if (first_last.first == -1 || first_last.second == -1)
+        // {
+        //     break;
+        // }
+        // if (check == false)
+        // {
+            // tmp.parse_config(file_lines, from, to);
+            // Servers_Config.push_back(tmp);
+        //     check = true;
+        // }
+        // else
+        //     throw Config::ErrorSyntax();
+        // first_last.first = first_last.second + 1;
+    // }
+    //check if a fallback is set
+    return 0;
+}
+
+std::string  Config::remove_whitespaces(std::string line)
+{
+    std::string tmp;
+    int i = 0;
+
+    while (line[i])
+    {
+        if (!std::isspace(line[i]))
+            tmp += line[i];
+        i++;
+    }
+    return tmp;
 }
 
 Vector_str Config::get_file_lines()

@@ -2,10 +2,6 @@
 
 #include "../../includes/CGI.hpp"
 
-#include <sstream>
-
-std::string generat_random_id();
-
 static std::string _trim(const std::string &s)
 {
 	size_t start = 0;
@@ -78,7 +74,7 @@ static std::string _cwd()
 
 static std::string _get_filename_from_headers_or_query(const ClientState &state)
 {
-	// 1) Query string: /uploads?filename=...
+	// 1) Query string: ?filename=...
 	std::string path = state.path;
 	size_t qpos = path.find('?');
 	if (qpos == std::string::npos)
@@ -120,34 +116,6 @@ static std::string _get_filename_from_headers_or_query(const ClientState &state)
 	return "default_upload_" + generat_random_id();
 }
 
-static bool _is_uploads_path(const std::string &path)
-{
-	// Accept: /uploads, /uploads?..., /uploads%3f...
-	std::string p = path;
-	while (!p.empty() && (unsigned char)p[0] <= 32)
-		p.erase(0, 1);
-	while (!p.empty() && (unsigned char)p[p.size() - 1] <= 32)
-		p.erase(p.size() - 1);
-
-	if (p.size() < 8)
-		return false;
-	if (p.compare(0, 8, "/uploads") != 0)
-		return false;
-	if (p.size() == 8)
-		return true;
-	if (p[8] == '?')
-		return true;
-	if (p.size() >= 11 && p[8] == '%')
-	{
-		std::string enc = p.substr(8, 3);
-		for (size_t i = 0; i < enc.size(); i++)
-			enc[i] = (char)std::tolower(enc[i]);
-		if (enc == "%3f")
-			return true;
-	}
-	return false;
-}
-
 std::string generat_random_id()
 {
 	static const char charset[] =
@@ -174,7 +142,7 @@ static void close_connection(ClientState &state, const std::string &response, co
 	state.waiting = false;
 }
 
-static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
+static bool Upload_files(ClientState &state, const int &fd_client, Config &a, const std::string &upload_dir)
 {
 	if (fd_client < 0)
 	{
@@ -202,7 +170,7 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 		return true;
 	}
 
-	state.filename_upload = "www/upload/" + state.filename;
+	state.filename_upload = upload_dir + "/" + state.filename;
 	if (state.fd_upload == -1)
 	{
 		state.fd_upload = open(state.filename_upload.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
@@ -398,7 +366,7 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a)
 	return true;
 }
 
-static bool Upload_raw(ClientState &state, const int &fd_client, Config &a)
+static bool Upload_raw(ClientState &state, const int &fd_client, Config &a, const std::string &upload_dir)
 {
 	if (state.filename.empty())
 	{
@@ -416,7 +384,7 @@ static bool Upload_raw(ClientState &state, const int &fd_client, Config &a)
 		return true;
 	}
 	if (state.filename_upload.empty())
-		state.filename_upload = "www/upload/" + state.filename;
+		state.filename_upload = upload_dir + "/" + state.filename;
 	if (state.fd_upload == -1)
 		state.fd_upload = open(state.filename_upload.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (state.fd_upload < 0)
@@ -568,11 +536,9 @@ void _handle_post_check_user(ClientState &state, Config&a)
 
 void _handle_post_login(ClientState &state, Config &a)
 {
-	// Extract username from metadata
 	std::string username = get_username_from_metadata(state.metadata);
 	if (username.empty())
 	{
-		// std::cout << "No username found in metadata" << std::endl;
 		state.response = ErrorResponse::Error_BadRequest(a);
 		state.close = true;
 		state.cleanup = true;
@@ -580,7 +546,6 @@ void _handle_post_login(ClientState &state, Config &a)
 		return;
 	}
 
-	// Distinguish new session vs returning user (already has the same cookie)
 	std::string flash_value = (state.cookies == username) ? "SIGNED_IN" : "NEW_USER";
 
 	std::string response =
@@ -599,8 +564,6 @@ void _handle_post_login(ClientState &state, Config &a)
 	state.close = false;
 	state.cleanup = true;
 	state.send_data = true;
-
-	// std::cout << "User '" << username << "' logged in with session ID: " << state.cookies << std::endl;
 }
 
 std::string _get_filename(const std::string &metadata)
@@ -630,6 +593,20 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		req_path = req_path.substr(0, qpos);
 	}
 	LocationConfig info_location = a.get_info_location(req_path);
+
+	std::string upload_dir = _cwd() + info_location.get_root();
+	std::string location_path = info_location.get_path();
+	if (location_path != "None" && location_path != "/")
+	{
+		if (!location_path.empty() && location_path[location_path.size() - 1] == '/')
+			location_path.erase(location_path.size() - 1);
+		upload_dir += location_path;
+	}
+	struct stat upload_dir_stat;
+	if (stat(upload_dir.c_str(), &upload_dir_stat) != 0 || !S_ISDIR(upload_dir_stat.st_mode))
+	{
+		upload_dir = _cwd() + info_location.get_root();
+	}
 
 	{
 		if (info_location.get_path() != "None")
@@ -682,9 +659,9 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 						state.readstring.erase(0, (size_t)w);
 					}
 
-					char buf[4096];
-					while (state.body_received < state.content_length) //! I HAVE TO REMOVE THIS CAUSE IT CAUSES HANGING WHEN THE CLIENT CLOSES THE CONNECTION BEFORE SENDING ALL THE BODY, I NEED TO CHECK IF THE CLIENT CLOSED THE CONNECTION INSIDE THE LOOP
+					if (state.body_received < state.content_length)
 					{
+						char buf[4096];
 						ssize_t n = read(fd_client, buf, sizeof(buf));
 						if (n == 0)
 						{
@@ -716,43 +693,35 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 							return state.response;
 						}
 						state.body_received += (size_t)w;
+						state.waiting = (state.body_received < state.content_length);
+						if (state.waiting)
+							return state.response;
 					}
 
 					close(state.fd_body);
 					state.fd_body = -1;
 
-					std::vector<std::string> envs;
-					envs.push_back("REQUEST_METHOD=POST");
-					envs.push_back("QUERY_STRING=" + query_string);
+					std::vector<std::string> envs = build_cgi_env("POST",
+										 query_string,
+										 state.content_length,
+										 state.raw_content_type,
+										 req_path);
+
+					if (!start_cgi_for_client(state, binary, script_fs, envs, state.body_tmp_path))
 					{
-						std::ostringstream oss;
-						oss << state.content_length;
-						envs.push_back("CONTENT_LENGTH=" + oss.str());
-					}
-					envs.push_back("CONTENT_TYPE=" + state.raw_content_type);
-					envs.push_back("GATEWAY_INTERFACE=CGI/1.1");
-					envs.push_back("SERVER_PROTOCOL=HTTP/1.1");
-					envs.push_back("SCRIPT_NAME=" + req_path);
-
-					std::vector<const char *> envp;
-					for (size_t i = 0; i < envs.size(); i++)
-						envp.push_back(envs[i].c_str());
-					envp.push_back(NULL);
-
-					CGI cgi("POST", script_fs.c_str(), ext.c_str(), binary.c_str(), &envp[0], state.body_tmp_path.c_str());
-					if (cgi.CGIProccess())
-						state.response = cgi.response;
-					else if (cgi.TimedOut())
-						state.response = ErrorResponse::Error_GatewayTimeout(a);
-					else
+						std::remove(state.body_tmp_path.c_str());
+						state.body_tmp_path.clear();
+						state.body_received = 0;
 						state.response = ErrorResponse::default_response_error("500");
+						state.send_data = true;
+						state.cleanup = true;
+						state.waiting = false;
+						state.close = true;
+						return state.response;
+					}
 
-					std::remove(state.body_tmp_path.c_str());
 					state.body_tmp_path.clear();
 					state.body_received = 0;
-					state.send_data = true;
-					state.cleanup = true;
-					state.waiting = false;
 					return state.response;
 				}
 			}
@@ -764,7 +733,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 	const bool is_config_post_upload_path =
 		(info_location.get_path() != "None" && info_location.get_method("POST"));
 
-	if (!is_special_post_path && (_is_uploads_path(state.path) || is_config_post_upload_path))
+	if (!is_special_post_path && is_config_post_upload_path)
 	{
 		const size_t _hard_cap = 1024ULL * 1024ULL * 1024ULL;
 		if (state.content_length > _hard_cap ||
@@ -776,6 +745,11 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		if (!state.complete_upload)
 		{
 			state.timestamp = get_current_timestamp();
+			if (info_location.get_path() == "None" || !info_location.get_method("POST"))
+			{
+				close_connection(state, ErrorResponse::Error_MethodeNotAllowed(a), "");
+				return state.response;
+			}
 			if (state.content_type == "multipart/form-data")
 			{
 				if (state.boundary.empty() || state.metadata.empty())
@@ -786,7 +760,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 				state.filename = _get_filename(state.metadata);
 				try
 				{
-					bool done = Upload_files(state, fd_client, a);
+					bool done = Upload_files(state, fd_client, a, upload_dir);
 					if (!done)
 						return state.response;
 				}
@@ -800,7 +774,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 			else
 			{
 				state.filename = _get_filename_from_headers_or_query(state);
-				bool done = Upload_raw(state, fd_client, a);
+				bool done = Upload_raw(state, fd_client, a, upload_dir);
 				if (!done)
 					return state.response;
 			}

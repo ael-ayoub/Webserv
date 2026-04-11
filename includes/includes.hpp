@@ -22,6 +22,4 @@
 #include <signal.h>
 #include <fcntl.h>
 
-void printCurrentTime();
-
 #endif
