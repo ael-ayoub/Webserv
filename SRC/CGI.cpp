@@ -18,12 +18,7 @@ void rmCgiFd(int fd_epoll, int cgi_fd, std::map<int, int> &cgi_to_client)
     cgi_to_client.erase(cgi_fd);
 }
 
-bool start_cgi_process(const std::string &cgi_binary,
-                  const std::string &script_path,
-                  const std::vector<std::string> &envs,
-                  int &out_fd,
-                  pid_t &pid,
-                  const std::string &stdin_file_path)
+bool start_cgi_process(const std::string &cgi_binary, const std::string &script_path, const std::vector<std::string> &envs, int &out_fd, pid_t &pid, const std::string &stdin_file_path)
 {
     out_fd = -1;
     pid = -1;
@@ -85,11 +80,7 @@ bool start_cgi_process(const std::string &cgi_binary,
     return true;
 }
 
-std::vector<std::string> build_cgi_env(const std::string &method,
-                                       const std::string &query_string,
-                                       size_t content_length,
-                                       const std::string &content_type,
-                                       const std::string &script_name)
+std::vector<std::string> build_cgi_env(const std::string &method, const std::string &query_string, size_t content_length, const std::string &content_type, const std::string &script_name)
 {
     std::vector<std::string> envs;
     envs.push_back("REQUEST_METHOD=" + method);
@@ -106,11 +97,7 @@ std::vector<std::string> build_cgi_env(const std::string &method,
     return envs;
 }
 
-bool start_cgi_for_client(ClientState &state,
-                          const std::string &cgi_binary,
-                          const std::string &script_path,
-                          const std::vector<std::string> &envs,
-                          const std::string &stdin_file_path)
+bool start_cgi_for_client(ClientState &state, const std::string &cgi_binary, const std::string &script_path, const std::vector<std::string> &envs, const std::string &stdin_file_path)
 {
     int out_fd = -1;
     pid_t pid = -1;
@@ -130,10 +117,7 @@ bool start_cgi_for_client(ClientState &state,
     return true;
 }
 
-bool start_get_cgi_if_needed(ClientState &state,
-                             Request &request,
-                             Config &config,
-                             ServerConfig &server)
+bool start_get_cgi_if_needed(ClientState &state, Request &request, Config &config, ServerConfig &server)
 {
     if (request.get_method() != "GET")
         return false;
