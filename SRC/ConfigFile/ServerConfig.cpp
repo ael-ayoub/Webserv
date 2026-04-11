@@ -29,18 +29,28 @@ int right_path(std::string Config_path, std::string path)
 {
     if (Config_path.empty() || path.empty())
         return -1;
-    if (path.size() < Config_path.size())
-        return -1;
-    if (path.compare(0, Config_path.size(), Config_path) != 0)
-        return -1;
-    // If it's an exact match, accept it.
-    if (path.size() == Config_path.size())
+    
+    // Special case: exact match always wins
+    if (path == Config_path)
         return (int)Config_path.size();
+    
     // For prefix matches, require the location path to end with '/'
     // so that '/upload/' matches '/upload/file' but '/up' doesn't.
     if (Config_path[Config_path.size() - 1] != '/')
         return -1;
-    return (int)Config_path.size();
+    
+    // Check if path starts with Config_path
+    if (path.compare(0, Config_path.size(), Config_path) == 0)
+        return (int)Config_path.size();
+    
+    // Check if request path without trailing slash matches location with trailing slash
+    // e.g., /upload matches /upload/
+    if (path.size() + 1 == Config_path.size()
+        && Config_path.compare(0, path.size(), path) == 0
+        && Config_path[Config_path.size() - 1] == '/')
+        return (int)path.size();
+    
+    return -1;
 }
 std::string get_current_pathh()
 {

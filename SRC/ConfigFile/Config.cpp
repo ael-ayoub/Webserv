@@ -123,27 +123,15 @@ int Config::store_file(std::string path_of_Cfile)
 LocationConfig Config::get_info_location(std::string path)
 {
     LocationConfig tmp;
-    size_t i = 0;
-    while (i < Servers_Config.size())
-    {
-        tmp = Servers_Config[i].get_conf(path);
-        if (tmp.get_path() != "None")
-            return tmp;
-        i++;
-    }
-    return tmp;
-}
-
-void Config::print_confiFile()
-{
     // size_t i = 0;
-    // std::cout << "....\n";
     // while (i < Servers_Config.size())
     // {
-    //     Servers_Config[i].print_conf();
+    tmp = Servers_Config[0].get_conf(path);
+    // if (tmp.get_path() != "None")
+    //     return tmp;
     //     i++;
-    //     std::cout << "....\n";
     // }
+    return tmp;
 }
 
 std::pair<int, int> Config::get_firstlast()

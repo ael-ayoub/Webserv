@@ -168,15 +168,38 @@ void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::st
 
 void LocationConfig::print_info()
 {
-    std::cout << "--------location : " << path_location << "-----------\n\n" << std::endl;
-    std::cout << "index : " << path_index << std::endl;
-    std::cout << "root : " << path_root << std::endl;
-    std::cout << "autoindex : " <<autoindex << std::endl;
-    std::cout << "GET : " << GET_methode << std::endl;
-    std::cout << "POST : " << post_methode << std::endl;
-    std::cout << "Delete : " << delete_methode << std::endl;
-    std::cout << "upload_enable : " << upload_enable << std::endl;
-    std::cout << "upload_store : " << upload_store << std::endl;
-    std::cout << "status return : " << return_location.first << std::endl;
-    std::cout << "return_path : " << return_location.second << std::endl;
+    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "LOCATION CONFIGURATION" << std::endl;
+    std::cout << "-------------------------------------------" << std::endl;
+
+    std::cout << "Path Location:  " << path_location << std::endl;
+    std::cout << "Root Path:      " << path_root << std::endl;
+    std::cout << "Index Path:     " << path_index << std::endl;
+    std::cout << "Upload Store:   " << upload_store << std::endl;
+
+    std::cout << std::boolalpha; 
+    std::cout << "Autoindex:      " << autoindex << std::endl;
+    std::cout << "Upload Enabled: " << upload_enable << std::endl;
+    std::cout << "Redirection:    " << redirection << std::endl;
+    
+    std::cout << "Methods:        " 
+              << (GET_methode ? "[GET] " : "") 
+              << (post_methode ? "[POST] " : "") 
+              << (delete_methode ? "[DELETE]" : "") << std::endl;
+
+    if (redirection) {
+        std::cout << "Return:         Code " << return_location.first 
+                  << " -> " << return_location.second << std::endl;
+    }
+
+    std::cout << "CGI Pass:       ";
+    if (cgi_pass.empty()) {
+        std::cout << "None";
+    } else {
+        std::map<std::string, std::string>::iterator it;
+        for (it = cgi_pass.begin(); it != cgi_pass.end(); ++it) {
+            std::cout << "\n  - " << it->first << " => " << it->second;
+        }
+    }
+    std::cout << std::endl << "-------------------------------------------" << std::endl;
 }

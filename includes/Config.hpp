@@ -16,6 +16,10 @@ class Config
     public:
         Config();
 
+        void settte(ServerConfig &a) {
+            Servers_Config.clear();
+            Servers_Config.push_back(a);
+        }
         void set_sessions(std::pair<std::string , std::string> ss);
         std::vector<std::pair<std::string , std::string> > get_sessions();
         bool check_session(std::pair<std::string , std::string> ss);
@@ -29,9 +33,6 @@ class Config
         Vector_str          get_file_lines();
         static std::string         remove_whitespaces(std::string line);
         std::pair<int, int> get_firstlast();
-        //void Get_all_users();
-
-        void print_confiFile();
 
         std::string get_mine(std::string path);
         LocationConfig get_info_location(std::string path);

@@ -123,7 +123,12 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
                         return ErrorResponse::Error_Internal_Server(a);
                 }
                 // std::cout << "last path is : " << last_path << std::endl;
-                return Response::Display_file(last_path, a);
+                struct stat index_stat;
+                if (stat(last_path.c_str(), &index_stat) == 0 && !S_ISDIR(index_stat.st_mode))
+                    return Response::Display_file(last_path, a);
+                if (info_location.get_autoIndex() == true)
+                    return Response::Display_dir(path, info_location);
+                return ErrorResponse::Error_NotFound(a);
             }
             else
             {

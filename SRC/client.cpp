@@ -138,13 +138,12 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     servers[0] = checkRightServer(servers, status, fd_client, request);
 
-    Vector_str aa = servers[0].get_server_name();
+    // Vector_str aa = servers[0].get_server_name();
     if (state.method == "GET" || state.method == "DELETE")
     {
         if (!_process_get_delete_request(fd_client, state, request, a, servers, m))
             return;
     }
-
     else if (state.method == "POST")
     {
         state.timestamp = get_current_timestamp();
@@ -165,6 +164,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
                 state.waiting = false;
             }
         }
+        a.settte(servers[0]);
         state.timestamp = get_current_timestamp();
         if (state.complete_metadata)
         {

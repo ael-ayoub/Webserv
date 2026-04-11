@@ -243,7 +243,6 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a, co
 		}
 		if (state.byte_uploaded - state.metadata.size() >= state.content_length)
 		{
-			// finished upload
 			state.waiting = false;
 			buffer[0] = 0;
 			break;
@@ -254,7 +253,6 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a, co
 
 			if (n == 0)
 			{
-				// the cleint close the connection
 				std::cerr << "Error: Client closed connection during file upload" << std::endl;
 				close(state.fd_upload);
 				state.response = ErrorResponse::Error_BadRequest(a);
@@ -582,6 +580,8 @@ std::string _get_filename(const std::string &metadata)
 	return "default_upload_" + generat_random_id();
 }
 
+
+
 std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &state)
 {
 	std::string req_path = state.path;
@@ -728,10 +728,15 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		}
 	}
 
-	const bool is_special_post_path =
-		(req_path == "/login" || req_path == "/check_user" || req_path == "/logout");
-	const bool is_config_post_upload_path =
-		(info_location.get_path() != "None" && info_location.get_method("POST"));
+	bool is_special_post_path = (req_path == "/login" || req_path == "/check_user" || req_path == "/logout");
+	bool has_matching_location = (info_location.get_path() != "None");
+	bool is_config_post_upload_path = (has_matching_location && info_location.get_method("POST"));
+
+	if (!is_special_post_path && has_matching_location && !info_location.get_method("POST"))
+	{
+		close_connection(state, ErrorResponse::Error_MethodeNotAllowed(a), "");
+		return state.response;
+	}
 
 	if (!is_special_post_path && is_config_post_upload_path)
 	{
