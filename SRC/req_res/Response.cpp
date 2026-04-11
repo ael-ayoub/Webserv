@@ -93,9 +93,6 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
     if (qpos != std::string::npos)
         request_path = request_path.substr(0, qpos);
 
-    // std::cout << "path is : " << path << std::endl;
-
-    // std::cout << "reach here\n";
     if (info_location.GetRedirectionBool() == true)
     {
         // std::cout << "path is : " << info_location.get_path() << "\n";
@@ -107,13 +104,11 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
     }
     if (stat(path.c_str(), &statbuf) == 0)
     {
-        // std::cout << "before anything here\n";
         if (S_ISDIR(statbuf.st_mode))
         {
             if (info_location.get_pathIndex() != "None")
             {
                 last_path = gcwdd() + info_location.get_root() + test_request.get_path() + info_location.get_pathIndex();
-                // check extention
                 const size_t dot = last_path.rfind('.');
                 if (dot != std::string::npos)
                 {
@@ -122,7 +117,6 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
                     if (!binary.empty())
                         return ErrorResponse::Error_Internal_Server(a);
                 }
-                // std::cout << "last path is : " << last_path << std::endl;
                 struct stat index_stat;
                 if (stat(last_path.c_str(), &index_stat) == 0 && !S_ISDIR(index_stat.st_mode))
                     return Response::Display_file(last_path, a);
@@ -140,7 +134,6 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
         else
         {
             last_path = gcwdd() + info_location.get_root() + request_path;
-            // std::cout << "pathh: " << last_path << std::endl;
 
             const size_t dot = last_path.rfind('.');
             if (dot != std::string::npos)

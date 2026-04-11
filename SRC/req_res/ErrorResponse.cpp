@@ -219,39 +219,6 @@ std::string ErrorResponse::generate_error_page(std::string status_code)
     return headers + body;
 }
 
-// std::string ErrorResponse::response_error(Config a, std::string last)
-// {
-//     ServerConfig tmp = a.get_server_config();
-//     std::vector<std::map<int, std::string> > error = tmp.get_error_status();
-//     std::string body, line, header, response, s;
-//     std::map<int, std::string>::iterator err_tmp = error[0].begin();
-    
-//     std::ifstream file((err_tmp->second).c_str() , std::ios::in);
-// 	if (!file.is_open())
-//         return default_response_error(a);
-// 	while (getline(file, line))
-// 		body += line + "\n";
-// 	std::stringstream ss ;
-// 	ss << body.size();
-// 	s = ss.str();
-
-//     std::string error_status;
-//     std::stringstream sss;
-//     sss << err_tmp->first;
-//     error_status = sss.str();
-//     header = "HTTP/1.1 ";
-//     header += error_status;
-//     header += " OK\r\n";
-// 	header += "Content-Type: " + a.get_mine(last) + "\r\n";
-// 	header += "Content-Length: " + s + "\r\n";
-// 	header += "Connection: close\r\n";
-
-// 	response += header;
-// 	response += "\r\n";
-// 	response += body;
-//     return response;
-// }
-
 std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::string> > error,
                                             int status_code, std::string& path)
 {

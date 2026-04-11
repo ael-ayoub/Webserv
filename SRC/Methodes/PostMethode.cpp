@@ -74,8 +74,7 @@ static std::string _cwd()
 
 static std::string _get_filename_from_headers_or_query(const ClientState &state)
 {
-	// 1) Query string: ?filename=...
-	std::string path = state.path;
+    std::string path = state.path;
 	size_t qpos = path.find('?');
 	if (qpos == std::string::npos)
 		qpos = path.find("%3F");
@@ -275,12 +274,10 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a, co
 				{
 					state.readstring.append(buffer, n);
 				}
-				catch(const std::exception& e)
-				{
-					// std::cerr << e.what() << '\n';
-				}
-				
-				state.waiting = false;
+                catch(const std::exception& e)
+                {
+                }
+                				state.waiting = false;
 				state.send_data = false;
 			}
 		}
@@ -484,7 +481,6 @@ void _handle_post_check_user(ClientState &state, Config&a)
 	std::string username = get_username_from_metadata(state.metadata);
 	if (username.empty())
 	{
-		// std::cout << "No username found in metadata" << std::endl;
 		state.response = ErrorResponse::Error_BadRequest(a);
 		state.close = true;
 		state.cleanup = true;

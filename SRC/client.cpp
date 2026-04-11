@@ -16,24 +16,6 @@ void _sendReaponse(const std::string &response, int fd_client)
     }
 }
 
-
-// std::string CheckSession(const std::string &message)
-// {
-//     std::string body = message;
-
-//     std::string response;
-//     response = "HTTP/1.1 200 OK\r\n";
-//     response += "Content-Type: text/plain\r\n";
-//     std::stringstream ss;
-//     ss << body.size();
-//     response += "Content-Length: " + ss.str() + "\r\n";
-//     if ()
-//     response += "\r\n";
-//     response += body;
-
-//     return response;
-// }
-
 std::string FirstLineHeader(std::string FirstLine)
 {
     size_t i = 0;
@@ -138,7 +120,6 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     servers[0] = checkRightServer(servers, status, fd_client, request);
 
-    // Vector_str aa = servers[0].get_server_name();
     if (state.method == "GET" || state.method == "DELETE")
     {
         if (!_process_get_delete_request(fd_client, state, request, a, servers, m))

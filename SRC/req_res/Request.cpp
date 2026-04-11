@@ -185,7 +185,6 @@ std::string Request::check_headerline(std::string header_line, Config &a)
 
 std::string CheckContentLenght(std::string str, Config a)
 {
-    // ServerConfig x;
     size_t num;
 
     for (size_t i = 0; i < str.size() - 2; i++)
@@ -246,7 +245,6 @@ std::string Request::check_request(std::string str, Config a)
         return response;
     }
     
-    // Find and validate the Host header
     bool host_found = false;
     for (size_t i = 1; i < args.size(); i++)
     {
