@@ -56,6 +56,13 @@ public:
 	bool complete_upload;
 	std::vector<char> tail;
 
+	bool cgi_active;
+	int cgi_fd;
+	pid_t cgi_pid;
+	unsigned long long cgi_deadline;
+	std::string cgi_output;
+	std::string cgi_stdin_path;
+
 	ClientState()
 	{
 		complete_metadata = false;
@@ -68,6 +75,10 @@ public:
 		send_data = false;
 		fd_upload = -1;
 		fd_body = -1;
+		cgi_active = false;
+		cgi_fd = -1;
+		cgi_pid = -1;
+		cgi_deadline = 0;
 		timestamp = 0;
 		byte_uploaded = 0;
 		body_received = 0;
@@ -96,9 +107,6 @@ std::string generateSuccessMsg();
 std::string generateFailerMsg();
 bool _uploadFile(const int &fd_client, ClientState &state);
 
-// void _setCookies(std::string &username);
-
-void printCurrentTime();
 void _sendReaponse(const std::string &response, int fd_client);
 
 unsigned long long get_current_timestamp();

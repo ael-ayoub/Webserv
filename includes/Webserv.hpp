@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -41,4 +42,4 @@ std::string get_username_from_metadata(const std::string &metadata);
 unsigned long long get_current_timestamp();
 bool check_timeout(unsigned long long timestamp, unsigned long long timeout);
 void cloce_connection(ClientState &state);
-
+std::string generat_random_id();

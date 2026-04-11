@@ -37,12 +37,6 @@ std::vector<std::pair<std::string, int> > filterServerPorts(std::vector<ServerCo
 		o++;
 	}
 
-	// size_t i = 0;
-	// while (i < store_ports.size())
-	// {
-	// 	std::cout << "port is : " << store_ports[i].second << std::endl;
-	// 	i++;
-	// }
 	return store_ports;
 }
 
@@ -53,7 +47,6 @@ void run_server(std::string av)
 		Config a;
 
 		a.store_file(av);
-
 		Socket socket(filterServerPorts(a.get_allserver_config()));
 		socket.run(a);
 	}

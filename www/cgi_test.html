@@ -315,13 +315,13 @@
                     return response.text();
                 })
                 .then(function(data){
-                    loading.classList.std::remove('active');
+                    loading.classList.remove('active');
                     resultContent.textContent = data;
                     resultDiv.style.display = 'block';
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 })
                 .catch(function(err){
-                    loading.classList.std::remove('active');
+                    loading.classList.remove('active');
                     resultContent.textContent = 'ERROR: ' + err.message;
                     resultDiv.style.display = 'block';
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -362,13 +362,13 @@
             fetch(url, opts)
                 .then(function(r) { return r.text(); })
                 .then(function(html) {
-                    loading.classList.std::remove('active');
+                    loading.classList.remove('active');
                     renderInFrame('custom-result-frame', html);
                     resultDiv.style.display = 'block';
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 })
                 .catch(function(err) {
-                    loading.classList.std::remove('active');
+                    loading.classList.remove('active');
                     renderInFrame('custom-result-frame',
                         '<pre style="color:red;padding:1rem;font-family:monospace">ERROR: ' + err.message + '</pre>');
                     resultDiv.style.display = 'block';
@@ -395,13 +395,13 @@
             })
                 .then(function(r) { return r.text(); })
                 .then(function(html) {
-                    loading.classList.std::remove('active');
+                    loading.classList.remove('active');
                     renderInFrame('echo-result-frame', html);
                     resultDiv.style.display = 'block';
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 })
                 .catch(function(err) {
-                    loading.classList.std::remove('active');
+                    loading.classList.remove('active');
                     renderInFrame('echo-result-frame',
                         '<pre style="color:red;padding:1rem;font-family:monospace">ERROR: ' + err.message + '</pre>');
                     resultDiv.style.display = 'block';

@@ -1,4 +1,5 @@
 #include "../includes/Webserv.hpp"
+#include "../includes/CGI.hpp"
 
 // std::string _getCookies(const std::string &header)
 // {
@@ -210,6 +211,14 @@ bool _process_get_delete_request(int fd_client, ClientState &state, Request &req
             return false;
         }
         state.timestamp = get_current_timestamp();
+
+        if (!state.cgi_active && start_get_cgi_if_needed(state, request, a, servers[0]))
+            return true;
+        if (state.cgi_active)
+        {
+            state.waiting = true;
+            return true;
+        }
         
         state.response = m.GetMethod(a, request, servers[0]);
         state.send_data = true;
@@ -333,9 +342,6 @@ bool _process_post_request(int fd_client, ClientState &state, Config &a, Methode
         }
 
         if (state.header.find("Connection: close") != std::string::npos)
-        {
-            // std::cout << "the client send Connection: close header, so we close the connection after response.\n";
             state.close = true;
-        }
     return true;
 }
