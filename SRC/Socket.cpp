@@ -113,9 +113,9 @@ std::string makeLog(ClientState &state)
     std::string log_entry;
 
     std::string stats = "";
-     if (state.response.empty())
+    if (state.response.empty())
         stats = "No response generated";
-     else
+    else
         stats = state.response.substr(0, 16);
 
     log_entry += format_timestamp(state.timestamp);
@@ -191,10 +191,13 @@ void resetKeepAliveState(ClientState &state)
     state.boundary.clear();
     state.method.clear();
     state.path.clear();
+    state.response.clear();
     state = ClientState();
     state.ip = saved_ip;
     state.port = saved_port;
     state.timestamp = get_current_timestamp();
+    state.byte_send = 0;
+    state.send_complete = false;
 }
 
 void Socket::Monitor(Config &a)
@@ -241,9 +244,9 @@ void Socket::Monitor(Config &a)
                     {
                         if (it->second.complete_header || !it->second.readstring.empty())
                         {
-                                requestnotComplet(fd, it->second);
-                                sendAndClose(it->second, ErrorResponse::Error_RequestTimeout(a));
-                                modClientEvent(fd_epoll, fd, EPOLLOUT);
+                            requestnotComplet(fd, it->second);
+                            sendAndClose(it->second, ErrorResponse::Error_RequestTimeout(a));
+                            modClientEvent(fd_epoll, fd, EPOLLOUT);
                             ++it;
                             continue;
                         }
@@ -387,24 +390,57 @@ void Socket::Monitor(Config &a)
                             continue;
                         }
                     }
-                    if (it->second.send_data)
+                    if (it->second.send_data && !it->second.send_complete)
                     {
                         modClientEventOrThrow(fd_epoll, fd_client, EPOLLOUT);
-                        try
+
+                        ssize_t sent = send(fd_client,
+                                            it->second.response.c_str() + it->second.byte_send,
+                                            it->second.response.size() - it->second.byte_send,
+                                            MSG_NOSIGNAL);
+
+                        if (sent > 0)
                         {
-                            _sendReaponse(it->second.response, fd_client);
-                            printLogs(it->second);
+                            it->second.byte_send += sent;
+                            if (it->second.byte_send >= it->second.response.size())
+                            {
+                                it->second.send_complete = true;
+                                printLogs(it->second);
+                            }
                         }
-                        catch (const std::exception &e)
+                        else if (sent < 0)
                         {
-                            std::cerr << e.what() << '\n';
+                            it->second.close = true;
+                            it->second.cleanup = true;
+                        }
+                        else
+                        {
                             it->second.close = true;
                             it->second.cleanup = true;
                         }
                     }
-                    if (it->second.header.find("Connection: close") != std::string::npos || 
-                        it->second.response.find("Connection: close") != std::string::npos || 
-                        it->second.close)
+                    else if (it->second.send_data && it->second.send_complete)
+                    {
+                        if (it->second.header.find("Connection: close") != std::string::npos ||
+                            it->second.response.find("Connection: close") != std::string::npos ||
+                            it->second.close)
+                        {
+                            if (it->second.cgi_active)
+                                cleanup_cgi_state(it->second, fd_epoll, cgi_to_client);
+                            if (it->second.cleanup)
+                                status.erase(it);
+                            epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd_client, NULL);
+                            close(fd_client);
+                        }
+                        else
+                        {
+                            modClientEventOrThrow(fd_epoll, fd_client, EPOLLIN);
+                            resetKeepAliveState(it->second);
+                        }
+                    }
+                    else if (it->second.header.find("Connection: close") != std::string::npos ||
+                             it->second.response.find("Connection: close") != std::string::npos ||
+                             it->second.close)
                     {
                         if (it->second.cgi_active)
                             cleanup_cgi_state(it->second, fd_epoll, cgi_to_client);
@@ -438,5 +474,3 @@ void Socket::run(Config &a)
         std::cout << e.what() << std::endl;
     }
 }
-
-

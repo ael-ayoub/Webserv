@@ -56,6 +56,9 @@ public:
 	bool complete_upload;
 	std::vector<char> tail;
 
+	size_t byte_send;
+	bool send_complete;
+
 	bool cgi_active;
 	int cgi_fd;
 	pid_t cgi_pid;
@@ -82,6 +85,8 @@ public:
 		timestamp = 0;
 		byte_uploaded = 0;
 		body_received = 0;
+		send_complete = false;
+		byte_send = 0;
 	}
 };
 
