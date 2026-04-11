@@ -11,14 +11,10 @@ SockConf::SockConf(std::string ip, int p)
 
 Socket::Socket(std::vector<std::pair<std::string, int> > ports)
 {
-    // for (size_t i = 0; i < ports.size(); i++)
-    // {
     for (size_t j = 0; j < ports.size(); j++)
     {
         sockconf.push_back(SockConf(ports[j].first, ports[j].second));
-        // sockconf.push_back(SockConf(ports[i][j].first, ports[i][j].second));
     }
-    // }
 }
 
 void Socket::set_nonblocking(int fd)

@@ -6,7 +6,6 @@ class syntax_server
 {
     private:
         bool listen_check;
-        // bool serverName_check;
         bool client_max_body_size_check;
         bool error_page_check;
         Vector_str location_path;

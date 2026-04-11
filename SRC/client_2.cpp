@@ -1,26 +1,6 @@
 #include "../includes/Webserv.hpp"
 #include "../includes/CGI.hpp"
 
-// std::string _getCookies(const std::string &header)
-// {
-//     std::string username_key = "username=";
-// 	size_t pos = header.find(username_key);
-// 	if (pos != std::string::npos)
-// 	{
-// 		pos += username_key.length();
-// 		size_t end_pos = header.find("\r\n", pos);
-// 		if (end_pos != std::string::npos)
-// 		{
-// 			return header.substr(pos, end_pos - pos);
-// 		}
-// 		else
-// 		{
-// 			return header.substr(pos);
-// 		}
-// 	}
-// 	return "";
-// }
-
 static std::string _lower(const std::string &s)
 {
     std::string out = s;
@@ -78,7 +58,6 @@ static std::string _boundary_from_content_type(const std::string &content_type)
     if (end == std::string::npos)
         end = content_type.size();
     std::string val = content_type.substr(b, end - b);
-    // strip quotes
     if (val.size() >= 2 && val[0] == '"' && val[val.size() - 1] == '"')
         val = val.substr(1, val.size() - 2);
     return val;
@@ -112,26 +91,16 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
     {
         buffer[n] = '\0'; 
         state.readstring.append(buffer, n);
-        // std::cout << "-----------" << std::endl;
-        // std::cout << "header is : " << buffer << std::endl;
-        // std::cout << "-----------"<< std::endl;
-        // std::cout << "state.readstring >> " <<  state.readstring << std::endl;
-
         size_t pos = state.readstring.find("\r\n\r\n");
         if (pos != std::string::npos)
         {
-            // std::cout << "checking timeout for fd: " << fd_client << std::endl;
-
             if (!check_timeout(state.timestamp, TIMEOUT))
             {
-                // std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                 cloce_connection(state);
                 return false;
             }
             state.timestamp = get_current_timestamp();
-            // std::cout << "Complete header received from fd: " << fd_client << std::endl;
             state.header = state.readstring.substr(0, pos + 2);  // Include the final \r\n
-            // std::cout << "DEBUG: Full header received:\n[" << state.header << "]" << std::endl;
             if (state.header.size() > HEADER_SIZE)
             {
                 state.response = ErrorResponse::Error_BadRequest(a);
@@ -156,7 +125,6 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
             state.method = request.get_method();
             state.path = request.get_path();
             state.content_length = content_length(state.header);
-            // std::cout << "Content-Length: " << state.content_length << std::endl;
             state.timestamp = get_current_timestamp();
 
             state.raw_content_type = _header_value(state.header, "Content-Type");
@@ -179,10 +147,8 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
         }
         else
         {
-            // std::cout << "checking timeout for fd: " << fd_client << std::endl;
             if (!check_timeout(state.timestamp, TIMEOUT))
             {
-                // std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                 state.close = true;
                 state.cleanup = true;
                 state.send_data = false;
@@ -190,7 +156,6 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
                 return false;
             }
             state.timestamp = get_current_timestamp();
-            // std::cout << "Incomplete header, waiting for more data from fd: " << fd_client << std::endl;
             state.waiting = true;
             return false;
         }
@@ -244,18 +209,15 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
 {
     if (!check_timeout(state.timestamp, TIMEOUT))
     {
-        // std::cout << "Connection timed out for fd: " << fd_client << std::endl;
         state.response = ErrorResponse::Error_BadRequest(a);
         cloce_connection(state);
         return false;
     }
     state.timestamp = get_current_timestamp();
     char buffer[4096];
-    // check if metatdata in readstring
     size_t pos = state.readstring.find("\r\n\r\n");
     if (pos != std::string::npos)
     {
-        // std::cout << "Complete metadata received from fd: " << fd_client << std::endl;
         state.metadata = state.readstring.substr(0, pos + 4);
         state.readstring.erase(0, pos + 4);
         state.complete_metadata = true;
@@ -265,7 +227,6 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
     ssize_t n = read(fd_client, buffer, sizeof(buffer));
     if (n == 0)
     {
-        // std::cout << "Client disconnected fd: " << fd_client << std::endl;
         state.close = true;
         state.cleanup = true;
         state.send_data = false;
@@ -279,7 +240,6 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
     }
     else
     {
-        // std::cout << "Read " << n << " bytes from fd: " << fd_client << std::endl;
         state.readstring.append(buffer, n);
         size_t pos = state.readstring.find("\r\n\r\n");
         if (pos != std::string::npos)
@@ -321,9 +281,8 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
 
 bool _process_post_request(int fd_client, ClientState &state, Config &a, Methodes &m)
 {
-        if (!check_timeout(state.timestamp, TIMEOUT))
+        if(!check_timeout(state.timestamp, TIMEOUT))
         {
-            // std::cout << "Connection timed out for fd: " << fd_client << std::endl;
             cloce_connection(state);
             return false;
         }

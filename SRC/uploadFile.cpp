@@ -58,7 +58,6 @@ bool _uploadFile(const int &fd_client, ClientState &state)
 		ssize_t byte_read = read(fd_client, buffer, sizeof(buffer));
 		if (byte_read == 0)
 		{
-			// std::cout << "upload done " << std::endl;
 			return true;
 		}
 		if (byte_read < 0)
