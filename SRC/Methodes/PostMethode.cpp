@@ -724,13 +724,30 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		}
 	}
 
+	// info_location.print_info();
+
 	bool is_special_post_path = (req_path == "/login" || req_path == "/check_user" || req_path == "/logout");
 	bool has_matching_location = (info_location.get_path() != "None");
 	bool is_config_post_upload_path = (has_matching_location && info_location.get_method("POST"));
+	bool is_root_fallback_location = (info_location.get_path() == "/" && req_path != "/");
 
 	if (!is_special_post_path && has_matching_location && !info_location.get_method("POST"))
 	{
-		close_connection(state, ErrorResponse::Error_MethodeNotAllowed(a), "");
+		std::string target_path = _cwd() + info_location.get_root() + req_path;
+		// std::cout << "Path1: " << target_path << std::endl; 
+
+		struct stat target_stat;
+		if (is_root_fallback_location)
+		{
+			if (stat(target_path.c_str(), &target_stat) == 0)
+				close_connection(state, ErrorResponse::Error_Forbidden(a), "");
+			else
+				close_connection(state, ErrorResponse::Error_NotFound(a), "");
+		}
+		else if (stat(target_path.c_str(), &target_stat) != 0)
+			close_connection(state, ErrorResponse::Error_NotFound(a), "");
+		else
+			close_connection(state, ErrorResponse::Error_MethodeNotAllowed(a), "");
 		return state.response;
 	}
 
@@ -780,6 +797,17 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 					return state.response;
 			}
 		}
+		return state.response;
+	}
+	else if (!is_special_post_path && !has_matching_location)
+	{
+		std::string filesystem_path = _cwd() + "/www" + req_path;
+		// std::cout << "Path: " << filesystem_path << std::endl; 
+		struct stat path_stat;
+		if (stat(filesystem_path.c_str(), &path_stat) == 0)
+			close_connection(state, ErrorResponse::Error_Forbidden(a), "");
+		else
+			close_connection(state, ErrorResponse::Error_NotFound(a), "");
 		return state.response;
 	}
 	else if (req_path == "/login")
