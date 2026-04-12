@@ -211,7 +211,11 @@ void Socket::Monitor(Config &a)
     {
         max_fds = epoll_wait(fd_epoll, events, MAX_EVENTS, 1000);
         if (max_fds == -1)
-            throw(std::runtime_error("Error: epoll wait failed !!"));
+        {
+            if (errno != EINTR)
+                std::cerr << "Error: epoll wait failed" << std::endl;
+            continue;
+        }
         if (max_fds == 0)
         {
             for (std::map<int, ClientState>::iterator it = status.begin();
@@ -284,8 +288,8 @@ void Socket::Monitor(Config &a)
                 event_client.events = EPOLLIN;
                 if (epoll_ctl(fd_epoll, EPOLL_CTL_ADD, fd_client, &event_client) == -1)
                 {
-                    close(fd_socket);
-                    throw(std::runtime_error("cannot add client to epoll instance !"));
+                    close(fd_client);
+                    continue;
                 }
             }
             else if (cgi_to_client.find(current_fd) != cgi_to_client.end())
