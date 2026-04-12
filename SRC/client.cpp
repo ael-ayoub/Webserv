@@ -111,6 +111,20 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
         return;
 
     state.timestamp = get_current_timestamp();
+
+    if (state.complete_header)
+    {
+        std::string parse_res = request.parse_request(state.header, a);
+        if (parse_res != "NONE")
+        {
+            state.response = parse_res;
+            state.close = true;
+            state.cleanup = true;
+            state.send_data = true;
+            return;
+        }
+    }
+    
     if (!state.complete_header)
     {
         if (!_parse_header(state, fd_client, request, a))
