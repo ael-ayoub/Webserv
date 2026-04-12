@@ -273,7 +273,7 @@ void Socket::Monitor(Config &a)
                 int &fd_socket = sockconf[index].fd_socket;
                 fd_client = accept(fd_socket, NULL, NULL);
                 if (fd_client == -1)
-                    throw std::runtime_error("cannot accept new client !!");
+                    continue;
                 set_nonblocking(fd_client);
                 status[fd_client] = ClientState();
                 status[fd_client].ip = inet_ntoa(sockconf[index].addr.sin_addr);
