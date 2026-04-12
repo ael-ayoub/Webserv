@@ -114,6 +114,8 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
 
     if (state.complete_header)
     {
+        servers[0] = checkRightServer(servers, status, fd_client, request);
+        ServerConfig::client_max_body_size = servers[0].get_client_max_body_size();
         std::string parse_res = request.parse_request(state.header, a);
         if (parse_res != "NONE")
         {
@@ -133,6 +135,7 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     state.timestamp = get_current_timestamp();
 
     servers[0] = checkRightServer(servers, status, fd_client, request);
+    ServerConfig::client_max_body_size = servers[0].get_client_max_body_size();
 
     if (state.method == "GET" || state.method == "DELETE")
     {
@@ -159,12 +162,11 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
                 state.waiting = false;
             }
         }
-        a.settte(servers[0]);
         state.timestamp = get_current_timestamp();
         if (state.complete_metadata)
         {
             state.timestamp = get_current_timestamp();
-            if (!_process_post_request(fd_client, state, a, m))
+            if (!_process_post_request(fd_client, state, a, m, servers[0]))
                 return;
         }
         else

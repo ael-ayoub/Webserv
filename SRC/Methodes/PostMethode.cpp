@@ -578,8 +578,15 @@ std::string _get_filename(const std::string &metadata)
 
 
 
-std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &state)
+std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &state, ServerConfig& selected_server)
 {
+	if (state.content_length > MAX_BODY_SIZE_HARD_CAP ||
+		(ServerConfig::client_max_body_size != 0 && state.content_length > ServerConfig::client_max_body_size))
+	{
+		close_connection(state, ErrorResponse::Error_PayloadTooLarge(a), "");
+		return state.response;
+	}
+
 	std::string req_path = state.path;
 	std::string query_string;
 	size_t qpos = req_path.find('?');
@@ -588,7 +595,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		query_string = req_path.substr(qpos + 1);
 		req_path = req_path.substr(0, qpos);
 	}
-	LocationConfig info_location = a.get_info_location(req_path);
+	LocationConfig info_location = selected_server.get_conf(req_path);
 
 	std::string upload_dir = _cwd() + info_location.get_root();
 	std::string location_path = info_location.get_path();
@@ -753,13 +760,6 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 
 	if (!is_special_post_path && is_config_post_upload_path)
 	{
-		const size_t _hard_cap = 1024ULL * 1024ULL * 1024ULL;
-		if (state.content_length > _hard_cap ||
-			(ServerConfig::client_max_body_size != 0 && state.content_length > ServerConfig::client_max_body_size))
-		{
-			close_connection(state, ErrorResponse::Error_PayloadTooLarge(a), "");
-			return state.response;
-		}
 		if (!state.complete_upload)
 		{
 			state.timestamp = get_current_timestamp();

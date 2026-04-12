@@ -206,7 +206,7 @@ void Socket::Monitor(Config &a)
     std::map<int, ClientState> status;
     std::map<int, int> cgi_to_client;
     const unsigned long long CGI_TIMEOUT_MS = 5000;
-
+    
     while (true)
     {
         max_fds = epoll_wait(fd_epoll, events, MAX_EVENTS, 1000);

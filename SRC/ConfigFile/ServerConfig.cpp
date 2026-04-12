@@ -1,8 +1,13 @@
 #include "../../includes/ServerConfig.hpp"
 
 size_t ServerConfig::client_max_body_size = 0;
-ServerConfig::ServerConfig() : server_name()
+ServerConfig::ServerConfig() : server_name(), client_max_body_size_value(0)
 {
+}
+
+size_t ServerConfig::get_client_max_body_size() const
+{
+    return client_max_body_size_value;
 }
 
 std::vector<std::map<int, std::string> > ServerConfig::get_error_status()
@@ -20,6 +25,7 @@ bool ServerConfig::CheckClientMaxBodySize(size_t num)
     // Treat 0 as "unlimited".
     if (client_max_body_size == 0)
         return false;
+    // std::cout << "client_max_body_size: " << client_max_body_size << std::endl; 
     if (num > client_max_body_size)
         return true;
     return false;
@@ -200,7 +206,7 @@ void    ServerConfig::store_server_info()
         else if (a.first == "server_name")
             server_name = ft_splitv2(a.second, ' ');
         else if (a.first == "client_max_body_size")
-            std::istringstream(a.second) >> client_max_body_size;
+            std::istringstream(a.second) >> client_max_body_size_value;
         else if (a.first == "root")
             path_server_root = a.second;
         else if (a.first == "index")
@@ -247,7 +253,7 @@ void ServerConfig::print_info_server()
     }
     std::cout << "root :" << path_server_root << "." << std::endl;
     std::cout << "index :" << path_server_index << "." << std::endl;
-    std::cout << "client_max_body_size :" << client_max_body_size << "." << std::endl;
+    std::cout << "client_max_body_size :" << client_max_body_size_value << "." << std::endl;
     i = 0;
     while (i < errorStatus_pathError.size())
     {

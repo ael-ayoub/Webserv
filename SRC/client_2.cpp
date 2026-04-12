@@ -185,7 +185,6 @@ bool _process_get_delete_request(int fd_client, ClientState &state, Request &req
             return true;
         }
 
-        a.settte(servers[0]);
         
         state.response = m.GetMethod(a, request, servers[0]);
         state.send_data = true;
@@ -281,7 +280,7 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
 }
 
 
-bool _process_post_request(int fd_client, ClientState &state, Config &a, Methodes &m)
+bool _process_post_request(int fd_client, ClientState &state, Config &a, Methodes &m, ServerConfig& selected_server)
 {
         if(!check_timeout(state.timestamp, TIMEOUT))
         {
@@ -290,7 +289,7 @@ bool _process_post_request(int fd_client, ClientState &state, Config &a, Methode
         }
         state.timestamp = get_current_timestamp();
 
-        m.PostMethod(a, fd_client, state);
+        m.PostMethod(a, fd_client, state, selected_server);
         if (state.waiting)
             return true;
 
