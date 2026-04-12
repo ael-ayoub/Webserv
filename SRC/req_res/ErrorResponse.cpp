@@ -312,13 +312,19 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
 
 std::string ErrorResponse::Error_GatewayTimeout(Config &a)
 {
-    (void)a;
+    std::string path;
+    std::string status_head = check_errorstatus(a.get_server_config().get_error_status(), 504, path);
+    if (!status_head.empty())
+        return Responde(a, path, status_head, "504");
     return generate_error_page("504");
 }
 
 std::string ErrorResponse::Error_MethodeNotAllowed(Config a)
 {
-    (void)a;
+    std::string path;
+    std::string status_head = check_errorstatus(a.get_server_config().get_error_status(), 405, path);
+    if (!status_head.empty())
+        return Responde(a, path, status_head, "405");
     return generate_error_page("405");
 }
 
@@ -373,31 +379,46 @@ std::string ErrorResponse::Error_NotFound(Config &a)
 
 std::string ErrorResponse::Error_Internal_Server(Config &a)
 {
-    (void)a;
+    std::string path;
+    std::string status_head = check_errorstatus(a.get_server_config().get_error_status(), 500, path);
+    if (!status_head.empty())
+        return Responde(a, path, status_head, "500");
     return generate_error_page("500");
 }
 
 std::string ErrorResponse::Error_BadRequest(Config &a)
 {
-    (void)a;
+    std::string path;
+    std::string status_head = check_errorstatus(a.get_server_config().get_error_status(), 400, path);
+    if (!status_head.empty())
+        return Responde(a, path, status_head, "400");
     return generate_error_page("400");
 }
 
 std::string ErrorResponse::Error_PayloadTooLarge(Config &a)
 {
-    (void)a;
+    std::string path;
+    std::string status_head = check_errorstatus(a.get_server_config().get_error_status(), 413, path);
+    if (!status_head.empty())
+        return Responde(a, path, status_head, "413");
     return generate_error_page("413");
 }
 
 std::string ErrorResponse::Error_Forbidden(Config &a)
 {
-    (void)a;
+    std::string path;
+    std::string status_head = check_errorstatus(a.get_server_config().get_error_status(), 403, path);
+    if (!status_head.empty())
+        return Responde(a, path, status_head, "403");
     return generate_error_page("403");
 }
 
 std::string ErrorResponse::Error_RequestTimeout(Config &a)
 {
-    (void)a;
+    std::string path;
+    std::string status_head = check_errorstatus(a.get_server_config().get_error_status(), 408, path);
+    if (!status_head.empty())
+        return Responde(a, path, status_head, "408");
     return generate_error_page("408");
 }
 
