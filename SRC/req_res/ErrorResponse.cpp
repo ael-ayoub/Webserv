@@ -141,7 +141,7 @@ std::string ErrorResponse::generate_error_page(std::string status_code)
     else if (code == "408")
     {
         message = "Request Timeout";
-        description = "The server timed out waiting for the complete request body. The Content-Length header may not match the actual data sent.";
+        description = "The server timed out.";
     }
     else if (code == "413")
     {

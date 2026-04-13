@@ -20,7 +20,10 @@ Socket::Socket(std::vector<std::pair<std::string, int> > ports)
 void Socket::set_nonblocking(int fd)
 {
     int flags = fcntl(fd, F_GETFL, 0);
-    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    if (flags == -1)
+        throw(std::runtime_error("Cannot get socket flags!"));
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+        throw(std::runtime_error("Cannot set socket to non-blocking!"));
 }
 
 void Socket::CreateSocket()
@@ -230,7 +233,7 @@ void Socket::Monitor(Config &a)
                 {
                     cleanup_cgi_state(it->second, fd_epoll, cgi_to_client);
                     sendAndClose(it->second, ErrorResponse::Error_GatewayTimeout(a));
-                    modifyClientEvent(fd_epoll, it->first, EPOLLOUT);
+                    modifyClientEventOrThrow(fd_epoll, it->first, EPOLLOUT);
                     ++it;
                     continue;
                 }
@@ -251,8 +254,18 @@ void Socket::Monitor(Config &a)
                         {
                             requestnotComplet(fd, it->second);
                             sendAndClose(it->second, ErrorResponse::Error_RequestTimeout(a));
-                            modifyClientEvent(fd_epoll, fd, EPOLLOUT);
+                            modifyClientEventOrThrow(fd_epoll, fd, EPOLLOUT);
                             ++it;
+                            continue;
+                        }
+                        else
+                        {
+                            epoll_ctl(fd_epoll, EPOLL_CTL_DEL, fd, NULL);
+                            close(fd);
+
+                            std::map<int, ClientState>::iterator to_erase = it;
+                            ++it;
+                            status.erase(to_erase);
                             continue;
                         }
                     }
@@ -318,7 +331,7 @@ void Socket::Monitor(Config &a)
                 {
                     cleanup_cgi_state(cstate, fd_epoll, cgi_to_client);
                     sendAndClose(cstate, ErrorResponse::Error_GatewayTimeout(a));
-                    modifyClientEvent(fd_epoll, owner_fd, EPOLLOUT);
+                    modifyClientEventOrThrow(fd_epoll, owner_fd, EPOLLOUT);
                     continue;
                 }
 
@@ -331,7 +344,7 @@ void Socket::Monitor(Config &a)
                     }
                     else
                         finalize_cgi_success(cstate, fd_epoll, cgi_to_client);
-                    modifyClientEvent(fd_epoll, owner_fd, EPOLLOUT);
+                    modifyClientEventOrThrow(fd_epoll, owner_fd, EPOLLOUT);
                     continue;
                 }
 
@@ -346,6 +359,13 @@ void Socket::Monitor(Config &a)
                 if (n == 0)
                 {
                     finalize_cgi_success(cstate, fd_epoll, cgi_to_client);
+                    modifyClientEventOrThrow(fd_epoll, owner_fd, EPOLLOUT);
+                    continue;
+                }
+                if (n < 0)
+                {
+                    cleanup_cgi_state(cstate, fd_epoll, cgi_to_client);
+                    sendAndClose(cstate, ErrorResponse::Error_Internal_Server(a));
                     modifyClientEvent(fd_epoll, owner_fd, EPOLLOUT);
                     continue;
                 }

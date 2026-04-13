@@ -84,7 +84,10 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
     }
     else if (n < 0)
     {
-        state.waiting = true;
+        state.close = true;
+        state.cleanup = true;
+        state.send_data = false;
+        state.waiting = false;
         return false;
     }
     else

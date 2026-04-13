@@ -112,7 +112,6 @@ public:
 
 std::string generateSuccessMsg();
 std::string generateFailerMsg();
-bool _uploadFile(const int &fd_client, ClientState &state);
 
 void _sendReaponse(const std::string &response, int fd_client);
 
