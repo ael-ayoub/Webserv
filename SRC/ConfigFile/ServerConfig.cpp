@@ -25,7 +25,7 @@ bool ServerConfig::CheckClientMaxBodySize(size_t num)
     // Treat 0 as "unlimited".
     if (client_max_body_size == 0)
         return false;
-    // std::cout << "client_max_body_size: " << client_max_body_size << std::endl; 
+    // std::cout << "client_max_body_size: " << client_max_body_size << std::endl;
     if (num > client_max_body_size)
         return true;
     return false;
@@ -35,27 +35,25 @@ int right_path(std::string Config_path, std::string path)
 {
     if (Config_path.empty() || path.empty())
         return -1;
-    
+
     // Special case: exact match always wins
     if (path == Config_path)
         return (int)Config_path.size();
-    
+
     // For prefix matches, require the location path to end with '/'
     // so that '/upload/' matches '/upload/file' but '/up' doesn't.
     if (Config_path[Config_path.size() - 1] != '/')
         return -1;
-    
+
     // Check if path starts with Config_path
     if (path.compare(0, Config_path.size(), Config_path) == 0)
         return (int)Config_path.size();
-    
+
     // Check if request path without trailing slash matches location with trailing slash
     // e.g., /upload matches /upload/
-    if (path.size() + 1 == Config_path.size()
-        && Config_path.compare(0, path.size(), path) == 0
-        && Config_path[Config_path.size() - 1] == '/')
+    if (path.size() + 1 == Config_path.size() && Config_path.compare(0, path.size(), path) == 0 && Config_path[Config_path.size() - 1] == '/')
         return (int)path.size();
-    
+
     return -1;
 }
 std::string get_current_pathh()
@@ -78,19 +76,19 @@ LocationConfig ServerConfig::get_Location_Config(std::string path)
         if (Location_Config[i].get_path() == path)
             return Location_Config[i];
         int j = right_path(Location_Config[i].get_path(), path);
-		if (j > best_match)
-		{
-			best_match = j;
-			store_id = (int)i;
-		}
+        if (j > best_match)
+        {
+            best_match = j;
+            store_id = (int)i;
+        }
         i++;
     }
     // std::cout << "first location is : " << Location_Config[0].get_path() << std::endl;
     // std::cout << "seconde location is : " << Location_Config[1].get_path() << std::endl;
     // if (store_id != 0 && path != "/")
     // {
-        // std::cout << "returning this and the index is " << store_id << std::endl;
-        // std::cout << "index is " << store_id << std::endl;
+    // std::cout << "returning this and the index is " << store_id << std::endl;
+    // std::cout << "index is " << store_id << std::endl;
     if (store_id < 0)
         return tmp;
     return Location_Config[store_id];
@@ -103,26 +101,21 @@ Vector_str ServerConfig::get_server_name()
     return server_name;
 }
 
-int    ServerConfig::check_configFile()
+int ServerConfig::check_configFile()
 {
     syntax_server tmp;
     tmp.check_server_syntax(server_config);
     return 0;
 }
 
-int    ServerConfig::parse_config(Vector_str server_configg, int from, int to)
+int ServerConfig::parse_config(Vector_str server_configg, int from, int to)
 {
     while (from < to)
     {
         server_config.push_back(server_configg[from]);
         from++;
     }
-    // unsigned int i = 0;
-    // while (server_config[i].size() > i)
-    // {
-    //     std::cout << "found : " << server_config[i] << std::endl;
-    //     i++;
-    // }
+
     this->check_configFile();
     this->store_server_info();
     return 0;
@@ -143,19 +136,8 @@ Vector_str ServerConfig::parse_line(std::string line)
         pos = tmp.find(' ', to);
     }
     if (to != std::string::npos)
-      re.push_back(tmp.substr(to));
-    // size_t i = 0;
-    // while (i < re.size())
-    // {
-    //   std::cout << "i have :" << re[i] << "." << std::endl;
-    //   i++;
-    // }
-    // re.push_back(tmp.substr(0, pos));
-    // while (pos != std::string::npos)
-    // {
-    //     re.push_back(tmp.substr(pos, to));
-    //     pos = tmp.find(' ');
-    // }
+        re.push_back(tmp.substr(to));
+
     return re;
 }
 
@@ -177,7 +159,7 @@ bool ServerConfig::checkAdd_fallback()
     return false;
 }
 
-void    ServerConfig::store_server_info()
+void ServerConfig::store_server_info()
 {
     size_t i = 0;
     while (i < server_config.size())
@@ -260,7 +242,7 @@ void ServerConfig::print_info_server()
         std::map<int, std::string>::iterator ii = errorStatus_pathError[i].begin();
         while (ii != errorStatus_pathError[i].end())
         {
-            std::cout << "error_status :"<< ii->first;
+            std::cout << "error_status :" << ii->first;
             std::cout << " path :" << ii->second << "." << std::endl;
             ii++;
         }
@@ -272,7 +254,6 @@ void ServerConfig::print_info_server()
         Location_Config[i].print_info();
         i++;
     }
-    
 }
 
 std::string ServerConfig::remove_spaces(std::string str)
@@ -309,8 +290,7 @@ Vector_str ServerConfig::ft_splitv2(std::string str, char c)
         pos = str.find(c, to);
     }
     if (to != std::string::npos)
-      re.push_back(str.substr(to));
-      
+        re.push_back(str.substr(to));
 
     return re;
 }
@@ -340,7 +320,7 @@ LocationConfig ServerConfig::get_conf(std::string path)
     return get_Location_Config(path);
 }
 
-void    ServerConfig::print_conf()
+void ServerConfig::print_conf()
 {
     size_t i = 0;
     while (i < server_config.size())

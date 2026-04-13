@@ -2,8 +2,9 @@
 
 syntax_location::syntax_location()
     : methods(false), upload_enable(false), upload_store(false), cgi(false),
-    root(false), index(false), auto_index(false), redirection(false)
-{}
+      root(false), index(false), auto_index(false), redirection(false)
+{
+}
 
 void syntax_location::check_locations(Vector_str str, int *i)
 {
@@ -15,9 +16,9 @@ void syntax_location::check_locations(Vector_str str, int *i)
 
 void syntax_location::check_regular(Vector_str str, int *i)
 {
-     (*i)++;
-	bool has_upload_directives = false;
-	bool post_allowed = false;
+    (*i)++;
+    bool has_upload_directives = false;
+    bool post_allowed = false;
     while ((unsigned int)*i < str.size())
     {
         Vector_str tmp = ServerConfig::ft_splitv2(ServerConfig::remove_spaces(str[*i]), ' ');
@@ -44,11 +45,10 @@ void syntax_location::check_regular(Vector_str str, int *i)
             size_t k = 1;
             while (k < tmp.size())
             {
-                if (tmp[k] != "POST" && tmp[k] != "DELETE"
-                    && tmp[k] != "GET")
+                if (tmp[k] != "POST" && tmp[k] != "DELETE" && tmp[k] != "GET")
                     throw Config::ErrorSyntax();
-				if (tmp[k] == "POST")
-					post_allowed = true;
+                if (tmp[k] == "POST")
+                    post_allowed = true;
                 k++;
             }
         }
@@ -76,30 +76,30 @@ void syntax_location::check_regular(Vector_str str, int *i)
             if (tmp.size() != 2 || (tmp[1] != "off" && tmp[1] != "on"))
                 throw Config::ErrorSyntax();
         }
-		else if (tmp[0] == "cgi_pass")
-		{
-			// cgi_pass <.ext> </absolute/path/to/interpreter>
-			if (tmp.size() != 3 || tmp[1].size() < 2 || tmp[1][0] != '.' || tmp[2].size() == 0 || tmp[2][0] != '/')
-				throw Config::ErrorSyntax();
-		}
-		else if (tmp[0] == "upload_store")
-		{
-			has_upload_directives = true;
-			if (upload_store == true)
-				throw Config::ErrorSyntax();
-			upload_store = true;
-			if (tmp.size() != 2 || tmp[1].size() == 0 || tmp[1][0] != '/')
-				throw Config::ErrorSyntax();
-		}
-		else if (tmp[0] == "upload_enable")
-		{
-			has_upload_directives = true;
-			if (upload_enable == true)
-				throw Config::ErrorSyntax();
-			upload_enable = true;
-			if (tmp.size() != 2 || (tmp[1] != "on" && tmp[1] != "off"))
-				throw Config::ErrorSyntax();
-		}
+        else if (tmp[0] == "cgi_pass")
+        {
+            // cgi_pass <.ext> </absolute/path/to/interpreter>
+            if (tmp.size() != 3 || tmp[1].size() < 2 || tmp[1][0] != '.' || tmp[2].size() == 0 || tmp[2][0] != '/')
+                throw Config::ErrorSyntax();
+        }
+        else if (tmp[0] == "upload_store")
+        {
+            has_upload_directives = true;
+            if (upload_store == true)
+                throw Config::ErrorSyntax();
+            upload_store = true;
+            if (tmp.size() != 2 || tmp[1].size() == 0 || tmp[1][0] != '/')
+                throw Config::ErrorSyntax();
+        }
+        else if (tmp[0] == "upload_enable")
+        {
+            has_upload_directives = true;
+            if (upload_enable == true)
+                throw Config::ErrorSyntax();
+            upload_enable = true;
+            if (tmp.size() != 2 || (tmp[1] != "on" && tmp[1] != "off"))
+                throw Config::ErrorSyntax();
+        }
         else if (tmp[0] == "return")
         {
             if (redirection == true)
@@ -115,17 +115,17 @@ void syntax_location::check_regular(Vector_str str, int *i)
         }
         (*i)++;
     }
-	if (redirection == false && (auto_index == false || root == false || methods == false))
+    if (redirection == false && (auto_index == false || root == false || methods == false))
         throw Config::ErrorSyntax();
-	if (has_upload_directives && (!upload_enable || !upload_store || !post_allowed))
-		throw Config::ErrorSyntax();
+    if (has_upload_directives && (!upload_enable || !upload_store || !post_allowed))
+        throw Config::ErrorSyntax();
     auto_index = false;
     index = false;
     methods = false;
     root = false;
     redirection = false;
-	upload_enable = false;
-	upload_store = false;
+    upload_enable = false;
+    upload_store = false;
 }
 
 void syntax_location::check_cgi(Vector_str str, int *i)
@@ -147,17 +147,6 @@ void syntax_location::check_cgi(Vector_str str, int *i)
         else
             throw Config::ErrorSyntax();
 
-        // if (tmp[0] == "methods")
-        // {
-        //     methods = true;
-        //     if (tmp.size() < 2
-        //         || (tmp[1] != "GET" && tmp[1] != "POST" && tmp[1] != "DELETE"))
-        //     {
-
-        //         throw Config::ErrorSyntax();
-        //     }
-        // }
-        // else 
         if (tmp[0] == "root")
         {
             if (root == true)
@@ -193,7 +182,7 @@ void syntax_location::check_cgi(Vector_str str, int *i)
 void syntax_location::check_upload(Vector_str str, int *i)
 {
     // std::cout << "found upload" << str[*i] << "\n";
-    
+
     (*i)++;
     while ((unsigned int)*i < str.size())
     {
@@ -210,7 +199,7 @@ void syntax_location::check_upload(Vector_str str, int *i)
             tmp[tmp.size() - 1].erase(tmp[tmp.size() - 1].size() - 1);
         else
             throw Config::ErrorSyntax();
-        
+
         if (tmp[0] == "methods")
         {
             if (methods == true)
@@ -221,7 +210,7 @@ void syntax_location::check_upload(Vector_str str, int *i)
 
                 throw Config::ErrorSyntax();
             }
-                // throw Config::ErrorSyntax();
+            // throw Config::ErrorSyntax();
         }
         else if (tmp[0] == "upload_store")
         {

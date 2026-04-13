@@ -43,7 +43,6 @@ std::string Config::get_mine(std::string path)
     else if (tmp == "sh")
     {
 
-        
         return "application/x-sh";
     }
     return "application/octet-stream";
@@ -95,12 +94,11 @@ int Config::store_file(std::string path_of_Cfile)
     }
 
     struct stat st;
-    
-    if (stat(path_of_Cfile.c_str(), &st) != 0 
-        || S_ISDIR(st.st_mode))
+
+    if (stat(path_of_Cfile.c_str(), &st) != 0 || S_ISDIR(st.st_mode))
     {
         std::cerr << "Error: invalid config file path!" << std::endl;
-        throw std::exception();    
+        throw std::exception();
     }
 
     std::ifstream file(path_of_Cfile.c_str());
@@ -136,11 +134,11 @@ LocationConfig Config::get_info_location(std::string path)
 
 std::pair<int, int> Config::get_firstlast()
 {
-    size_t  i = first_last.first;
-    int     found_it = 0;
-    int     brace_cout = 0;
-    int     first = -1;
-    int     last = -1;
+    size_t i = first_last.first;
+    int found_it = 0;
+    int brace_cout = 0;
+    int first = -1;
+    int last = -1;
 
     while (i < file_lines.size() && found_it == 0)
     {
@@ -175,8 +173,8 @@ std::pair<int, int> Config::get_firstlast()
     return std::make_pair(first, last);
 }
 
-void    Config::server_bounds(int index, Vector_str lines, int *from, 
-                        int *to, bool *bracket, bool *main_bracket)
+void Config::server_bounds(int index, Vector_str lines, int *from,
+                           int *to, bool *bracket, bool *main_bracket)
 {
     if (lines[index].find('\n') != std::string::npos)
         lines[index].substr(lines[index].size() - 1);
@@ -205,7 +203,7 @@ void    Config::server_bounds(int index, Vector_str lines, int *from,
         else
         {
             ServerConfig tmp;
-            *to = index; 
+            *to = index;
             *main_bracket = false;
             tmp.parse_config(lines, *from, *to);
             Servers_Config.push_back(tmp);
@@ -213,48 +211,22 @@ void    Config::server_bounds(int index, Vector_str lines, int *from,
     }
 }
 
-int    Config::stores_config()
+int Config::stores_config()
 {
-    // bool check = false;
     int from = 0, to = 0;
     bool bracket = false;
     bool main_bracket = false;
 
-    // while (1)
-    // {
-    //     ServerConfig tmp;
-
-        // std::cout << "---: " << file_lines.size() << "\n";
-        unsigned int i = 0;
-        while (i < file_lines.size())
-        {
-            // std::cout << "---: " << file_lines.size() << "\n";
-            server_bounds(i, file_lines, &from, &to, &bracket, &main_bracket);
-            i++;
-        }
-        // break;
-        // first_last = this->get_firstlast();
-        // if (first_last.first == -2)
-        //     throw Config::ErrorSyntax();
-        // if (first_last.first == -1 || first_last.second == -1)
-        // {
-        //     break;
-        // }
-        // if (check == false)
-        // {
-            // tmp.parse_config(file_lines, from, to);
-            // Servers_Config.push_back(tmp);
-        //     check = true;
-        // }
-        // else
-        //     throw Config::ErrorSyntax();
-        // first_last.first = first_last.second + 1;
-    // }
-    //check if a fallback is set
+    unsigned int i = 0;
+    while (i < file_lines.size())
+    {
+        server_bounds(i, file_lines, &from, &to, &bracket, &main_bracket);
+        i++;
+    }
     return 0;
 }
 
-std::string  Config::remove_whitespaces(std::string line)
+std::string Config::remove_whitespaces(std::string line)
 {
     std::string tmp;
     int i = 0;
@@ -279,17 +251,16 @@ Config::Config()
     start = 0;
 }
 
-
-void Config::set_sessions(std::pair<std::string , std::string> ss)
+void Config::set_sessions(std::pair<std::string, std::string> ss)
 {
     sessions.push_back(ss);
 }
-std::vector<std::pair<std::string , std::string> > Config::get_sessions()
+std::vector<std::pair<std::string, std::string> > Config::get_sessions()
 {
     return sessions;
 }
 
-bool Config::check_session(std::pair<std::string , std::string> ss)
+bool Config::check_session(std::pair<std::string, std::string> ss)
 {
     for (size_t i = 0; i < sessions.size(); i++)
     {
