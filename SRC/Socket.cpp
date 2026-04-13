@@ -55,6 +55,7 @@ void Socket::CreateSocket()
         }
         sockconf[i].fd_socket = fd_socket;
     }
+    this->fd_socket = fd_socket;
 }
 
 void Socket::CreateEpoll()
@@ -63,8 +64,10 @@ void Socket::CreateEpoll()
 
     fd_epoll = epoll_create(1);
     if (fd_epoll == -1)
+    {
+        close(fd_socket);
         throw(std::runtime_error("Error: cant create epoll instance !!"));
-
+    }
     for (size_t i = 0; i < sockconf.size(); i++)
     {
         event.events = EPOLLIN;
@@ -99,9 +102,17 @@ std::string format_timestamp(unsigned long long timestamp)
 {
     time_t raw_time = timestamp / 1000;
     struct tm *time_info = localtime(&raw_time);
-    char buffer[80];
-    strftime(buffer, sizeof(buffer), "[%Y-%m-%d %H:%M:%S]", time_info);
-    return std::string(buffer);
+    
+    std::stringstream ss;
+    ss << "[" 
+       << (1900 + time_info->tm_year) << "-"
+       << (time_info->tm_mon + 1 < 10 ? "0" : "") << (time_info->tm_mon + 1) << "-"
+       << (time_info->tm_mday < 10 ? "0" : "") << time_info->tm_mday << " "
+       << (time_info->tm_hour < 10 ? "0" : "") << time_info->tm_hour << ":"
+       << (time_info->tm_min < 10 ? "0" : "") << time_info->tm_min << ":"
+       << (time_info->tm_sec < 10 ? "0" : "") << time_info->tm_sec << "]";
+    
+    return ss.str();
 }
 
 std::string makeLog(ClientState &state)
@@ -138,19 +149,19 @@ void sendAndClose(ClientState &state, const std::string &response)
 
 void requestnotComplet(int fd, ClientState &state)
 {
-    std::cerr << "\033[1;31m[ERROR]\033[0m Request timeout on fd: " << fd;
+    std::cerr << "Request timeout on fd: " << fd;
     if (state.content_length > 0)
     {
         size_t received = state.byte_uploaded > 0 ? state.byte_uploaded : state.body_received;
         received += state.readstring.size();
-        std::cerr << " - Content-Length declared: " << state.content_length
+        std::cerr << " - Content-Length: " << state.content_length
                   << " bytes, but only received: " << received << " bytes"
-                  << " (incomplete body, possible Content-Length mismatch)";
+                  << " (incomplete body)";
     }
     std::cerr << std::endl;
 }
 
-bool modClientEvent(int fd_epoll, int fd, uint32_t events)
+bool modifyClientEvent(int fd_epoll, int fd, uint32_t events)
 {
     epoll_event event_client;
     event_client.data.fd = fd;
@@ -158,9 +169,9 @@ bool modClientEvent(int fd_epoll, int fd, uint32_t events)
     return epoll_ctl(fd_epoll, EPOLL_CTL_MOD, fd, &event_client) != -1;
 }
 
-void modClientEventOrThrow(int fd_epoll, int fd, uint32_t events)
+void modifyClientEventOrThrow(int fd_epoll, int fd, uint32_t events)
 {
-    if (!modClientEvent(fd_epoll, fd, events))
+    if (!modifyClientEvent(fd_epoll, fd, events))
     {
         close(fd);
         std::cerr << "epoll_ctl MOD failed" << std::endl;
@@ -198,24 +209,18 @@ void resetKeepAliveState(ClientState &state)
 
 void Socket::Monitor(Config &a)
 {
-    int MAX_EVENTS = 256;
     int fd_client;
     int current_fd;
     int max_fds;
     epoll_event events[MAX_EVENTS];
     std::map<int, ClientState> status;
     std::map<int, int> cgi_to_client;
-    const unsigned long long CGI_TIMEOUT_MS = 5000;
     
     while (true)
     {
         max_fds = epoll_wait(fd_epoll, events, MAX_EVENTS, 1000);
         if (max_fds == -1)
-        {
-            if (errno != EINTR)
-                std::cerr << "Error: epoll wait failed" << std::endl;
             continue;
-        }
         if (max_fds == 0)
         {
             for (std::map<int, ClientState>::iterator it = status.begin();
@@ -225,7 +230,7 @@ void Socket::Monitor(Config &a)
                 {
                     cleanup_cgi_state(it->second, fd_epoll, cgi_to_client);
                     sendAndClose(it->second, ErrorResponse::Error_GatewayTimeout(a));
-                    modClientEvent(fd_epoll, it->first, EPOLLOUT);
+                    modifyClientEvent(fd_epoll, it->first, EPOLLOUT);
                     ++it;
                     continue;
                 }
@@ -246,7 +251,7 @@ void Socket::Monitor(Config &a)
                         {
                             requestnotComplet(fd, it->second);
                             sendAndClose(it->second, ErrorResponse::Error_RequestTimeout(a));
-                            modClientEvent(fd_epoll, fd, EPOLLOUT);
+                            modifyClientEvent(fd_epoll, fd, EPOLLOUT);
                             ++it;
                             continue;
                         }
@@ -313,7 +318,7 @@ void Socket::Monitor(Config &a)
                 {
                     cleanup_cgi_state(cstate, fd_epoll, cgi_to_client);
                     sendAndClose(cstate, ErrorResponse::Error_GatewayTimeout(a));
-                    modClientEvent(fd_epoll, owner_fd, EPOLLOUT);
+                    modifyClientEvent(fd_epoll, owner_fd, EPOLLOUT);
                     continue;
                 }
 
@@ -326,7 +331,7 @@ void Socket::Monitor(Config &a)
                     }
                     else
                         finalize_cgi_success(cstate, fd_epoll, cgi_to_client);
-                    modClientEvent(fd_epoll, owner_fd, EPOLLOUT);
+                    modifyClientEvent(fd_epoll, owner_fd, EPOLLOUT);
                     continue;
                 }
 
@@ -341,7 +346,7 @@ void Socket::Monitor(Config &a)
                 if (n == 0)
                 {
                     finalize_cgi_success(cstate, fd_epoll, cgi_to_client);
-                    modClientEvent(fd_epoll, owner_fd, EPOLLOUT);
+                    modifyClientEvent(fd_epoll, owner_fd, EPOLLOUT);
                     continue;
                 }
 
@@ -367,7 +372,6 @@ void Socket::Monitor(Config &a)
                         else
                             cgi_to_client[it->second.cgi_fd] = fd_client;
                     }
-
                     if (it->second.waiting)
                     {
                         if (it->second.cgi_active)
@@ -378,7 +382,7 @@ void Socket::Monitor(Config &a)
                             {
                                 requestnotComplet(fd_client, it->second);
                                 sendAndClose(it->second, ErrorResponse::Error_RequestTimeout(a));
-                                modClientEventOrThrow(fd_epoll, fd_client, EPOLLOUT);
+                                modifyClientEventOrThrow(fd_epoll, fd_client, EPOLLOUT);
                                 continue;
                             }
                             cloce_connection(it->second);
@@ -386,13 +390,13 @@ void Socket::Monitor(Config &a)
                         else
                         {
                             it->second.timestamp = get_current_timestamp();
-                            modClientEventOrThrow(fd_epoll, fd_client, EPOLLIN);
+                            modifyClientEventOrThrow(fd_epoll, fd_client, EPOLLIN);
                             continue;
                         }
                     }
                     if (it->second.send_data && !it->second.send_complete)
                     {
-                        modClientEventOrThrow(fd_epoll, fd_client, EPOLLOUT);
+                        modifyClientEventOrThrow(fd_epoll, fd_client, EPOLLOUT);
 
                         ssize_t sent = send(fd_client,
                                             it->second.response.c_str() + it->second.byte_send,
@@ -434,7 +438,7 @@ void Socket::Monitor(Config &a)
                         }
                         else
                         {
-                            modClientEventOrThrow(fd_epoll, fd_client, EPOLLIN);
+                            modifyClientEventOrThrow(fd_epoll, fd_client, EPOLLIN);
                             resetKeepAliveState(it->second);
                         }
                     }
@@ -451,7 +455,7 @@ void Socket::Monitor(Config &a)
                     }
                     else
                     {
-                        modClientEventOrThrow(fd_epoll, fd_client, EPOLLIN);
+                        modifyClientEventOrThrow(fd_epoll, fd_client, EPOLLIN);
                         resetKeepAliveState(it->second);
                     }
                 }

@@ -168,8 +168,6 @@ bool _process_get_delete_request(int fd_client, ClientState &state, Request &req
     (void) fd_client;
     try
     {
-        (void)fd_client;
-        // std::cout << "############ [..] handle GET/DELETE method for fd: " << fd_client << std::endl;
         if (!check_timeout(state.timestamp, TIMEOUT))
         {
             cloce_connection(state);

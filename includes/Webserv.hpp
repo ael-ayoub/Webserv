@@ -30,6 +30,8 @@ void run_server(std::string av);
 #include "socketConfig.hpp"
 #include <sys/time.h>
 #define MAX_BODY_SIZE_HARD_CAP (1024ULL * 1024ULL * 1024ULL)
+#define CGI_TIMEOUT_MS 5000
+#define MAX_EVENTS 250
 
 std::string get_current_path();
 bool _parse_header(ClientState &state, int fd_client, Request &request, Config &a);

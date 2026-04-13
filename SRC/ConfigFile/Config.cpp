@@ -97,15 +97,14 @@ int Config::store_file(std::string path_of_Cfile)
 
     if (stat(path_of_Cfile.c_str(), &st) != 0 || S_ISDIR(st.st_mode))
     {
-        std::cerr << "Error: invalid config file path!" << std::endl;
-        throw std::exception();
+        // std::cerr <<  << std::endl;
+        throw std::runtime_error("Error: invalid config file path!");
     }
 
     std::ifstream file(path_of_Cfile.c_str());
     if (!file.is_open())
     {
-        std::cerr << "Error: invalid config file path!" << std::endl;
-        throw std::exception();
+        throw std::runtime_error("Error: invalid config file path!");
     }
 
     std::string line;

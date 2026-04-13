@@ -97,16 +97,14 @@ ServerConfig checkRightServer(std::vector<ServerConfig> servers, std::map<int,
 
 void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &status)
 {
-    std::vector<ServerConfig> servers = a.get_allserver_config();
-    if (servers.empty())
-        return;
-
-    
     std::pair<std::string, int> ip_port;
     Request request;
 
+    std::vector<ServerConfig> servers = a.get_allserver_config();
+    if (servers.empty())
+    return;
+    
     ClientState &state = status[fd_client];
-
     if (state.send_data)
         return;
 

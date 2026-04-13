@@ -72,6 +72,7 @@ public:
 		complete_header = false;
 		complete_upload = false;
 		expected_content_length = 0;
+		content_length = 0;
 		close = false;
 		cleanup = false;
 		waiting = false;
@@ -96,6 +97,7 @@ private:
 	Methodes m;
 	std::vector<SockConf> sockconf;
 	int fd_epoll;
+	int fd_socket;
 
 public:
 	Socket(std::vector<std::pair<std::string, int> > ports);
