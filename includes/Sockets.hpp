@@ -110,8 +110,6 @@ public:
 	void Monitor(Config &a);
 };
 
-std::string generateSuccessMsg();
-std::string generateFailerMsg();
 
 void _sendReaponse(const std::string &response, int fd_client);
 

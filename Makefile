@@ -5,7 +5,7 @@ SRCS = main.cpp includes/helper_functions/ft_strol.cpp SRC/CGI.cpp SRC/ConfigFil
 	SRC/ConfigFile/Syntax_location.cpp SRC/Socket.cpp\
 	SRC/Methodes/GetMethode.cpp SRC/req_res/Request.cpp\
 	SRC/req_res/Response.cpp SRC/req_res/ErrorResponse.cpp SRC/runServer.cpp \
-	SRC/generateMsg.cpp SRC/client.cpp SRC/client_2.cpp \
+	SRC/client.cpp SRC/client_2.cpp \
 	SRC/Methodes/PostMethode.cpp
 
 OBJ = $(SRCS:.cpp=.o)
