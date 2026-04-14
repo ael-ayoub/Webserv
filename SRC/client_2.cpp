@@ -65,7 +65,7 @@ static std::string _boundary_from_content_type(const std::string &content_type)
 
 bool _parse_header(ClientState &state, int fd_client, Request &request, Config &a)
 {
-    if (!check_timeout(state.timestamp, TIMEOUT))
+    if (!times_out(state.timestamp, TIMEOUT))
     {
         state.response = ErrorResponse::Error_BadRequest(a);
         cloce_connection(state);
@@ -97,7 +97,7 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
         size_t pos = state.readstring.find("\r\n\r\n");
         if (pos != std::string::npos)
         {
-            if (!check_timeout(state.timestamp, TIMEOUT))
+            if (!times_out(state.timestamp, TIMEOUT))
             {
                 cloce_connection(state);
                 return false;
@@ -150,7 +150,7 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
         }
         else
         {
-            if (!check_timeout(state.timestamp, TIMEOUT))
+            if (!times_out(state.timestamp, TIMEOUT))
             {
                 state.close = true;
                 state.cleanup = true;
@@ -171,14 +171,14 @@ bool _process_get_delete_request(int fd_client, ClientState &state, Request &req
     (void) fd_client;
     try
     {
-        if (!check_timeout(state.timestamp, TIMEOUT))
+        if (!times_out(state.timestamp, TIMEOUT))
         {
             cloce_connection(state);
             return false;
         }
         state.timestamp = get_current_timestamp();
 
-        if (!state.cgi_active && start_get_cgi_if_needed(state, request, a, servers[0]))
+        if (!state.cgi_active && processCGI(state, request, a, servers[0]))
             return true;
         if (state.cgi_active)
         {
@@ -209,7 +209,7 @@ bool _process_get_delete_request(int fd_client, ClientState &state, Request &req
 
 bool _parse_metadata(ClientState &state, int fd_client, Config &a)
 {
-    if (!check_timeout(state.timestamp, TIMEOUT))
+    if (!times_out(state.timestamp, TIMEOUT))
     {
         state.response = ErrorResponse::Error_BadRequest(a);
         cloce_connection(state);
@@ -246,7 +246,7 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
         size_t pos = state.readstring.find("\r\n\r\n");
         if (pos != std::string::npos)
         {
-            if (!check_timeout(state.timestamp, TIMEOUT))
+            if (!times_out(state.timestamp, TIMEOUT))
             {
                 // std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                 cloce_connection(state);
@@ -262,7 +262,7 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
         }
         else
         {
-            if (!check_timeout(state.timestamp, TIMEOUT))
+            if (!times_out(state.timestamp, TIMEOUT))
             {
                 // std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                 state.close = true;
@@ -283,7 +283,7 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
 
 bool _process_post_request(int fd_client, ClientState &state, Config &a, Methodes &m, ServerConfig& selected_server)
 {
-        if(!check_timeout(state.timestamp, TIMEOUT))
+        if(!times_out(state.timestamp, TIMEOUT))
         {
             cloce_connection(state);
             return false;

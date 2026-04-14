@@ -15,7 +15,7 @@
 class Config;
 
 #define HEADER_SIZE 1024 * 16
-#define TIMEOUT 5000
+#define TIMEOUT 8000
 
 class ClientState
 {
@@ -116,7 +116,7 @@ std::string generateFailerMsg();
 void _sendReaponse(const std::string &response, int fd_client);
 
 unsigned long long get_current_timestamp();
-bool check_timeout(unsigned long long timestamp, unsigned long long timeout);
+bool times_out(unsigned long long timestamp, unsigned long long timeout);
 void cloce_connection(ClientState &state);
 
 #endif

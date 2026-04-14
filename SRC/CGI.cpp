@@ -3,7 +3,7 @@
 #include <sstream>
 #include <sys/wait.h>
 
-std::string getQueryPath(const std::string &path)
+std::string pathWithoutQuery(const std::string &path)
 {
     size_t q = path.find('?');
     if (q == std::string::npos)
@@ -47,7 +47,7 @@ bool start_cgi_process(const std::string &cgi_binary, const std::string &script_
 
     if (pid == 0)
     {
-        dup2(pipefd[1], STDOUT_FILENO);
+        dup2(pipefd[1], 1);
         close(pipefd[0]);
         close(pipefd[1]);
 
@@ -56,7 +56,7 @@ bool start_cgi_process(const std::string &cgi_binary, const std::string &script_
             int in = open(stdin_file_path.c_str(), O_RDONLY);
             if (in != -1)
             {
-                dup2(in, STDIN_FILENO);
+                dup2(in, 0);
                 close(in);
             }
         }
@@ -72,7 +72,6 @@ bool start_cgi_process(const std::string &cgi_binary, const std::string &script_
         envp.push_back(NULL);
 
         execve(cgi_binary.c_str(), &argv[0], &envp[0]);
-        _exit(1);
     }
 
     close(pipefd[1]);
@@ -97,7 +96,7 @@ std::vector<std::string> build_cgi_env(const std::string &method, const std::str
     return envs;
 }
 
-bool start_cgi_for_client(ClientState &state, const std::string &cgi_binary, const std::string &script_path, const std::vector<std::string> &envs, const std::string &stdin_file_path)
+bool startCGI(ClientState &state, const std::string &cgi_binary, const std::string &script_path, const std::vector<std::string> &envs, const std::string &stdin_file_path)
 {
     int out_fd = -1;
     pid_t pid = -1;
@@ -117,7 +116,7 @@ bool start_cgi_for_client(ClientState &state, const std::string &cgi_binary, con
     return true;
 }
 
-bool start_get_cgi_if_needed(ClientState &state, Request &request, Config &config, ServerConfig &server)
+bool processCGI(ClientState &state, Request &request, Config &config, ServerConfig &server)
 {
     if (request.get_method() != "GET")
         return false;
@@ -131,7 +130,7 @@ bool start_get_cgi_if_needed(ClientState &state, Request &request, Config &confi
         request_path = request_path.substr(0, qpos);
     }
 
-    LocationConfig info_location = server.get_conf(getQueryPath(request_path));
+    LocationConfig info_location = server.get_conf(pathWithoutQuery(request_path));
     if (info_location.GetRedirectionBool() == true)
         return false;
 
@@ -159,12 +158,8 @@ bool start_get_cgi_if_needed(ClientState &state, Request &request, Config &confi
     if (binary.empty())
         return false;
 
-    std::vector<std::string> envs = build_cgi_env(request.get_method(),
-                                                  query_string,
-                                                  request.get_content_length(),
-                                                  "",
-                                                  request_path);
-    if (!start_cgi_for_client(state, binary, script_fs, envs, ""))
+    std::vector<std::string> envs = build_cgi_env(request.get_method(), query_string, request.get_content_length(), "", request_path);
+    if (!startCGI(state, binary, script_fs, envs, ""))
     {
         state.response = ErrorResponse::Error_Internal_Server(config);
         state.send_data = true;

@@ -43,9 +43,9 @@ std::string Config::get_mine(std::string path)
     else if (tmp == "sh")
     {
 
-        return "application/x-sh";
+        return "text/plain";
     }
-    return "application/octet-stream";
+    return "text/plain";
 }
 
 void Config::DefaultConfigFile()

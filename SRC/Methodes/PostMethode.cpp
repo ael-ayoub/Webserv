@@ -187,7 +187,7 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a, co
 
 	while (true)
 	{
-		if(!check_timeout(state.timestamp, TIMEOUT))
+		if(!times_out(state.timestamp, TIMEOUT))
 		{
 			state.response = ErrorResponse::Error_BadRequest(a);
 			cloce_connection(state);
@@ -710,7 +710,7 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 										 state.raw_content_type,
 										 req_path);
 
-					if (!start_cgi_for_client(state, binary, script_fs, envs, state.body_tmp_path))
+					if (!startCGI(state, binary, script_fs, envs, state.body_tmp_path))
 					{
 						std::remove(state.body_tmp_path.c_str());
 						state.body_tmp_path.clear();

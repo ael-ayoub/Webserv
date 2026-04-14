@@ -39,7 +39,7 @@ unsigned long long get_current_timestamp()
     return (tv.tv_sec * 1000ULL) + (tv.tv_usec / 1000ULL);
 }
 
-bool check_timeout(unsigned long long timestamp, unsigned long long timeout)
+bool times_out(unsigned long long timestamp, unsigned long long timeout)
 {
     unsigned long long current_time = get_current_timestamp();
     return (current_time - timestamp) <= timeout;

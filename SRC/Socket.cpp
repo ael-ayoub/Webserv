@@ -229,7 +229,7 @@ void Socket::Monitor(Config &a)
             for (std::map<int, ClientState>::iterator it = status.begin();
                  it != status.end();)
             {
-                if (it->second.cgi_active && !check_timeout(it->second.cgi_deadline, CGI_TIMEOUT_MS))
+                if (it->second.cgi_active && !times_out(it->second.cgi_deadline, CGI_TIMEOUT_MS))
                 {
                     cleanup_cgi_state(it->second, fd_epoll, cgi_to_client);
                     sendAndClose(it->second, ErrorResponse::Error_GatewayTimeout(a));
@@ -244,7 +244,7 @@ void Socket::Monitor(Config &a)
                     continue;
                 }
 
-                if (!check_timeout(it->second.timestamp, TIMEOUT))
+                if (!times_out(it->second.timestamp, TIMEOUT))
                 {
                     int fd = it->first;
 
@@ -327,7 +327,7 @@ void Socket::Monitor(Config &a)
                     continue;
                 }
 
-                if (!check_timeout(cstate.cgi_deadline, CGI_TIMEOUT_MS))
+                if (!times_out(cstate.cgi_deadline, CGI_TIMEOUT_MS))
                 {
                     cleanup_cgi_state(cstate, fd_epoll, cgi_to_client);
                     sendAndClose(cstate, ErrorResponse::Error_GatewayTimeout(a));
@@ -383,7 +383,7 @@ void Socket::Monitor(Config &a)
                     {
                         epoll_event cgi_event;
                         cgi_event.data.fd = it->second.cgi_fd;
-                        cgi_event.events = EPOLLIN | EPOLLHUP | EPOLLRDHUP | EPOLLERR;
+                        cgi_event.events = EPOLLIN | EPOLLHUP | EPOLLRDHUP;
                         if (epoll_ctl(fd_epoll, EPOLL_CTL_ADD, it->second.cgi_fd, &cgi_event) == -1)
                         {
                             cleanup_cgi_state(it->second, fd_epoll, cgi_to_client);
@@ -396,7 +396,7 @@ void Socket::Monitor(Config &a)
                     {
                         if (it->second.cgi_active)
                             continue;
-                        if (!check_timeout(it->second.timestamp, TIMEOUT))
+                        if (!times_out(it->second.timestamp, TIMEOUT))
                         {
                             if (!it->second.send_data)
                             {
