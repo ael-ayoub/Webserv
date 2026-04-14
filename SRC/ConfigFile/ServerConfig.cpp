@@ -22,10 +22,8 @@ std::vector<std::pair<std::string, int> > ServerConfig::get_ip()
 
 bool ServerConfig::CheckClientMaxBodySize(size_t num)
 {
-    // Treat 0 as "unlimited".
     if (client_max_body_size == 0)
         return false;
-    // std::cout << "client_max_body_size: " << client_max_body_size << std::endl;
     if (num > client_max_body_size)
         return true;
     return false;
@@ -36,21 +34,15 @@ int right_path(std::string Config_path, std::string path)
     if (Config_path.empty() || path.empty())
         return -1;
 
-    // Special case: exact match always wins
     if (path == Config_path)
         return (int)Config_path.size();
 
-    // For prefix matches, require the location path to end with '/'
-    // so that '/upload/' matches '/upload/file' but '/up' doesn't.
     if (Config_path[Config_path.size() - 1] != '/')
         return -1;
 
-    // Check if path starts with Config_path
     if (path.compare(0, Config_path.size(), Config_path) == 0)
         return (int)Config_path.size();
 
-    // Check if request path without trailing slash matches location with trailing slash
-    // e.g., /upload matches /upload/
     if (path.size() + 1 == Config_path.size() && Config_path.compare(0, path.size(), path) == 0 && Config_path[Config_path.size() - 1] == '/')
         return (int)path.size();
 
@@ -83,17 +75,9 @@ LocationConfig ServerConfig::get_Location_Config(std::string path)
         }
         i++;
     }
-    // std::cout << "first location is : " << Location_Config[0].get_path() << std::endl;
-    // std::cout << "seconde location is : " << Location_Config[1].get_path() << std::endl;
-    // if (store_id != 0 && path != "/")
-    // {
-    // std::cout << "returning this and the index is " << store_id << std::endl;
-    // std::cout << "index is " << store_id << std::endl;
     if (store_id < 0)
         return tmp;
     return Location_Config[store_id];
-    // }
-    // return tmp;
 }
 
 Vector_str ServerConfig::get_server_name()
@@ -126,7 +110,6 @@ Vector_str ServerConfig::parse_line(std::string line)
     std::string tmp = remove_spaces(line);
     Vector_str re;
 
-    // size_t pos = tmp.find(' ');
     size_t pos = tmp.find(' ');
     size_t to = 0;
     while (pos != std::string::npos)
@@ -165,7 +148,6 @@ void ServerConfig::store_server_info()
     while (i < server_config.size())
     {
         std::pair<std::string, std::string> a = this->ft_splito(server_config[i], ' ');
-        // std::cout << "first :" << a.first << "\nseconde : " << a.second << std::endl;
         if (a.first == "listen")
         {
             if (a.second.find(':') != std::string::npos)
@@ -209,25 +191,19 @@ void ServerConfig::store_server_info()
         }
         else if (a.first == "location")
         {
-            // std::cout << "been called " << std::endl;
             LocationConfig tmp;
             std::pair<std::string, std::string> path = this->ft_splito(a.second, ' ');
             tmp.parse_locationConfig(server_config, &i, path.first);
             Location_Config.push_back(tmp);
         }
         i++;
-        // std::cout << "i = " << i << "server size is " << server_config.size() << std::endl;
     }
-    // if (checkAdd_fallback() == false)
-    //     std::cout << "the fallback not found\n";
 }
 
 void ServerConfig::print_info_server()
 {
     size_t i = 0;
     std::cout << "--------------------------------------\n";
-    // std::cout << "ip :" << ip_port.first << "." << std::endl;
-    // std::cout << "port_num :" << ip_port.second << "." << std::endl;
     while (i < server_name.size())
     {
         std::cout << "server name :" << server_name[i] << "." << std::endl;
@@ -297,7 +273,6 @@ Vector_str ServerConfig::ft_splitv2(std::string str, char c)
 
 std::pair<std::string, std::string> ServerConfig::ft_splito(std::string str, char c)
 {
-    // int i = 0;
     std::string tmp;
     std::string first;
     std::string seconde;

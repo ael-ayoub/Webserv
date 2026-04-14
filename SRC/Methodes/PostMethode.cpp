@@ -286,12 +286,10 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a, co
 	close(state.fd_upload);
 	state.fd_upload = -1;
 	state.complete_upload = true;
-	
 	std::string filename = state.filename_upload;
 	size_t last_slash = filename.find_last_of('/');
 	if (last_slash != std::string::npos)
 		filename = filename.substr(last_slash + 1);
-	
 	std::string body = 
 		"<!DOCTYPE html>\n"
 		"<html lang=\"en\">\n"
@@ -343,7 +341,6 @@ static bool Upload_files(ClientState &state, const int &fd_client, Config &a, co
 		"    </footer>\n"
 		"</body>\n"
 		"</html>\n";
-	
 	std::ostringstream oss;
 	oss << body.size();
 	state.response =
@@ -731,7 +728,6 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 		}
 	}
 
-	// info_location.print_info();
 
 	bool is_special_post_path = (req_path == "/login" || req_path == "/check_user" || req_path == "/logout");
 	bool has_matching_location = (info_location.get_path() != "None");
@@ -741,7 +737,6 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 	if (!is_special_post_path && has_matching_location && !info_location.get_method("POST"))
 	{
 		std::string target_path = _cwd() + info_location.get_root() + req_path;
-		// std::cout << "Path1: " << target_path << std::endl; 
 
 		struct stat target_stat;
 		if (is_root_fallback_location)
@@ -802,7 +797,6 @@ std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &s
 	else if (!is_special_post_path && !has_matching_location)
 	{
 		std::string filesystem_path = _cwd() + "/www" + req_path;
-		// std::cout << "Path: " << filesystem_path << std::endl; 
 		struct stat path_stat;
 		if (stat(filesystem_path.c_str(), &path_stat) == 0)
 			close_connection(state, ErrorResponse::Error_Forbidden(a), "");

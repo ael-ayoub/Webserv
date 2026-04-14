@@ -39,7 +39,6 @@ print(f"""<!DOCTYPE html>
             padding: 0;
             box-sizing: border-box;
         }}
-        
         body {{
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);

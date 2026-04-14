@@ -103,7 +103,7 @@ bool _parse_header(ClientState &state, int fd_client, Request &request, Config &
                 return false;
             }
             state.timestamp = get_current_timestamp();
-            state.header = state.readstring.substr(0, pos + 2);  // Include the final \r\n
+            state.header = state.readstring.substr(0, pos + 2);  
             if (state.header.size() > HEADER_SIZE)
             {
                 state.response = ErrorResponse::Error_BadRequest(a);
@@ -186,7 +186,6 @@ bool _process_get_delete_request(int fd_client, ClientState &state, Request &req
             return true;
         }
 
-        
         state.response = m.GetMethod(a, request, servers[0]);
         state.send_data = true;
         state.cleanup = true;
@@ -248,12 +247,10 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
         {
             if (!times_out(state.timestamp, TIMEOUT))
             {
-                // std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                 cloce_connection(state);
                 return false;
             }
             state.timestamp = get_current_timestamp();
-            // std::cout << "Complete metadata received from fd: " << fd_client << std::endl;
             state.metadata = state.readstring.substr(0, pos + 4);
             state.readstring.erase(0, pos + 4);
             state.complete_metadata = true;
@@ -264,7 +261,6 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
         {
             if (!times_out(state.timestamp, TIMEOUT))
             {
-                // std::cout << "Connection timed out for fd: " << fd_client << std::endl;
                 state.close = true;
                 state.cleanup = true;
                 state.send_data = false;
@@ -272,7 +268,6 @@ bool _parse_metadata(ClientState &state, int fd_client, Config &a)
                 return false;
             }
             state.timestamp = get_current_timestamp();
-            // std::cout << "Incomplete metadata, waiting for more data from fd: " << fd_client << std::endl;
             state.waiting = true;
             return false;
         }

@@ -8,11 +8,9 @@ static int ft_isspace(char c) {
 
 static int get_digit_value(char c, int base) {
     int val = -1;
-    
     if (c >= '0' && c <= '9') val = c - '0';
     else if (c >= 'a' && c <= 'z') val = c - 'a' + 10;
     else if (c >= 'A' && c <= 'Z') val = c - 'A' + 10;
-    
     if (val >= base) return -1;
     return val;
 }

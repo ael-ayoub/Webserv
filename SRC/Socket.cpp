@@ -105,7 +105,6 @@ std::string format_timestamp(unsigned long long timestamp)
 {
     time_t raw_time = timestamp / 1000;
     struct tm *time_info = localtime(&raw_time);
-    
     std::stringstream ss;
     ss << "[" 
        << (1900 + time_info->tm_year) << "-"
@@ -114,7 +113,6 @@ std::string format_timestamp(unsigned long long timestamp)
        << (time_info->tm_hour < 10 ? "0" : "") << time_info->tm_hour << ":"
        << (time_info->tm_min < 10 ? "0" : "") << time_info->tm_min << ":"
        << (time_info->tm_sec < 10 ? "0" : "") << time_info->tm_sec << "]";
-    
     return ss.str();
 }
 
@@ -218,7 +216,6 @@ void Socket::Monitor(Config &a)
     epoll_event events[MAX_EVENTS];
     std::map<int, ClientState> status;
     std::map<int, int> cgi_to_client;
-    
     while (true)
     {
         max_fds = epoll_wait(fd_epoll, events, MAX_EVENTS, 1000);

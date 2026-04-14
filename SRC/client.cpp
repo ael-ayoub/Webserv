@@ -103,7 +103,6 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
     std::vector<ServerConfig> servers = a.get_allserver_config();
     if (servers.empty())
     return;
-    
     ClientState &state = status[fd_client];
     if (state.send_data)
         return;
@@ -124,7 +123,6 @@ void Socket::HandleClient(int fd_client, Config &a, std::map<int, ClientState> &
             return;
         }
     }
-    
     if (!state.complete_header)
     {
         if (!_parse_header(state, fd_client, request, a))

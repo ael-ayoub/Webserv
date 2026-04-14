@@ -15,14 +15,12 @@ class ServerConfig
         std::string path_server_index;
         size_t client_max_body_size_value;
         std::vector<std::map<int, std::string> > errorStatus_pathError;
-        
     public:
         static size_t client_max_body_size;
         ServerConfig();
         static bool CheckClientMaxBodySize(size_t num);
         size_t get_client_max_body_size() const;
         LocationConfig get_Location_Config(std::string path);
-        
         Vector_str get_server_name();
         std::vector<std::pair<std::string, int> > get_ip();
         bool checkAdd_fallback();

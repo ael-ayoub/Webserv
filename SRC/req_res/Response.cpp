@@ -95,7 +95,6 @@ std::string Response::Get_response(std::string path, LocationConfig &info_locati
 
     if (info_location.GetRedirectionBool() == true)
     {
-        // std::cout << "path is : " << info_location.get_path() << "\n";
         std::string res;
         res += "HTTP/1.1 301 Moved Permanently\r\n";
         res += "Location: " + info_location.GetLocationPath() + "\r\n";

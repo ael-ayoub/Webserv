@@ -12,7 +12,6 @@ std::string clean_string(std::string str)
             re += str[i];
         i++;
     }
-    
     return re;
 }
 
@@ -39,7 +38,6 @@ std::string Methodes::GetMethod(Config& a, Request& test_request, ServerConfig& 
     std::string body, line, last_path;
     const std::string request_path = strip_query(test_request.get_path());
     LocationConfig info_location = Servers_Config.get_conf(request_path);
-    
     std::string path = gcwd() + info_location.get_root() + request_path;
     struct stat statbuf;
     if (stat((path).c_str(), &statbuf) == 0)
@@ -54,7 +52,6 @@ std::string Methodes::GetMethod(Config& a, Request& test_request, ServerConfig& 
         }
     }
     info_location = Servers_Config.get_conf(clean_string(request_path));
-    
     if (test_request.get_method() == "GET" && info_location.get_method("GET") == true)
     {
         return Response::Get_response(path, info_location, test_request, a);

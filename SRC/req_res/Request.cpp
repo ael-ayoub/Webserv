@@ -84,7 +84,7 @@ std::string Request::check_requestline(std::string request_line, Config a)
         return ErrorResponse::Error_BadRequest(a);
     if (args[0] != "GET" && args[0] != "POST" && args[0] != "DELETE")
     {
-        return ErrorResponse::Error_BadRequest(a); // 405
+        return ErrorResponse::Error_BadRequest(a); 
     }
     if (args[1][0] != '/')
         return ErrorResponse::Error_BadRequest(a);
@@ -154,16 +154,15 @@ std::string Request::check_headerline(std::string header_line, Config &a)
     }
     Vector_str args = ServerConfig::ft_splitv2(header_line, ' ');
     if (args.size() != 2)
-        return ErrorResponse::Error_BadRequest(a); // 400
+        return ErrorResponse::Error_BadRequest(a); 
     if (args[0] != "Host:")
-        return ErrorResponse::Error_BadRequest(a); // 400
-    
+        return ErrorResponse::Error_BadRequest(a); 
     Vector_str ip_port = ServerConfig::ft_splitv2(args[1], ':');
     if (ip_port.size() != 2)
-        return ErrorResponse::Error_BadRequest(a); // 400
+        return ErrorResponse::Error_BadRequest(a); 
     if (ip_port[0] != "localhost" && check_ip(ip_port[0]) == false)
     {
-        return ErrorResponse::Error_BadRequest(a); // 400
+        return ErrorResponse::Error_BadRequest(a); 
     }
     int start = ip_port[1].find('\r');
     std::string ip = ip_port[1].substr(0, start);
@@ -233,7 +232,6 @@ std::string Request::check_request(std::string str, Config a)
     }
     if (!tmp.empty())
         args.push_back(tmp);
-    
     if (args.empty())
         return ErrorResponse::Error_BadRequest(a);
     std::string response;
@@ -242,7 +240,6 @@ std::string Request::check_request(std::string str, Config a)
     {
         return response;
     }
-    
     bool host_found = false;
     for (size_t i = 1; i < args.size(); i++)
     {
@@ -261,12 +258,10 @@ std::string Request::check_request(std::string str, Config a)
             break;
         }
     }
-    
     if (!host_found)
     {
         return ErrorResponse::Error_BadRequest(a);
     }
-    
     std::string res;
     for (size_t b = 2; b < args.size() && get_method() == "POST"; b++)
     {

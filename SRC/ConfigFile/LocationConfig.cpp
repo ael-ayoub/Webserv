@@ -101,7 +101,6 @@ void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::st
     if (str[*start].find('{') != std::string::npos)
             brace_cout++;
     (*start)++;
-    // std::cout << "------------\n";
     path_location = path;
     while (*start < str.size())
     {
@@ -161,7 +160,6 @@ void LocationConfig::parse_locationConfig(Vector_str str, size_t *start, std::st
             std::istringstream(tmp.first) >> status_code;
             return_location = std::make_pair(status_code, tmp.second);
         }
-        // std::cout << str[i] << " start is " << start << "\n";
         (*start)++;
     }
 }
@@ -181,7 +179,6 @@ void LocationConfig::print_info()
     std::cout << "Autoindex:      " << autoindex << std::endl;
     std::cout << "Upload Enabled: " << upload_enable << std::endl;
     std::cout << "Redirection:    " << redirection << std::endl;
-    
     std::cout << "Methods:        " 
               << (GET_methode ? "[GET] " : "") 
               << (post_methode ? "[POST] " : "") 

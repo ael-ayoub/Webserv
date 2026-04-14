@@ -53,7 +53,7 @@ HTML
 
 # Sort keys alphabetically and print them
 foreach my $key (sort keys %ENV) {
-    my $value = $ENV{$key} // "[NOT SET]";
+    my $value = $ENV{$key} 
     print qq(
         <div class="env-card">
             <span class="key">$key</span>

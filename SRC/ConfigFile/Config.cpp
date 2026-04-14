@@ -97,7 +97,6 @@ int Config::store_file(std::string path_of_Cfile)
 
     if (stat(path_of_Cfile.c_str(), &st) != 0 || S_ISDIR(st.st_mode))
     {
-        // std::cerr <<  << std::endl;
         throw std::runtime_error("Error: invalid config file path!");
     }
 
@@ -120,14 +119,7 @@ int Config::store_file(std::string path_of_Cfile)
 LocationConfig Config::get_info_location(std::string path)
 {
     LocationConfig tmp;
-    // size_t i = 0;
-    // while (i < Servers_Config.size())
-    // {
     tmp = Servers_Config[0].get_conf(path);
-    // if (tmp.get_path() != "None")
-    //     return tmp;
-    //     i++;
-    // }
     return tmp;
 }
 
@@ -178,8 +170,6 @@ void Config::server_bounds(int index, Vector_str lines, int *from,
     if (lines[index].find('\n') != std::string::npos)
         lines[index].substr(lines[index].size() - 1);
 
-    // if (lines[index].find('\n') != std::string::npos)
-    //     std::cout << lines[index] << "sdf"<< "\n";
 
     if (index == 0 && lines[0] != "server {")
         throw Config::ErrorSyntax();

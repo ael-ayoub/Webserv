@@ -65,7 +65,6 @@ $quote = $quotes[array_rand($quotes)];
             padding: 0;
             box-sizing: border-box;
         }
-        
         body {
             font-family: 'Georgia', serif;
             background: #fafafa;
@@ -77,12 +76,10 @@ $quote = $quotes[array_rand($quotes)];
             padding: 40px 20px;
             line-height: 1.8;
         }
-        
         .container {
             max-width: 600px;
             width: 100%;
         }
-        
         .poem-card {
             background: white;
             padding: 60px 50px;
@@ -90,7 +87,6 @@ $quote = $quotes[array_rand($quotes)];
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-bottom: 30px;
         }
-        
         .poem-title {
             font-size: 28px;
             font-weight: 400;
@@ -99,7 +95,6 @@ $quote = $quotes[array_rand($quotes)];
             text-align: center;
             letter-spacing: 0.5px;
         }
-        
         .poem-line {
             font-size: 18px;
             color: #444;
@@ -107,18 +102,15 @@ $quote = $quotes[array_rand($quotes)];
             font-style: italic;
             text-align: center;
         }
-        
         .poem-line:last-child {
             margin-bottom: 0;
         }
-        
         .divider {
             width: 60px;
             height: 1px;
             background: #ddd;
             margin: 40px auto;
         }
-        
         .quote {
             background: white;
             padding: 30px 40px;
@@ -127,13 +119,11 @@ $quote = $quotes[array_rand($quotes)];
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-bottom: 30px;
         }
-        
         .quote-text {
             font-size: 16px;
             color: #555;
             line-height: 1.6;
         }
-        
         .meta {
             text-align: center;
             color: #999;
@@ -142,7 +132,6 @@ $quote = $quotes[array_rand($quotes)];
             text-transform: uppercase;
             margin-top: 20px;
         }
-        
         .refresh-btn {
             display: block;
             margin: 0 auto;
@@ -158,20 +147,16 @@ $quote = $quotes[array_rand($quotes)];
             transition: background 0.3s ease;
             text-decoration: none;
         }
-        
         .refresh-btn:hover {
             background: #555;
         }
-        
         @media (max-width: 600px) {
             .poem-card {
                 padding: 40px 30px;
             }
-            
             .poem-title {
                 font-size: 22px;
             }
-            
             .poem-line {
                 font-size: 16px;
             }
@@ -182,24 +167,18 @@ $quote = $quotes[array_rand($quotes)];
     <div class="container">
         <div class="poem-card">
             <h1 class="poem-title"><?php echo htmlspecialchars($selectedPoem['title']); ?></h1>
-            
             <?php foreach ($selectedPoem['lines'] as $line): ?>
                 <p class="poem-line"><?php echo htmlspecialchars($line); ?></p>
             <?php endforeach; ?>
-            
             <div class="divider"></div>
-            
             <p style="text-align: center; color: #999; font-size: 11px; font-style: normal; letter-spacing: 1px;">
                 BY SERAPH
             </p>
         </div>
-        
         <div class="quote">
             <p class="quote-text"><?php echo htmlspecialchars($quote); ?></p>
         </div>
-        
         <p class="meta"><?php echo $timestamp; ?></p>
-        
         <button class="refresh-btn" onclick="window.location.reload();" style="margin-top: 30px;">Generate New</button>
     </div>
 </body>

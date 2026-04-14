@@ -12,11 +12,9 @@ void syntax_server::check_server_syntax(Vector_str server)
         throw Config::ErrorSyntax();
     std::string tmp = Config::remove_whitespaces(server[i]);
     i++;
-    // std::cout << "server side is " << server.size() << ", and i: " << i<<"\n";
     while (i < server.size())
     {
         Vector_str tmp = ServerConfig::parse_line(server[i]);
-        // std::cout << "line is : " << tmp[0] << "\n";
         if (tmp[0] == "location" && tmp.size() == 3)
         {
             size_t k = 0;
@@ -30,7 +28,6 @@ void syntax_server::check_server_syntax(Vector_str server)
             if (listen_check == false || client_max_body_size_check == false
                 || error_page_check == false)
                 throw Config::ErrorSyntax();
-            // break;
 
             syntax_location loc;
             loc.check_locations(server, (int *)&i);
@@ -39,10 +36,6 @@ void syntax_server::check_server_syntax(Vector_str server)
             && server[i].find('}') == std::string::npos
             && tmp[tmp.size() - 1][tmp[tmp.size() - 1].size() - 1] != ';')
             throw Config::ErrorSyntax();
-        // if (tmp[0] != "error_page" && tmp[0][0] && tmp.size() != 2)
-        //     throw Config::ErrorSyntax();
-        // start checking server info
-        // std::cout << "he is \n";
 
         if (tmp[0] == "listen")
             check_listen(tmp);
@@ -56,7 +49,6 @@ void syntax_server::check_server_syntax(Vector_str server)
         {
             throw Config::ErrorSyntax();
         }
-        // printf()
         i++;
     }
 
@@ -67,7 +59,6 @@ void syntax_server::check_number(std::string str)
     int j = 0;
     while (str[j])
     {
-        // std::cout << "im in " << str[j] << "\n";
         if (!std::isdigit(str[j]))
             throw Config::ErrorSyntax();
         j++;
@@ -98,7 +89,7 @@ void syntax_server::check_body_size(Vector_str str)
     if (client_max_body_size_check == true || str.size() > 2)
         throw Config::ErrorSyntax();
     client_max_body_size_check = true;
-    str[1] = str[1].erase(str[1].size() - 1); // std::remove ;
+    str[1] = str[1].erase(str[1].size() - 1); 
     check_number(str[1]);
     size_t size;
     std::istringstream(str[1]) >> size;
@@ -112,11 +103,10 @@ void syntax_server::check_listen(Vector_str str)
     if (str.size() > 2)
         throw Config::ErrorSyntax();
     listen_check = true;
-    str[1] = str[1].erase(str[1].size() - 1); // std::remove ;
+    str[1] = str[1].erase(str[1].size() - 1); 
     if (str[1].find(':') != std::string::npos)
     {
         Vector_str info = ServerConfig::ft_splitv2(str[1], ':');
-        // std::cout << "size of them " << info[0].size() << std::endl;
         if (info.size() > 2 || info[0].size() == 0 || info[1].size() == 0)
             throw Config::ErrorSyntax();
         check_number(info[1]);
@@ -128,7 +118,6 @@ void syntax_server::check_listen(Vector_str str)
             Vector_str ip_port = ServerConfig::ft_splitv2(info[0], '.');
             if (ip_port.size() != 4)
                 throw Config::ErrorSyntax();
-            // std::cout << "size is " << ip_port.size() << "\n";
             size_t j = 0;
             while (j < ip_port.size())
             {

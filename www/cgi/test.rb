@@ -21,7 +21,7 @@ puts <<~HTML
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="10"> <title>#{hostname} // Dashboard</title>
+    <meta http-equiv="refresh" content="10"> <title>#{hostname} 
     <style>
         :root {
             --bg: #1f2430;
@@ -45,7 +45,6 @@ puts <<~HTML
             min-height: 100vh;
         }
         .container { width: 85%; max-width: 1100px; }
-        
         .header { margin-bottom: 40px; border-left: 4px solid var(--accent); padding-left: 20px; }
         .header h1 { font-size: 2.8rem; margin: 0; color: var(--accent); letter-spacing: -1px; }
         .header p { color: var(--dim); font-family: monospace; margin-top: 5px; text-transform: uppercase; }
@@ -54,15 +53,13 @@ puts <<~HTML
         .card { 
             background: var(--card);
             padding: 25px;
-            border-radius: 4px; /* Ayu uses sharper corners */
+            border-radius: 4px; 
             border-bottom: 2px solid transparent;
             transition: all 0.2s ease;
         }
         .card:hover { border-bottom-color: var(--accent); background: #2b3240; }
-        
         .label { font-size: 0.75rem; color: var(--dim); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         .value { font-size: 2rem; font-weight: 300; display: block; margin: 10px 0; font-family: 'JetBrains Mono', monospace; }
-        
         .meter { height: 4px; width: 100%; background: #191e2a; border-radius: 2px; overflow: hidden; }
         .fill { height: 100%; transition: width 0.5s ease; }
 
@@ -73,7 +70,7 @@ puts <<~HTML
     <div class="container">
         <div class="header">
             <h1>#{hostname}</h1>
-            <p>System Status // Uptime: #{uptime}</p>
+            <p>System Status 
         </div>
 
         <div class="grid">

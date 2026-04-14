@@ -12,7 +12,6 @@ class Request
         std::string hostname;
         std::string content_length;
         std::string Host;
-    
     public:
         Request() : content_length("NONE") {}
         std::string check_headerline(std::string str, Config &a);
@@ -23,8 +22,6 @@ class Request
         std::string get_method();
         std::string get_Host();
         size_t get_content_length();
-    
-    
         int get_port();
         std::string get_Hostname();
 };

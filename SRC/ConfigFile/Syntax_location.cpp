@@ -78,7 +78,6 @@ void syntax_location::check_regular(Vector_str str, int *i)
         }
         else if (tmp[0] == "cgi_pass")
         {
-            // cgi_pass <.ext> </absolute/path/to/interpreter>
             if (tmp.size() != 3 || tmp[1].size() < 2 || tmp[1][0] != '.' || tmp[2].size() == 0 || tmp[2][0] != '/')
                 throw Config::ErrorSyntax();
         }
@@ -110,7 +109,6 @@ void syntax_location::check_regular(Vector_str str, int *i)
         }
         else
         {
-            // std::cout << "Errorfsdfs\n";
             throw Config::ErrorSyntax();
         }
         (*i)++;
@@ -181,7 +179,6 @@ void syntax_location::check_cgi(Vector_str str, int *i)
 
 void syntax_location::check_upload(Vector_str str, int *i)
 {
-    // std::cout << "found upload" << str[*i] << "\n";
 
     (*i)++;
     while ((unsigned int)*i < str.size())
@@ -210,7 +207,6 @@ void syntax_location::check_upload(Vector_str str, int *i)
 
                 throw Config::ErrorSyntax();
             }
-            // throw Config::ErrorSyntax();
         }
         else if (tmp[0] == "upload_store")
         {

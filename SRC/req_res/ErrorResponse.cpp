@@ -95,7 +95,6 @@ std::string ErrorResponse::default_response_error(std::string status_code)
         body += "  <p>The server encountered an internal error.</p>\n";
     if (status_code == "504")
         body += "  <p>The upstream CGI script did not respond in time.</p>\n";
-        
     body += "</body>\n";
     body += "</html>\n";
 	std::stringstream ss ;
@@ -117,7 +116,6 @@ std::string ErrorResponse::generate_error_page(std::string status_code)
     std::string code = status_code.substr(0, 3);
     std::string message;
     std::string description;
-    
     if (code == "400")
     {
         message = "Bad Request";
@@ -163,7 +161,6 @@ std::string ErrorResponse::generate_error_page(std::string status_code)
         message = "Error";
         description = "An error occurred while processing your request.";
     }
-    
     std::string body = 
         "<!DOCTYPE html>\n"
         "<html lang=\"en\">\n"
@@ -211,11 +208,9 @@ std::string ErrorResponse::generate_error_page(std::string status_code)
         "    </footer>\n"
         "</body>\n"
         "</html>\n";
-    
     std::stringstream ss;
     ss << body.size();
     std::string s = ss.str();
-    
     std::string headers = "HTTP/1.1 ";
     headers += status_code;
     if (status_code == "200")
@@ -238,12 +233,10 @@ std::string ErrorResponse::generate_error_page(std::string status_code)
         headers += " Internal Server Error\r\n";
     else if (status_code == "504")
         headers += " Gateway Timeout\r\n";
-    
     headers += "Content-Type: text/html\r\n";
     headers += "Content-Length: " + s + "\r\n";
     headers += "Connection: close\r\n";
     headers += "\r\n";
-    
     return headers + body;
 }
 
@@ -261,7 +254,6 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
         std::map<int, std::string>::iterator it;
         for (it = error[i].begin(); it != error[i].end(); ++it) 
         {
-            // std::cout << "status code is : " << status_code << ", we found is : " << it->first << std::endl;
             err_tmp[it->first] = it->second;
             if (it->first == status_code)
             {
@@ -276,16 +268,11 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
             break;
         i++;
     }
-    
-    // int key = err_tmp.begin();
-    // ss << err_tmp.begin();
-    // error_status = ss.str();
     if (i == error.size())
         return "";
     std::string header;
     header = "HTTP/1.1 ";
     header += error_status;
-    // std::cout << "err: " << error_status << std::endl;
     if (error_status == "200")
         header += " OK\r\n";
     else if (error_status == "204")
@@ -306,7 +293,6 @@ std::string ErrorResponse::check_errorstatus(std::vector<std::map<int, std::stri
         header += " Internal Server Error\r\n";
     else if (error_status == "504")
         header += " Gateway Timeout\r\n";
-    // path = err_tmp->second;
     return header;
 }
 
@@ -328,13 +314,13 @@ std::string ErrorResponse::Error_MethodeNotAllowed(Config a)
     return generate_error_page("405");
 }
 
-// std::string get_current_path()
-// {
-//     char buffer[PATH_MAX];
-//     if (getcwd(buffer, sizeof(buffer)) != NULL)
-//         return std::string(buffer);
-//     return "";
-// }
+
+
+
+
+
+
+
 
 
 std::string ErrorResponse::Responde(Config &a, std::string path, std::string &head, std::string status)
