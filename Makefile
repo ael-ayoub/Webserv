@@ -1,4 +1,4 @@
-NAME = Webserv
+NAME = webserv
 
 SRCS = main.cpp includes/helper_functions/ft_strol.cpp SRC/CGI.cpp SRC/ConfigFile/Config.cpp SRC/ConfigFile/ServerConfig.cpp \
 	SRC/ConfigFile/LocationConfig.cpp SRC/ConfigFile/Syntax_server.cpp \
