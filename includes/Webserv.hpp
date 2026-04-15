@@ -29,7 +29,6 @@ void run_server(std::string av);
 #include "ErrorResponse.hpp"
 #include "socketConfig.hpp"
 #include <sys/time.h>
-#define MAX_BODY_SIZE_HARD_CAP (1024ULL * 1024ULL * 1024ULL)
 #define CGI_TIMEOUT_MS 5000
 #define MAX_EVENTS 250
 
