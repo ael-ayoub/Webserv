@@ -577,8 +577,7 @@ std::string _get_filename(const std::string &metadata)
 
 std::string Methodes::PostMethod(Config &a, const int &fd_client, ClientState &state, ServerConfig& selected_server)
 {
-	if (state.content_length > MAX_BODY_SIZE_HARD_CAP ||
-		(ServerConfig::client_max_body_size != 0 && state.content_length > ServerConfig::client_max_body_size))
+	if ((ServerConfig::client_max_body_size != 0 && state.content_length > ServerConfig::client_max_body_size))
 	{
 		close_connection(state, ErrorResponse::Error_PayloadTooLarge(a), "");
 		return state.response;

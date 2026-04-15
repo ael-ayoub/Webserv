@@ -196,8 +196,6 @@ std::string CheckContentLenght(std::string str, Config a)
 
     std::stringstream s(str);
     s >> num;
-    if (num > MAX_BODY_SIZE_HARD_CAP)
-        return ErrorResponse::Error_PayloadTooLarge(a);
     return "NONE";
 }
 
